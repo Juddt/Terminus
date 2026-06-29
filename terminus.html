@@ -1,0 +1,1736 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Soirée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #15110D;
+    --surface: #1E1812;
+    --surface-2: #251D15;
+    --line: #34291C;
+    --accent: #C97B4A;
+    --accent-bright: #E2944B;
+    --accent-deep: #A35E33;
+    --sage: #8A9A7E;
+    --clay: #A3503A;
+    --text: #F3ECDD;
+    --text-dim: #A89C8C;
+    --text-faint: #6E6354;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0; height:100%; background:#000;}
+  body{font-family:'Inter', sans-serif; color:var(--text); overflow:hidden; display:flex; align-items:center; justify-content:center;}
+  #frame{width:100%; max-width:480px; height:100vh; height:100dvh; background:var(--bg); position:relative; overflow:hidden;}
+  .screen{position:absolute; inset:0; display:none; flex-direction:column; padding:32px 24px; box-sizing:border-box;}
+  .screen.active{display:flex;}
+  h1,h2,h3{font-family:'Fraunces', serif; font-weight:500; margin:0;}
+  .eyebrow{font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
+  .btn{border:none; border-radius:6px; padding:18px 20px; font-family:'Inter', sans-serif; font-size:15px; font-weight:500; cursor:pointer; width:100%; transition: transform .08s ease, opacity .15s ease;}
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--accent); color:#1A1208;}
+  .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--text-dim);}
+
+  #screen-home{align-items:center; justify-content:space-between; padding-top:60px; padding-bottom:48px;}
+  #screen-home{padding:0; position:relative; overflow:hidden;}
+  .home-bg{position:absolute; inset:-10%; z-index:0; overflow:hidden;}
+  .ember{position:absolute; border-radius:50%; filter:blur(44px); opacity:0.5; mix-blend-mode:screen; animation: emberFloat 10s ease-in-out infinite;}
+  .e1{width:240px; height:240px; background:#E2944B; top:-30px; left:-70px;}
+  .e2{width:280px; height:280px; background:#C9512E; bottom:40px; right:-90px; animation-delay:2.4s;}
+  .e3{width:170px; height:170px; background:#8A3D22; top:42%; left:46%; animation-delay:4.8s;}
+  @keyframes emberFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-20px) scale(1.1);}}
+  .grain{position:absolute; inset:0; background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0); background-size:3px 3px; opacity:0.45; mix-blend-mode:overlay;}
+  .home-content{position:relative; z-index:2; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:60px 24px 48px; box-sizing:border-box;}
+  .hero-title{font-family:'Fraunces', serif; font-weight:600; font-size:58px; letter-spacing:-1.5px; color:var(--text); text-shadow:0 0 50px rgba(226,148,75,0.5); line-height:1;}
+  .hero-tag{font-size:11px; letter-spacing:3.5px; text-transform:uppercase; color:var(--accent-bright); margin-top:14px; text-align:center;}
+
+  .mark{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .mark-dot{width:46px; height:46px; border-radius:50%; border:1px solid var(--accent); display:flex; align-items:center; justify-content:center;}
+  .mark-name{font-size:13px; letter-spacing:4px; color:var(--text-dim);}
+
+  .mode-card{width:100%; border:1px solid var(--line); border-radius:10px; padding:20px; text-align:left; background:transparent; margin-bottom:12px; cursor:pointer;}
+  .mode-card .mode-title{font-family:'Fraunces', serif; font-size:18px; color:var(--text); margin-bottom:4px;}
+  .mode-card .mode-desc{font-size:12.5px; color:var(--text-faint); line-height:1.4;}
+  .mode-card.primary{border-color:var(--accent);}
+  .mode-card.primary .mode-title{color:var(--accent);}
+
+  .topnav{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .back-link{font-size:13px; color:var(--text-dim); cursor:pointer; display:flex; align-items:center; gap:5px;}
+
+  .scroll-screen{overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  .scroll-screen::-webkit-scrollbar{display:none;}
+
+  .game-card{border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:9px; cursor:pointer;}
+  .game-card .game-name{font-family:'Fraunces', serif; font-size:16px; color:var(--text); margin-bottom:5px;}
+  .game-card .game-meta{font-size:11px; color:var(--text-faint); display:flex; gap:10px;}
+  .game-card .game-meta span{display:flex; align-items:center; gap:4px;}
+
+  .game-detail-meta{display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap;}
+  .game-detail-meta .gd-item{font-size:11px; color:var(--text-faint);}
+  .game-detail-meta .gd-item b{color:var(--accent); font-weight:500; display:block; font-family:'Fraunces', serif; font-size:15px;}
+  .game-desc{font-size:13.5px; color:var(--text-dim); line-height:1.5; margin-bottom:22px;}
+  .rule-step{display:flex; align-items:center; gap:10px; margin-bottom:6px; padding:8px 10px; background:var(--surface); border-radius:6px; border:1px solid var(--line);}
+  .rule-step .step-num{font-family:'Fraunces', serif; color:var(--accent); font-size:13px; font-weight:600; flex-shrink:0; min-width:36px;}
+  .rule-step .step-text{font-size:12.5px; color:var(--text-dim); line-height:1.3;}
+
+  .progress{display:flex; gap:5px; margin-bottom:36px;}
+  .progress div{flex:1; height:2px; background:var(--line); border-radius:2px;}
+  .progress div.done{background:var(--accent);}
+  .step{display:none; flex-direction:column; flex:1;}
+  .step.active{display:flex;}
+  .step h2{font-size:21px; margin-bottom:8px; color:var(--text);}
+  .step .step-sub{font-size:13px; color:var(--text-faint); margin-bottom:28px;}
+
+  .stepper{display:flex; align-items:center; justify-content:center; gap:22px; margin:18px 0;}
+  .stepper button{width:48px; height:48px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--text); font-size:20px; font-family:'Inter'; flex-shrink:0;}
+  .count-input{font-family:'Fraunces', serif; font-size:42px; width:90px; text-align:center; background:transparent; border:none; color:var(--text); -moz-appearance:textfield;}
+  .count-input::-webkit-outer-spin-button, .count-input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  .count-input:focus{outline:none;}
+  .unit-label{text-align:center; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint); margin-bottom:18px;}
+
+  .name-input{width:100%; padding:14px 16px; border-radius:6px; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:15px; font-family:'Inter'; margin-bottom:14px;}
+  .name-input:focus{outline:none; border-color:var(--accent);}
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{display:flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--line); border-radius:30px; padding:8px 12px 8px 14px; font-size:13px;}
+  .chip .dot{width:8px; height:8px; border-radius:50%;}
+  .chip span.x{color:var(--text-faint); cursor:pointer; font-size:14px; padding:0 2px;}
+  .spacer{flex:1;}
+  .choice-list{display:flex; flex-direction:column; gap:9px;}
+  .choice{padding:16px 16px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; cursor:pointer;}
+  .choice .choice-label{font-family:'Fraunces', serif; font-size:16px; color:var(--text-dim);}
+  .choice .choice-sub{font-size:11px; color:var(--text-faint); margin-top:3px;}
+  .choice.selected{border-color:var(--accent);}
+  .choice.selected .choice-label{color:var(--accent);}
+
+  .slider-wrap{margin:30px 0 10px;}
+  input[type="range"]{width:100%; height:2px; background:var(--line); border-radius:2px; -webkit-appearance:none; outline:none;}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:26px; height:26px; border-radius:50%; background:var(--accent); border:3px solid var(--bg); cursor:pointer; margin-top:-2px;}
+  input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%; background:var(--accent); border:3px solid var(--bg); cursor:pointer;}
+  .slider-label{font-family:'Fraunces', serif; font-size:22px; color:var(--accent); text-align:center; margin-top:20px;}
+  .slider-sub{font-size:13px; color:var(--text-faint); text-align:center; margin-top:6px;}
+  .slider-marks{display:flex; justify-content:space-between; font-size:10px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase; margin-top:8px;}
+
+  #screen-countdown{align-items:center; justify-content:center; text-align:center;}
+  #cd-number{font-family:'Fraunces', serif; font-size:130px; color:var(--accent); line-height:1;}
+
+  #screen-main{padding:20px 20px 28px;}
+  .topbar{display:flex; flex-direction:column; gap:14px; margin-bottom:18px;}
+  .global-track{height:2px; background:var(--line); border-radius:2px; overflow:hidden;}
+  .global-fill{height:100%; background:var(--accent); width:100%; transition:width 1s linear;}
+  #rules-banner{display:flex; flex-wrap:wrap; gap:6px;}
+  .rule-pill{font-size:11px; color:var(--text-dim); border:1px solid var(--line); border-radius:5px; padding:6px 10px; display:flex; align-items:center; gap:6px;}
+  .rule-pill .ic{color:var(--accent); font-size:12px;}
+  .main-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:22px; padding:0 4px;}
+  .item-eyebrow{font-size:10px; letter-spacing:2.5px; text-transform:uppercase;}
+  .item-text{font-family:'Fraunces', serif; font-size:25px; font-weight:500; line-height:1.4; color:var(--text);}
+  .player-tags{display:flex; gap:8px; flex-wrap:wrap; justify-content:center;}
+  .player-tag{display:flex; align-items:center; gap:7px; border:1px solid var(--line); border-radius:30px; padding:8px 14px; font-size:13px;}
+  .player-tag .dot{width:8px; height:8px; border-radius:50%;}
+  .main-footer{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .footer-buttons{display:flex; gap:12px; width:100%;}
+  .footer-btn{flex:1; padding:14px 10px !important; width:auto !important;}
+  .ring-wrap{position:relative; width:48px; height:48px;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-bg{fill:none; stroke:var(--line); stroke-width:3;}
+  .ring-fg{fill:none; stroke:var(--accent); stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset .3s linear;}
+  .ring-label{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--text-dim);}
+
+  #screen-special{align-items:center; justify-content:center; text-align:center; background:#1E140F; border-top:1px solid var(--clay); border-bottom:1px solid var(--clay);}
+  #special-eyebrow{font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--clay); margin-bottom:14px;}
+  #special-icon{font-size:34px; margin-bottom:18px; color:var(--clay);}
+  #special-text{font-family:'Fraunces', serif; font-size:27px; font-weight:500; color:var(--text); line-height:1.4;}
+  #screen-special.climax{background:#231509; border-color:var(--accent);}
+  #screen-special.climax #special-eyebrow{color:var(--accent);}
+  #screen-special.climax #special-icon{color:var(--accent); font-size:42px;}
+  #screen-special.climax #special-text{font-size:30px;}
+
+  #screen-pause{align-items:center; justify-content:center; gap:18px; text-align:center; color:var(--text-faint);}
+  #screen-pause .btn-ghost{width:auto; padding:14px 30px;}
+
+  #screen-end{padding-top:48px;}
+  #screen-end h2{font-size:23px; text-align:center; margin-bottom:6px;}
+  .end-sub{text-align:center; color:var(--text-dim); font-size:13px; margin-bottom:28px;}
+  .stat-card{border:1px solid var(--line); border-radius:6px; padding:14px 16px; margin-bottom:10px;}
+  .stat-label{font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-faint);}
+  .stat-value{font-family:'Fraunces', serif; font-size:18px; color:var(--accent); margin-top:3px;}
+  .hidden{display:none !important;}
+
+  /* Palmier Game */
+  #screen-palmier-setup, #screen-bus-setup{padding-top:20px;}
+  #palm-chips, #bus-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+  #palm-chips .chip, #bus-chips .chip{display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:13px; color:var(--text);}
+  #palm-chips .chip .x, #bus-chips .chip .x{cursor:pointer; margin-left:4px; color:var(--text-faint);}
+  #screen-palmier, #screen-bus{padding:0;}
+  .palm-header{display:flex; justify-content:space-between; align-items:center; padding:12px 14px 4px;}
+  .game-home-btn{font-size:11px; color:var(--text-dim); opacity:0.4; cursor:pointer;}
+  .palm-badges{display:flex; gap:4px;}
+  .badge{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:3px 8px; font-size:10px; color:var(--text-dim); display:flex; align-items:center; gap:3px;}
+  .badge .bv{font-weight:700; color:var(--text); font-size:12px;}
+  .palm-status-bar{padding:2px 14px 4px; display:flex; flex-wrap:wrap; gap:4px; min-height:8px;}
+  .master-pill{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:2px 8px; font-size:9px; color:var(--text-dim); display:inline-flex; gap:4px;}
+  .master-pill .mn{color:var(--accent); font-weight:600;}
+  .palm-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 16px; gap:6px; overflow:visible;}
+  .palm-footer{padding:8px 16px 22px; display:flex; gap:10px;}
+  .palm-footer .btn{flex:1;}
+  .palm-card{width:90px; height:126px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; border:2px solid var(--line); position:relative; flex-shrink:0;}
+  .palm-card.red{background:#1a0a0a; color:#C97B4A; border-color:#C97B4A;}
+  .palm-card.black{background:#0a0a0f; color:var(--text); border-color:var(--text-dim);}
+  .palm-card .card-suit{position:absolute; bottom:8px; right:12px; font-size:18px;}
+  .palm-card .card-val{font-family:'Fraunces',serif;}
+  .palm-player-big{font-family:'Fraunces',serif; font-size:32px; color:var(--accent); font-weight:600;}
+  .palm-rule-line{font-family:'Fraunces',serif; font-size:20px; color:var(--text); line-height:1.35; max-width:300px; margin-top:4px;}
+  .palm-kings-left{font-size:12px; color:var(--text-faint); margin-top:2px;}
+  .palmier-visual{position:relative; width:100%; height:300px; display:flex; align-items:flex-end; justify-content:center; flex-shrink:0; overflow:visible;}
+  .palmier-bottle{width:28px; height:56px; background:linear-gradient(to top, var(--text-faint), var(--surface)); border-radius:3px 3px 6px 6px; position:absolute; bottom:0; left:50%; transform:translateX(-50%); opacity:0.4;}
+  .palmier-bottle::before{content:''; position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:14px; height:8px; background:var(--text-faint); border-radius:2px 2px 0 0; opacity:0.6;}
+  .pm-card{position:absolute; width:80px; height:112px; border:1.5px solid var(--line); border-radius:6px; bottom:54px; left:50%; transform-origin:bottom center; font-size:14px; display:flex; align-items:center; justify-content:center; font-weight:700; line-height:1;}
+  .pm-card.r{background:#1a0a0a; color:#C97B4A; border-color:rgba(201,123,74,0.5);}
+  .pm-card.b{background:#0a0a0f; color:var(--text-dim); border-color:rgba(255,255,255,0.2);}
+  .creators-counter{text-align:center; font-size:11px; color:var(--text-faint); margin-top:12px; font-style:italic;}
+  .balance-track{width:100%; max-width:240px; height:24px; background:var(--surface); border-radius:12px; border:1px solid var(--line); position:relative; overflow:hidden;}
+  .balance-zone{position:absolute; top:0; bottom:0; background:rgba(138,154,126,0.25); border-left:2px solid var(--sage); border-right:2px solid var(--sage);}
+  .balance-cursor{position:absolute; top:2px; bottom:2px; width:6px; background:var(--accent); border-radius:3px;}
+  .balance-cursor.hit{background:var(--sage);}
+  .balance-cursor.miss{background:var(--clay);}
+  .balance-card-float{transition:transform 0.05s linear;}
+  .palm-collapse{font-family:'Fraunces',serif; font-size:32px; color:var(--clay); animation:shake 0.4s ease-in-out;}
+  @keyframes shake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}}
+
+  /* Rules overlay */
+  .rules-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .rules-overlay.hidden{display:none !important;}
+  .rules-modal{background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:18px; max-width:360px; width:100%; max-height:70vh; overflow-y:auto;}
+</style>
+</head>
+<body>
+<div id="frame">
+
+  <div class="screen active" id="screen-home">
+    <div class="home-bg">
+      <div class="ember e1"></div>
+      <div class="ember e2"></div>
+      <div class="ember e3"></div>
+      <div class="grain"></div>
+    </div>
+    <div class="home-content">
+      <div></div>
+      <div style="display:flex; flex-direction:column; align-items:center;">
+        <div class="hero-title">SOIRÉE</div>
+        <div class="hero-tag">Ce soir, personne ne gère</div>
+      </div>
+      <div style="width:100%;">
+        <button class="mode-card primary" onclick="goTo('setup')">
+          <div class="mode-title">Mode Rapide</div>
+          <div class="mode-desc">L'app pilote toute la soirée : règles, défis, mini-jeux et moments s'enchaînent tout seuls jusqu'à la fin du minuteur.</div>
+        </button>
+        <button class="mode-card" onclick="openGamesList()">
+          <div class="mode-title">Mode Jeux</div>
+          <div class="mode-desc">La bibliothèque des classiques. Choisissez un jeu, lisez les règles complètes, jouez une partie entière.</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-setup">
+    <div class="progress" id="setup-progress"><div></div><div></div><div></div><div></div></div>
+
+    <div class="step active" data-step="0">
+      <h2>Vous êtes combien ?</h2>
+      <div class="step-sub">Entre 2 et 20 joueurs</div>
+      <div class="stepper">
+        <button onclick="changeCount(-1)">–</button>
+        <input class="count-input" id="player-count" type="number" value="4" min="2" max="20" oninput="clampCount()">
+        <button onclick="changeCount(1)">+</button>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" onclick="nextStep()">Suivant</button>
+    </div>
+
+    <div class="step" data-step="1">
+      <h2>Les prénoms</h2>
+      <div class="step-sub">Un par un, validez avec Entrée</div>
+      <input class="name-input" id="name-field" placeholder="Tape un prénom et valide" maxlength="16">
+      <div class="step-sub" id="names-remaining" style="margin-bottom:14px;">Encore 4 prénoms sur 4</div>
+      <div class="chips" id="chips-wrap"></div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" id="names-next-btn" onclick="nextStep()" disabled>Suivant</button>
+    </div>
+
+    <div class="step" data-step="2">
+      <h2>Durée de la soirée</h2>
+      <div class="step-sub">Chaque durée a sa propre composition de contenu</div>
+      <div class="choice-list" id="duration-list"></div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" onclick="nextStep()">Suivant</button>
+    </div>
+
+    <div class="step" data-step="3">
+      <h2>Quelle ambiance ce soir ?</h2>
+      <div class="step-sub">Glissez pour régler l'intensité</div>
+      <div class="slider-wrap">
+        <input type="range" id="intensity-slider" min="0" max="100" value="50" oninput="updateIntensityLabel(this.value)">
+        <div class="slider-marks"><span>Soft</span><span>Fun</span><span>Chaos</span></div>
+      </div>
+      <div class="slider-label" id="intensity-label">Fun</div>
+      <div class="slider-sub" id="intensity-sub">Le standard, ça commence à bouger</div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" onclick="launchSession()">Lancer</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-countdown">
+    <div id="cd-number">3</div>
+    <div class="eyebrow" style="margin-top:14px;">Préparez-vous</div>
+  </div>
+
+  <div class="screen" id="screen-main">
+    <div class="topbar">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="game-home-btn" onclick="if(confirm('Quitter la soirée ?')){clearInterval(state.globalInterval);clearInterval(state.ringInterval);goTo('home');}">Accueil</div>
+        <div></div>
+      </div>
+      <div class="global-track"><div class="global-fill" id="global-fill"></div></div>
+      <div id="rules-banner"></div>
+    </div>
+    <div class="main-body">
+      <div class="item-eyebrow" id="item-eyebrow" style="color:var(--accent);">Défi</div>
+      <div class="item-text" id="item-text">—</div>
+      <div class="player-tags" id="item-players"></div>
+    </div>
+    <div class="main-footer">
+      <div class="ring-wrap">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <circle class="ring-bg" cx="24" cy="24" r="20"></circle>
+          <circle class="ring-fg" id="ring-fg" cx="24" cy="24" r="20" stroke-dasharray="125.6" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="ring-label" id="ring-label">10</div>
+      </div>
+      <div class="footer-buttons">
+        <button class="btn btn-ghost footer-btn" onclick="openPause()">Pause</button>
+        <button class="btn btn-ghost footer-btn" id="next-btn" onclick="advanceManually()">Suivant</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-special">
+    <div id="special-eyebrow">Moment</div>
+    <div id="special-icon">▲</div>
+    <div id="special-text">—</div>
+  </div>
+
+  <div class="screen" id="screen-pause">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    <div style="font-size:14px; letter-spacing:1px;">En pause</div>
+    <button class="btn btn-ghost" onclick="closePause()">Reprendre</button>
+  </div>
+
+  <div class="screen" id="screen-end">
+    <h2>Soirée terminée</h2>
+    <div class="end-sub" id="end-duration">—</div>
+    <div id="stats-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="resetAll()">Relancer une soirée</button>
+  </div>
+
+  <div class="screen scroll-screen" id="screen-games-list">
+    <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
+    <h2 style="font-size:20px; margin-bottom:4px;">Les classiques</h2>
+    <div class="step-sub" style="margin-bottom:22px;">Choisis un jeu, lis les règles, lance la partie</div>
+    <div id="games-list-wrap"></div>
+  </div>
+
+  <div class="screen scroll-screen" id="screen-game-detail">
+    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
+    <h2 id="gd-name" style="font-size:22px; margin-bottom:14px;">—</h2>
+    <div class="game-detail-meta" id="gd-meta"></div>
+    <div class="game-desc" id="gd-desc"></div>
+    <div id="gd-rules"></div>
+    <div id="gd-play-wrap" class="hidden" style="margin-top:20px;"></div>
+  </div>
+
+  <!-- Palmier Setup -->
+  <div class="screen" id="screen-palmier-setup">
+    <div class="topnav"><div class="back-link" onclick="goTo('game-detail')">← Le Palmier</div></div>
+    <h2 style="font-size:22px;">Qui joue ?</h2>
+    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 à 10 joueurs)</div>
+    <div class="field-row" style="margin-bottom:12px;">
+      <input type="text" id="palm-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
+    </div>
+    <div id="palm-chips" class="chips-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="palm-start-btn" disabled onclick="palmierStartGame()">Lancer la partie</button>
+  </div>
+
+  <!-- Palmier Game -->
+  <div class="screen" id="screen-palmier">
+    <div class="palm-header">
+      <div>
+        <div class="back-link" onclick="palmierQuit()" style="font-size:13px;">✕ Quitter</div>
+        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+      </div>
+      <div class="palm-badges">
+        <div class="badge"><span class="bv" id="palm-cards-left">52</span>cartes</div>
+        <div class="badge"><span class="bv" id="palm-kings-count">0</span>/4 Rois</div>
+        <div class="badge"><span class="bv" id="palm-collapse-count">0</span>/5 chutes</div>
+        <div class="badge" onclick="showRulesOverlay('palmier')" style="cursor:pointer;">?</div>
+      </div>
+    </div>
+    <div id="palm-status-bar" class="palm-status-bar"></div>
+    <div class="palm-body" id="palm-body">
+      <!-- Dynamic content injected here -->
+    </div>
+    <div class="palm-footer" id="palm-footer"></div>
+  </div>
+
+  <!-- Bus Setup -->
+  <div class="screen" id="screen-bus-setup">
+    <div class="topnav"><div class="back-link" onclick="goTo('game-detail')">← Le Bus</div></div>
+    <h2 style="font-size:22px;">Qui joue ?</h2>
+    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 à 10 joueurs)</div>
+    <div class="field-row" style="margin-bottom:12px;">
+      <input type="text" id="bus-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
+    </div>
+    <div id="bus-chips" class="chips-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="bus-start-btn" disabled onclick="busStartGame()">Lancer la partie</button>
+  </div>
+
+  <!-- Bus Game -->
+  <div class="screen" id="screen-bus">
+    <div class="palm-header">
+      <div>
+        <div class="back-link" onclick="busQuit()" style="font-size:13px;">✕ Quitter</div>
+        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <div class="palm-badges" id="bus-header-info"></div>
+        <div class="badge" onclick="showRulesOverlay('bus')" style="cursor:pointer;">?</div>
+      </div>
+    </div>
+    <div class="palm-body" id="bus-body"></div>
+    <div class="palm-footer" id="bus-footer"></div>
+  </div>
+
+  <!-- Rules Overlay -->
+  <div id="rules-overlay" class="rules-overlay hidden" onclick="closeRulesOverlay()">
+    <div class="rules-modal" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-family:Fraunces,serif;font-size:18px;">Règles</div>
+        <div style="cursor:pointer;color:var(--text-dim);font-size:18px;" onclick="closeRulesOverlay()">✕</div>
+      </div>
+      <div id="rules-overlay-content"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const PLAYER_COLORS = ["#C97B4A","#8A9A7E","#A3503A","#B89968","#6E8C7A","#9C6B4F"];
+
+const RULES = [
+  {text:"Interdit de dire « oui » — dites « clairement »", tier:0},
+  {text:"Doit boire de la main gauche", tier:0},
+  {text:"Interdit de pointer du doigt", tier:0},
+  {text:"Doit applaudir quand on dit son propre prénom", tier:0},
+  {text:"Doit trinquer avant chaque gorgée", tier:0},
+  {text:"Interdit de regarder son téléphone, sauf celui-ci", tier:0},
+  {text:"Interdit de dire « je sais pas »", tier:0},
+  {text:"Doit lever son verre avant chaque cul sec", tier:0},
+  {text:"Doit dire « cheers » au lieu de « santé »", tier:0},
+  {text:"Interdit de s'asseoir", tier:0},
+  {text:"Doit garder une main sur la tête", tier:0},
+  {text:"Interdit de dire des chiffres à voix haute", tier:0},
+  {text:"Doit parler plus fort que la normale", tier:0},
+  {text:"Interdit de toucher son téléphone", tier:0},
+  {text:"Interdit de poser son verre sur une table", tier:1},
+  {text:"Doit dire « Votre Majesté » en s'adressant à {p1}", tier:1},
+  {text:"Interdit de dire « soirée » — dites « mission »", tier:1},
+  {text:"Doit complimenter quelqu'un avant chaque gorgée", tier:1},
+  {text:"Interdit de croiser les bras", tier:1},
+  {text:"Doit chuchoter pendant 2 minutes", tier:1},
+  {text:"Interdit de dire le prénom de {p1}, dites « Le Sujet »", tier:1},
+  {text:"Doit imiter un animal avant de boire", tier:1},
+  {text:"Interdit de rire — celui qui craque boit", tier:1},
+  {text:"Doit parler à la troisième personne", tier:1},
+  {text:"Interdit de dire « non »", tier:1},
+  {text:"Doit garder les yeux fermés pendant 1 minute", tier:1},
+  {text:"Surnom obligatoire pour {p1} : Capitaine", tier:1},
+  {text:"Doit parler avec un accent au choix pendant 5 minutes", tier:2},
+  {text:"Interdit de dire des mots de plus de 2 syllabes", tier:2},
+  {text:"Doit terminer chaque phrase par « ... voilà »", tier:2},
+  {text:"Interdit de regarder {p1} dans les yeux", tier:2},
+  {text:"Doit boire sans utiliser les mains à la prochaine gorgée", tier:2},
+  {text:"Surnom obligatoire pour tout le monde : un prénom de star", tier:2},
+  {text:"Interdit de dire « moi » — parlez de vous à la troisième personne", tier:2},
+  {text:"Doit répondre à toute question par une question", tier:2},
+  {text:"Interdit de dire « du coup »", tier:0},
+  {text:"Doit faire un check à chaque gorgée", tier:0},
+  {text:"Interdit de dire « grave »", tier:0},
+  {text:"Doit taper la table avant de parler", tier:0},
+  {text:"Interdit de dire « en fait »", tier:1},
+  {text:"Doit garder un bras levé pendant 2 minutes", tier:1},
+  {text:"Doit faire un compliment avant de répondre à toute question", tier:1},
+  {text:"Interdit de boire sans trinquer d'abord avec {p1}", tier:1},
+  {text:"Interdit de dire des mots en anglais", tier:1},
+  {text:"Doit parler en rimes pendant 3 minutes", tier:2},
+  {text:"Doit imiter la voix de {p1} pour toute phrase", tier:2},
+  {text:"Interdit d'utiliser son prénom — dites « ce mec » ou « cette fille »", tier:2},
+  {text:"Doit garder les jambes croisées tout le temps", tier:0},
+];
+
+const CHALLENGES = [
+  {text:"{p1}, fais dire un mot interdit à {p2} avant la fin du minuteur", n:2, tier:0},
+  {text:"{p1}, convaincs {p2} de changer de place", n:2, tier:0},
+  {text:"{p1}, obtiens un compliment sincère de {p2}", n:2, tier:0},
+  {text:"Tout le monde sauf {p1} doit boire", n:1, tier:0},
+  {text:"{p1}, désigne la personne la plus susceptible de devenir riche — elle boit", n:1, tier:0},
+  {text:"{p1}, raconte ton pire souvenir de soirée en 20 secondes", n:1, tier:0},
+  {text:"{p1}, fais deviner un métier en mimant, le groupe a 20 secondes", n:1, tier:0},
+  {text:"{p1}, trouve un point commun avec {p2} en moins de 15 secondes", n:2, tier:0},
+  {text:"{p1}, fais rire {p2} sans le toucher", n:2, tier:0},
+  {text:"{p1} et {p2} : bras de fer, le perdant boit", n:2, tier:1},
+  {text:"{p1}, imite {p2} pendant 30 secondes sans rire", n:2, tier:1},
+  {text:"{p1}, échange ton verre avec {p2}", n:2, tier:1},
+  {text:"{p1}, raconte un mensonge convaincant, le groupe vote vrai ou faux", n:1, tier:1},
+  {text:"{p1}, désigne le pire mauvais perdant du groupe — il boit", n:1, tier:1},
+  {text:"{p1}, donne un ordre à {p2} qu'il doit suivre dans la minute", n:2, tier:1},
+  {text:"{p1}, chante les 5 premiers mots d'une chanson au choix de {p2}", n:2, tier:1},
+  {text:"{p1}, avoue ta pire excuse pour annuler un plan", n:1, tier:1},
+  {text:"{p1} et {p2}, échangez un secret inoffensif à voix basse", n:2, tier:1},
+  {text:"{p1}, fais un compliment à {p2} sans utiliser la lettre A", n:2, tier:1},
+  {text:"{p1}, révèle le dernier message envoyé sur ton téléphone (si tu oses)", n:1, tier:2},
+  {text:"{p1} et {p2}, regardez-vous dans les yeux 20 secondes sans rire", n:2, tier:2},
+  {text:"{p1}, fais une déclaration dramatique à {p2} comme dans une telenovela", n:2, tier:2},
+  {text:"{p1}, imite la façon de parler de {p2} pendant 1 minute", n:2, tier:2},
+  {text:"{p1}, raconte ta pire honte publique", n:1, tier:2},
+  {text:"{p1}, {p2} te pose une question — réponds sans mentir", n:2, tier:2},
+  {text:"{p1}, désigne qui du groupe gagnerait dans un combat à mains nues — il/elle boit", n:1, tier:2},
+  {text:"{p1}, avoue ton dernier mensonge à {p2}", n:2, tier:2},
+  {text:"{p1}, choisis qui termine son verre à ta place pour cette manche", n:1, tier:2},
+  {text:"{p1}, fais un discours improvisé de 15 secondes sur un sujet donné par {p2}", n:2, tier:1},
+  {text:"{p1}, devine en 3 questions ce que {p2} a mangé aujourd'hui", n:2, tier:0},
+  {text:"{p1}, propose un toast personnalisé pour {p2}", n:2, tier:0},
+  {text:"{p1}, fais deviner une expression en mimant, le groupe a 15 secondes", n:1, tier:0},
+  {text:"{p1} et {p2}, pierre-feuille-ciseaux, le perdant boit, 3 manches", n:2, tier:0},
+  {text:"{p1}, raconte ta pire anecdote de transport en commun", n:1, tier:0},
+  {text:"{p1}, choisis ton némésis de la soirée — il/elle te défiera en retour plus tard", n:1, tier:1},
+  {text:"{p1}, fais une imitation de prof pendant 20 secondes", n:1, tier:1},
+  {text:"{p1}, avoue ta pire note scolaire", n:1, tier:1},
+  {text:"{p1}, désigne qui s'endort en premier ce soir, il/elle boit une gorgée d'avance", n:1, tier:1},
+  {text:"{p1} et {p2}, improvisez 20 secondes de scène de film sur un thème donné", n:2, tier:2},
+  {text:"{p1}, raconte ton crush le plus gênant", n:1, tier:2},
+];
+
+const MINIGAMES = [
+  {text:"Catégories : Animaux. Chacun donne un animal à tour de rôle. Qui bloque boit.", dur:20, tier:0},
+  {text:"Jamais je n'ai... Chacun lève un doigt par affirmation vraie pour lui. Premier à 0 boit.", dur:20, tier:0},
+  {text:"Mexican : chacun cache un nombre de doigts, devinez la somme totale. Qui se trompe boit.", dur:20, tier:0},
+  {text:"Statues : au signal, tout le monde se fige. Le premier qui bouge boit.", dur:15, tier:0},
+  {text:"Le Sondage : votez à main levée sur une question absurde, la minorité boit.", dur:20, tier:0},
+  {text:"Le Tribunal : {p1} est accusé. Le groupe délibère et vote sa peine.", dur:25, tier:1},
+  {text:"30 secondes de silence total. Le premier qui parle boit.", dur:15, tier:1},
+  {text:"Le Mot Caché : un mot est choisi en secret. Ramenez la conversation vers ce mot sans le dire.", dur:30, tier:1},
+  {text:"Rythme : tape un rythme, le suivant le reproduit puis ajoute le sien. Erreur = boit.", dur:20, tier:1},
+  {text:"Chaise Musicale Verbale : continuez une histoire phrase par phrase. Qui hésite boit.", dur:25, tier:1},
+  {text:"Le Cercle : désignez un roi secret. Tout le monde suit ses ordres jusqu'à la fin.", dur:25, tier:2},
+  {text:"Question Brûlante : chacun pose une question gênante au voisin de droite.", dur:25, tier:2},
+  {text:"Mexicano éclair : 2 dés, chacun annonce un score plus haut ou doute. Le perdant boit.", dur:25, tier:1},
+  {text:"Bus de la honte, mini-manche : devine rouge ou noir sur 3 cartes retournées. Erreur, tu bois.", dur:20, tier:0},
+  {text:"Kings express : pioche une carte, suis l'action associée à sa valeur.", dur:20, tier:1},
+  {text:"Flip Cup éclair : retourne ton gobelet vide d'un coup de doigt, premier réussi gagne.", dur:15, tier:0},
+  {text:"Beer Pong mini-manche : 3 lancers chacun, qui rate le plus boit.", dur:20, tier:0},
+  {text:"Catégories Capitales : énumérez des capitales du monde à tour de rôle.", dur:15, tier:0},
+  {text:"Président éclair : posez vos cartes les plus fortes, le dernier à finir boit.", dur:25, tier:1},
+];
+
+const VOTES = [
+  {text:"Qui finira la soirée le premier au lit ?", tier:0},
+  {text:"Qui changerait son prénom contre 1000€ ?", tier:0},
+  {text:"Qui a le plus mauvais goût musical du groupe ?", tier:0},
+  {text:"Qui survivrait le plus longtemps seul sur une île ?", tier:0},
+  {text:"Qui est le plus susceptible d'arriver en retard à son propre mariage ?", tier:0},
+  {text:"Qui a la meilleure excuse pour sécher un cours ou le travail ?", tier:0},
+  {text:"Qui a le plus de chance de mentir là, tout de suite ?", tier:1},
+  {text:"Qui regrettera le plus demain matin ?", tier:1},
+  {text:"Le couple le plus probable du groupe ?", tier:1},
+  {text:"Qui craquerait en premier dans un jeu de séduction ?", tier:1},
+  {text:"Qui a déjà menti pour éviter une soirée ?", tier:1},
+  {text:"Qui garde le plus de secrets dans le groupe ?", tier:1},
+  {text:"Qui a le crush le plus surprenant dans la pièce ?", tier:2},
+  {text:"Qui ferait le pire dans une situation de crise ?", tier:2},
+  {text:"Qui a la vie amoureuse la plus chaotique ?", tier:2},
+  {text:"Qui trahirait le groupe pour 100€ ?", tier:2},
+  {text:"Qui a le plus de chances de finir la soirée en larmes, de rire ou pas ?", tier:2},
+  {text:"Qui regretterait le moins de tout révéler ce soir ?", tier:2},
+  {text:"Qui est le plus susceptible de devenir célèbre ?", tier:0},
+  {text:"Qui a la pire excuse de retard ?", tier:0},
+  {text:"Qui finirait premier dans un Koh-Lanta ?", tier:0},
+  {text:"Qui ferait le pire coloc ?", tier:0},
+  {text:"Qui a la playlist la plus embarrassante ?", tier:1},
+  {text:"Qui a déjà fait semblant d'être malade pour éviter un truc ?", tier:1},
+  {text:"Qui a le plus de chances de se marier en premier ?", tier:1},
+  {text:"Qui parlerait à un inconnu en premier dans une soirée ?", tier:1},
+  {text:"Qui a la vie la plus secrète ici ?", tier:2},
+  {text:"Qui regretterait le plus un retour en arrière de 5 ans ?", tier:2},
+];
+
+const LIGHT_EVENTS = [
+  {text:"Tout le monde change de place, sens des aiguilles d'une montre", dur:8, tier:0},
+  {text:"Tout le monde lève son verre en silence pendant 5 secondes", dur:8, tier:0},
+  {text:"Tout le monde doit sourire pendant 10 secondes, peu importe la raison", dur:10, tier:0},
+  {text:"Faites un cercle et tapez dans la main de votre voisin", dur:8, tier:0},
+  {text:"Chante le refrain d'une chanson au hasard", dur:10, tier:1},
+  {text:"Tout le monde doit chuchoter sa prochaine phrase", dur:10, tier:1},
+  {text:"Improvisez un toast collectif en 10 secondes", dur:12, tier:1},
+  {text:"Tout le monde montre la photo la plus random de sa galerie", dur:12, tier:1},
+  {text:"Tout le monde doit parler comme un robot pendant 30 secondes", dur:15, tier:2},
+  {text:"Échangez un vêtement avec votre voisin pendant 2 minutes", dur:10, tier:2},
+  {text:"Le groupe invente un nouveau toast officiel de la soirée", dur:12, tier:2},
+  {text:"Tout le monde doit applaudir au ralenti pendant 10 secondes", dur:10, tier:2},
+  {text:"Tout le monde doit taper des mains en rythme pendant 8 secondes", dur:8, tier:0},
+  {text:"Faites un compliment à la personne à votre gauche", dur:8, tier:0},
+  {text:"Tout le monde doit dire un mot qui rime avec « soirée »", dur:10, tier:1},
+  {text:"Levez votre verre et criez un mot au choix, tous ensemble", dur:8, tier:0},
+  {text:"Tout le monde ferme les yeux 10 secondes", dur:10, tier:1},
+  {text:"Échangez de place avec la personne la plus loin de vous", dur:10, tier:1},
+];
+
+const SPECIAL_EVENTS = [
+  {text:"Tout le monde finit son verre", tier:0},
+  {text:"Cul sec général", tier:1},
+  {text:"{p1} boit double", n:1, tier:1},
+  {text:"Échangez votre verre avec votre voisin", tier:0},
+  {text:"Tout le monde à gauche de {p1} boit", n:1, tier:1},
+  {text:"Reversal : le prochain défi sera pour tout le monde sauf une personne", tier:2},
+  {text:"La prochaine règle annoncée compte double", tier:2},
+  {text:"{p1} choisit qui boit à sa place", n:1, tier:1},
+  {text:"Silence radio : personne ne parle pendant 15 secondes, sous peine de boire", tier:0},
+  {text:"Tout le monde debout, cul sec en 5 secondes", tier:1},
+  {text:"{p1} et son voisin de droite boivent ensemble", n:1, tier:1},
+  {text:"Doublez votre prochaine gorgée", tier:0},
+];
+
+const CLIMAX_EVENTS = [
+  "L'heure est venue. Tout le monde finit son verre, cul sec, maintenant.",
+  "Le moment est arrivé. Levez vos verres et terminez-les ensemble.",
+  "Dernière ligne droite avant la suite. Cul sec général, sans exception.",
+  "L'instant que personne n'attendait. Terminez votre verre, tout le monde, en même temps.",
+  "Le minuteur caché vient de sonner. Cul sec collectif.",
+  "Ça y est. Tout le monde boit, jusqu'au fond.",
+];
+
+const GAMES = [
+  {
+    id:"palmier", name:"Le Palmier", joueurs:"2-10", duree:"20-40 min",
+    interactive: true, launchFn: 'palmierSetup',
+    desc:"Pioche une carte, applique la règle, et pose-la en équilibre sur le palmier — sans le faire s'écrouler. 5 chutes = perdu !",
+    rules:[
+      {card:'As', text:'Rouge = cul sec — Noir = choisis qui boit'},
+      {card:'2 / 3', text:'Rouge = bois — Noir = donne'},
+      {card:'4 / 5', text:'Floor to the floor ! / Five to the sky !'},
+      {card:'6', text:'Dans ma valise il y a…'},
+      {card:'7', text:'Maître de la question'},
+      {card:'8', text:'Distribue 8 gorgées'},
+      {card:'9', text:'J\'ai déjà / J\'ai jamais'},
+      {card:'10', text:'Maître du freeze'},
+      {card:'Valet', text:'Jeu du thème'},
+      {card:'Dame', text:'Tout le monde boit'},
+      {card:'Roi', text:'Invente une règle (4ème = cul sec)'},
+    ]
+  },
+  {
+    id:"bus", name:"Le Bus", joueurs:"2-10", duree:"10-20 min",
+    interactive: true, launchFn: 'busSetup',
+    desc:"Devine les caractéristiques de tes 4 cartes cachées. Le pire joueur monte dans le bus — et là, bonne chance.",
+    rules:[
+      {card:'Tour 1', text:'Rouge ou Noir ?'},
+      {card:'Tour 2', text:'Plus haut ou Plus bas ?'},
+      {card:'Tour 3', text:'Dedans ou Dehors ?'},
+      {card:'Tour 4', text:'Devine ♥ ♦ ♣ ou ♠'},
+      {card:'Erreur', text:'1 gorgée au tour 1, puis +1 par tour'},
+      {card:'Bus', text:'Le pire joueur retourne 5 cartes — figure = recommence'},
+    ]
+  },
+];
+
+
+let creatorsGlasses = 0;
+
+let state = {
+  step:0, playerCount:4, players:[],
+  durationMin:20, intensityValue:50,
+  globalSecondsTotal:0, globalSecondsLeft:0, globalInterval:null,
+  ringInterval:null, activeRules:[],
+  ringTotal:10, ringLeft:10,
+  paused:false, bags:{},
+  climaxElapsedTarget:0, climaxFired:false,
+  stats:{ challenges:0, specials:0, rulesAdded:0, targets:{} }
+};
+
+function goTo(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+}
+
+function openGamesList(){
+  const wrap = document.getElementById('games-list-wrap');
+  wrap.innerHTML = '';
+  GAMES.forEach(g=>{
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    card.innerHTML = '<div class="game-name">'+g.name+'</div>'+
+      '<div class="game-meta"><span>'+g.joueurs+'</span><span>'+g.duree+'</span></div>'+
+      '<div style="display:flex;gap:8px;margin-top:10px;">'+
+        (g.interactive ? '<button class="btn btn-primary" style="flex:2;padding:12px;" onclick="event.stopPropagation();'+g.launchFn+'()">Jouer</button>' : '')+
+        '<button class="btn btn-ghost" style="flex:1;padding:12px;" onclick="event.stopPropagation();openGameDetail(\''+g.id+'\')">Règles</button>'+
+      '</div>';
+    wrap.appendChild(card);
+  });
+  goTo('games-list');
+}
+
+function openGameDetail(id){
+  const g = GAMES.find(x=>x.id===id);
+  document.getElementById('gd-name').textContent = g.name;
+  document.getElementById('gd-desc').textContent = g.desc;
+  let metaHTML = '<div class="gd-item"><b>'+g.joueurs+'</b>Joueurs</div>'+
+    '<div class="gd-item"><b>'+g.duree+'</b>Durée</div>';
+  if(g.materiel) metaHTML += '<div class="gd-item"><b>'+g.materiel+'</b>Matériel</div>';
+  document.getElementById('gd-meta').innerHTML = metaHTML;
+  const rulesWrap = document.getElementById('gd-rules');
+  rulesWrap.innerHTML = '';
+  g.rules.forEach((r)=>{
+    const step = document.createElement('div');
+    step.className = 'rule-step';
+    if(typeof r === 'object' && r.card){
+      step.innerHTML = '<div class="step-num" style="min-width:28px; font-size:13px;">'+r.card+'</div><div class="step-text">'+r.text+'</div>';
+    } else {
+      step.innerHTML = '<div class="step-text">'+r+'</div>';
+    }
+    rulesWrap.appendChild(step);
+  });
+  const playWrap = document.getElementById('gd-play-wrap');
+  if(g.interactive){
+    playWrap.classList.remove('hidden');
+    playWrap.innerHTML = '<button class="btn btn-primary" onclick="'+g.launchFn+'()" style="width:100%;">Jouer sur l\'app</button>';
+  } else {
+    playWrap.classList.add('hidden');
+    playWrap.innerHTML = '';
+  }
+  goTo('game-detail');
+}
+
+function clampCount(){
+  let v = parseInt(document.getElementById('player-count').value)||2;
+  v = Math.max(2, Math.min(20, v));
+  state.playerCount = v;
+}
+function changeCount(delta){
+  state.playerCount = Math.max(2, Math.min(20, state.playerCount + delta));
+  document.getElementById('player-count').value = state.playerCount;
+}
+
+const DURATIONS = [
+  {min:10, label:"10 minutes", sub:"2 mini-jeux · 3 votes · 2 défis · 1 cul sec"},
+  {min:20, label:"20 minutes", sub:"4 mini-jeux · 6 votes · 4 défis · 2 cul secs"},
+  {min:30, label:"30 minutes", sub:"6 mini-jeux · 9 votes · 6 défis · 3 cul secs"},
+  {min:45, label:"45 minutes", sub:"12 mini-jeux · 18 votes · 12 défis · 5 cul secs"},
+  {min:60, label:"1 heure", sub:"16 mini-jeux · 24 votes · 16 défis · 7 cul secs"},
+];
+const RECIPES = {
+  10: {minigame:2, vote:3, challenge:2, special:1, rule:1, light:1},
+  20: {minigame:4, vote:6, challenge:4, special:2, rule:2, light:2},
+  30: {minigame:6, vote:9, challenge:6, special:3, rule:3, light:3},
+  45: {minigame:12, vote:18, challenge:12, special:5, rule:7, light:6},
+  60: {minigame:16, vote:24, challenge:16, special:7, rule:8, light:9},
+};
+
+function renderDurationChoices(){
+  const wrap = document.getElementById('duration-list');
+  wrap.innerHTML = '';
+  DURATIONS.forEach(d=>{
+    const el = document.createElement('div');
+    el.className = 'choice' + (state.durationMin===d.min ? ' selected':'');
+    el.innerHTML = '<div><div class="choice-label">'+d.label+'</div><div class="choice-sub">'+d.sub+'</div></div>';
+    el.onclick = ()=>{ state.durationMin = d.min; renderDurationChoices(); };
+    wrap.appendChild(el);
+  });
+}
+
+function updateIntensityLabel(val){
+  state.intensityValue = parseInt(val);
+  const label = document.getElementById('intensity-label');
+  const sub = document.getElementById('intensity-sub');
+  if(val < 34){ label.textContent='Soft'; sub.textContent='Ambiance détendue entre potes'; }
+  else if(val < 67){ label.textContent='Fun'; sub.textContent='Le standard, ça commence à bouger'; }
+  else { label.textContent='Chaos'; sub.textContent='Intensité maximale, accrochez-vous'; }
+}
+
+function renderChips(){
+  const wrap = document.getElementById('chips-wrap');
+  wrap.innerHTML = '';
+  state.players.forEach((p, idx)=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = '<span class="dot" style="background:'+p.color+'"></span>' + p.name + '<span class="x" onclick="removePlayer('+idx+')">×</span>';
+    wrap.appendChild(chip);
+  });
+  const remaining = state.playerCount - state.players.length;
+  const remainingEl = document.getElementById('names-remaining');
+  if(remaining > 0){
+    remainingEl.textContent = 'Encore ' + remaining + (remaining===1 ? ' prénom' : ' prénoms') + ' sur ' + state.playerCount;
+  } else {
+    remainingEl.textContent = 'Tout le monde est là';
+  }
+  document.getElementById('names-next-btn').disabled = state.players.length < state.playerCount;
+}
+function removePlayer(idx){ state.players.splice(idx,1); renderChips(); }
+
+document.getElementById('name-field').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    const val = e.target.value.trim();
+    if(val && state.players.length < state.playerCount){
+      state.players.push({name:val, color: PLAYER_COLORS[state.players.length % PLAYER_COLORS.length]});
+      e.target.value = '';
+      renderChips();
+    }
+  }
+});
+
+function nextStep(){
+  if(state.step === 0) clampCount();
+  if(state.step === 1 && state.players.length < state.playerCount) return;
+  state.step++;
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.querySelector('.step[data-step="'+state.step+'"]').classList.add('active');
+  const dots = document.querySelectorAll('#setup-progress div');
+  dots.forEach((d,i)=> d.classList.toggle('done', i < state.step));
+  if(state.step === 1) renderChips();
+  if(state.step === 2) renderDurationChoices();
+}
+
+function shuffleArr(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function buildBag(arr){ return { items: shuffleArr(arr), index:0 }; }
+function drawFromBag(bagKey, sourceArr){
+  let bag = state.bags[bagKey];
+  if(!bag || bag.index >= bag.items.length){
+    bag = buildBag(filterByTier(sourceArr));
+    state.bags[bagKey] = bag;
+  }
+  const item = bag.items[bag.index];
+  bag.index++;
+  return item;
+}
+
+function buildQueue(recipe){
+  let arr = [];
+  Object.keys(recipe).forEach(type=>{ for(let i=0;i<recipe[type];i++) arr.push(type); });
+  arr = shuffleArr(arr);
+  const half = Math.floor(arr.length/2);
+  const specialIdxs = arr.map((t,i)=> t==='special' ? i : -1).filter(i=>i>=0);
+  const hasLateSpecial = specialIdxs.some(i=>i>=half);
+  if(specialIdxs.length>0 && !hasLateSpecial){
+    const swapWith = half + Math.floor(Math.random()*(arr.length-half));
+    const idx = specialIdxs[0];
+    const tmp = arr[idx]; arr[idx] = arr[swapWith]; arr[swapWith] = tmp;
+  }
+  const lateSpecials = arr.map((t,i)=> (t==='special' && i>=half) ? i : -1).filter(i=>i>=0);
+  state.climaxQueueIndex = lateSpecials.length ? lateSpecials[Math.floor(Math.random()*lateSpecials.length)] : -1;
+  return arr;
+}
+
+function launchSession(){
+  state.globalSecondsTotal = state.durationMin * 60;
+  state.globalSecondsLeft = state.globalSecondsTotal;
+  state.activeRules = [];
+  state.bags = {};
+  state.climaxFired = false;
+  state.stats = { challenges:0, specials:0, rulesAdded:0, targets:{} };
+  state.typesQueue = buildQueue(RECIPES[state.durationMin]);
+  state.queueIndex = 0;
+  goTo('countdown');
+  let n = 3;
+  document.getElementById('cd-number').textContent = n;
+  const cdInterval = setInterval(()=>{
+    n--;
+    if(n > 0){ document.getElementById('cd-number').textContent = n; }
+    else { clearInterval(cdInterval); startMainLoop(); }
+  }, 800);
+}
+
+function startMainLoop(){
+  goTo('main');
+  document.getElementById('global-fill').style.width = '100%';
+  state.globalInterval = setInterval(tickGlobal, 1000);
+  advanceQueue();
+}
+
+function tickGlobal(){
+  if(state.paused) return;
+  state.globalSecondsLeft--;
+  const pct = Math.max(0, (state.globalSecondsLeft / state.globalSecondsTotal) * 100);
+  document.getElementById('global-fill').style.width = pct + '%';
+  // Safety net : force le climax s'il n'a pas encore eu lieu et qu'il reste peu de temps
+  if(!state.climaxFired && state.globalSecondsLeft > 5 && state.globalSecondsLeft <= 30){
+    fireClimax();
+    return;
+  }
+  if(state.globalSecondsLeft <= 0){ endSession(); }
+}
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function pickPlayers(n){ return [...state.players].sort(()=>Math.random()-0.5).slice(0, n); }
+function fillTemplate(text, players){
+  let t = text;
+  players.forEach((p,i)=>{ t = t.split('{p'+(i+1)+'}').join(p.name); });
+  return t;
+}
+function tierLimit(){ return (state.intensityValue/100) * 2; }
+function filterByTier(arr){ const lim = tierLimit(); return arr.filter(i => i.tier <= lim); }
+function speedFactor(){ return 1 - (state.intensityValue/100) * 0.4; }
+
+function advanceQueue(){
+  clearInterval(state.ringInterval);
+
+  let type;
+  if(state.queueIndex < state.typesQueue.length){
+    type = state.typesQueue[state.queueIndex];
+  } else {
+    // file épuisée avant la fin du minuteur global : contenu de secours léger
+    type = Math.random() < 0.5 ? 'vote' : 'light';
+  }
+  const isClimax = (state.queueIndex === state.climaxQueueIndex);
+  state.queueIndex++;
+
+  if(type === 'special'){
+    if(isClimax){ fireClimax(); } else { showSpecialEvent(); }
+    return;
+  }
+
+  if(type === 'rule'){
+    const r = drawFromBag('rule', RULES);
+    const players = pickPlayers(1);
+    const text = fillTemplate(r.text, players);
+    state.activeRules.push(text);
+    state.stats.rulesAdded++;
+    renderRulesBanner();
+    renderItem('Nouvelle règle', text, [], Math.round(4*speedFactor()));
+  } else if(type === 'challenge'){
+    const c = drawFromBag('challenge', CHALLENGES);
+    const players = pickPlayers(c.n);
+    const text = fillTemplate(c.text, players);
+    state.stats.challenges++;
+    players.forEach(p=>{ state.stats.targets[p.name] = (state.stats.targets[p.name]||0) + 1; });
+    renderItem('Défi', text, players, Math.round(25*speedFactor()));
+  } else if(type === 'minigame'){
+    const m = drawFromBag('minigame', MINIGAMES);
+    const players = m.text.includes('{p1}') ? pickPlayers(1) : [];
+    const text = fillTemplate(m.text, players);
+    renderItem('Mini-jeu', text, players, Math.round(m.dur*speedFactor()));
+  } else if(type === 'vote'){
+    const v = drawFromBag('vote', VOTES);
+    renderItem('Vote', v.text, [], Math.round(20*speedFactor()));
+  } else {
+    const l = drawFromBag('light', LIGHT_EVENTS);
+    renderItem('Moment', l.text, [], Math.round(l.dur*speedFactor()));
+  }
+}
+
+function renderItem(eyebrow, text, players, seconds){
+  document.getElementById('item-eyebrow').textContent = eyebrow;
+  document.getElementById('item-text').textContent = text;
+  const tagsWrap = document.getElementById('item-players');
+  tagsWrap.innerHTML = '';
+  players.forEach(p=>{
+    const tag = document.createElement('div');
+    tag.className = 'player-tag';
+    tag.innerHTML = '<span class="dot" style="background:'+p.color+'"></span>'+p.name;
+    tagsWrap.appendChild(tag);
+  });
+  startRing(Math.max(4,seconds));
+}
+
+function startRing(seconds){
+  state.ringTotal = seconds;
+  state.ringLeft = seconds;
+  const fg = document.getElementById('ring-fg');
+  const circumference = 125.6;
+  document.getElementById('ring-label').textContent = seconds;
+  fg.setAttribute('stroke-dashoffset', 0);
+  fg.style.stroke = 'var(--accent)';
+  state.ringInterval = setInterval(()=>{
+    if(state.paused) return;
+    state.ringLeft--;
+    document.getElementById('ring-label').textContent = Math.max(0, state.ringLeft);
+    const offset = circumference * (1 - state.ringLeft / state.ringTotal);
+    fg.setAttribute('stroke-dashoffset', offset);
+    if(state.ringLeft <= 0){
+      clearInterval(state.ringInterval);
+      fg.style.stroke = 'var(--sage)';
+      document.getElementById('ring-label').textContent = '✓';
+    }
+  }, 1000);
+}
+
+function advanceManually(){
+  clearInterval(state.ringInterval);
+  advanceQueue();
+}
+
+function renderRulesBanner(){
+  const wrap = document.getElementById('rules-banner');
+  wrap.innerHTML = '';
+  state.activeRules.forEach(r=>{
+    const pill = document.createElement('div');
+    pill.className = 'rule-pill';
+    pill.innerHTML = '<span class="ic">·</span>' + r;
+    wrap.appendChild(pill);
+  });
+}
+
+function showSpecialEvent(){
+  const e = drawFromBag('special', SPECIAL_EVENTS);
+  const players = e.n ? pickPlayers(e.n) : [];
+  const text = fillTemplate(e.text, players);
+  state.stats.specials++;
+  document.getElementById('screen-special').classList.remove('climax');
+  document.getElementById('special-eyebrow').textContent = 'Moment';
+  document.getElementById('special-icon').textContent = '▲';
+  document.getElementById('special-text').textContent = text;
+  goTo('special');
+  if(navigator.vibrate) navigator.vibrate([80,40,80]);
+  setTimeout(()=>{ goTo('main'); advanceQueue(); }, 3200);
+}
+
+function fireClimax(){
+  state.climaxFired = true;
+  const text = pick(CLIMAX_EVENTS);
+  document.getElementById('screen-special').classList.add('climax');
+  document.getElementById('special-eyebrow').textContent = "L'instant";
+  document.getElementById('special-icon').textContent = '◆';
+  document.getElementById('special-text').textContent = text;
+  goTo('special');
+  if(navigator.vibrate) navigator.vibrate([100,60,100,60,220]);
+  setTimeout(()=>{ goTo('main'); advanceQueue(); }, 4500);
+}
+
+function openPause(){ state.paused = true; goTo('pause'); }
+function closePause(){ state.paused = false; goTo('main'); }
+
+function endSession(){
+  clearInterval(state.globalInterval);
+  clearInterval(state.ringInterval);
+  goTo('end');
+  const h = Math.floor(state.durationMin/60);
+  const m = state.durationMin % 60;
+  document.getElementById('end-duration').textContent = h + 'h' + (m? (m<10?'0'+m:m) : '') + ' de soirée jouée';
+
+  let topTarget = '—', topCount = 0;
+  Object.keys(state.stats.targets).forEach(name=>{
+    if(state.stats.targets[name] > topCount){ topCount = state.stats.targets[name]; topTarget = name; }
+  });
+
+  const stats = [
+    {label:'Le plus sollicité', value: topTarget + (topCount? ' ('+topCount+')' : '')},
+    {label:'Défis lancés', value: state.stats.challenges},
+    {label:'Règles imposées', value: state.stats.rulesAdded},
+    {label:'Événements spéciaux', value: state.stats.specials},
+  ];
+  const wrap = document.getElementById('stats-wrap');
+  wrap.innerHTML = '';
+  stats.forEach(s=>{
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    card.innerHTML = '<div class="stat-label">'+s.label.toUpperCase()+'</div><div class="stat-value">'+s.value+'</div>';
+    wrap.appendChild(card);
+  });
+  creatorsGlasses++;
+  const cc = document.createElement('div');
+  cc.className = 'creators-counter';
+  cc.textContent = '🥂 '+creatorsGlasses+' verre'+(creatorsGlasses>1?'s':'')+' pour les créateurs du jeu';
+  wrap.appendChild(cc);
+}
+
+function resetAll(){
+  state.step = 0; state.playerCount = 4; state.players = []; state.durationMin = 20;
+  document.getElementById('player-count').value = 4;
+  document.getElementById('intensity-slider').value = 50;
+  updateIntensityLabel(50);
+  document.getElementById('chips-wrap').innerHTML = '';
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.querySelector('.step[data-step="0"]').classList.add('active');
+  document.querySelectorAll('#setup-progress div').forEach(d=>d.classList.remove('done'));
+  goTo('home');
+}
+
+function showRulesOverlay(gameId){
+  const g = GAMES.find(x=>x.id===gameId);
+  if(!g) return;
+  const wrap = document.getElementById('rules-overlay-content');
+  wrap.innerHTML = '';
+  g.rules.forEach(r=>{
+    const el = document.createElement('div');
+    el.className = 'rule-step';
+    if(typeof r === 'object' && r.card){
+      el.innerHTML = '<div class="step-num">'+r.card+'</div><div class="step-text">'+r.text+'</div>';
+    } else {
+      el.innerHTML = '<div class="step-text">'+r+'</div>';
+    }
+    wrap.appendChild(el);
+  });
+  document.getElementById('rules-overlay').classList.remove('hidden');
+}
+function closeRulesOverlay(){
+  document.getElementById('rules-overlay').classList.add('hidden');
+}
+
+/* ==================== PALMIER GAME ==================== */
+
+const PALM_SUITS = ['♥','♦','♣','♠'];
+const PALM_VALUES = ['A','2','3','4','5','6','7','8','9','10','V','D','R'];
+function palmIsRed(s){ return s==='♥'||s==='♦'; }
+
+const palm = {
+  players:[], currentIdx:0, deck:[], palmHeight:0, maxHeight:0,
+  kingsDrawn:0, questionMaster:null, freezeMaster:null,
+  currentCard:null, collapseCount:0,
+  drawnCards:[], balInterval:null,
+};
+
+function palmMakeDeck(){
+  const d=[];
+  PALM_SUITS.forEach(s=> PALM_VALUES.forEach(v=> d.push({suit:s, value:v})));
+  for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+  return d;
+}
+
+/* --- Setup --- */
+function palmierSetup(){
+  palm.players=[];
+  document.getElementById('palm-chips').innerHTML='';
+  document.getElementById('palm-name-field').value='';
+  document.getElementById('palm-start-btn').disabled=true;
+  goTo('palmier-setup');
+  setTimeout(()=> document.getElementById('palm-name-field').focus(), 100);
+}
+
+document.getElementById('palm-name-field').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    const val=e.target.value.trim();
+    if(val && palm.players.length<10){
+      palm.players.push(val);
+      e.target.value='';
+      palmRenderSetupChips();
+    }
+  }
+});
+
+function palmRenderSetupChips(){
+  const wrap=document.getElementById('palm-chips');
+  wrap.innerHTML='';
+  palm.players.forEach((name,i)=>{
+    const chip=document.createElement('div');
+    chip.className='chip';
+    chip.innerHTML=name+'<span class="x" onclick="palmRemovePlayer('+i+')">×</span>';
+    wrap.appendChild(chip);
+  });
+  document.getElementById('palm-start-btn').disabled = palm.players.length < 2;
+}
+function palmRemovePlayer(i){ palm.players.splice(i,1); palmRenderSetupChips(); }
+
+function palmierStartGame(){
+  if(palm.players.length<2) return;
+  palm.deck = palmMakeDeck();
+  palm.currentIdx = 0;
+  palm.palmHeight = 0;
+  palm.maxHeight = 0;
+  palm.kingsDrawn = 0;
+  palm.questionMaster = null;
+  palm.freezeMaster = null;
+  palm.currentCard = null;
+  palm.collapseCount = 0;
+  palm.drawnCards = [];
+  goTo('palmier');
+  palmUpdateHeader();
+  palmNextTurn();
+}
+
+/* --- Header & status --- */
+function palmUpdateHeader(){
+  document.getElementById('palm-cards-left').textContent = palm.deck.length;
+  document.getElementById('palm-kings-count').textContent = palm.kingsDrawn;
+  document.getElementById('palm-collapse-count').textContent = palm.collapseCount;
+  const bar = document.getElementById('palm-status-bar');
+  let html = '';
+  if(palm.questionMaster!==null) html += '<div class="master-pill">Maître Question <span class="mn">'+palm.players[palm.questionMaster]+'</span></div>';
+  if(palm.freezeMaster!==null) html += '<div class="master-pill">Maître Freeze <span class="mn">'+palm.players[palm.freezeMaster]+'</span></div>';
+  bar.innerHTML = html;
+}
+function palmPlayer(){ return palm.players[palm.currentIdx % palm.players.length]; }
+
+/* --- Palm tree visual (fanning cards on bottle) --- */
+function palmTreeHTML(){
+  if(palm.drawnCards.length===0) return '<div class="palmier-visual"><div class="palmier-bottle"></div></div>';
+  let h='<div class="palmier-visual"><div class="palmier-bottle"></div>';
+  const cards = palm.drawnCards;
+  const n = cards.length;
+  cards.forEach((c,i)=>{
+    const red = palmIsRed(c.suit);
+    const idx = i - Math.floor(n/2);
+    const baseAngle = idx * (14 + n * 1.2);
+    const jitter = ((c.value.charCodeAt(0) * 7 + c.suit.charCodeAt(0) * 13 + i * 17) % 11 - 5) * 1.2;
+    const angle = baseAngle + jitter;
+    const lift = Math.abs(idx) * 3 + ((c.value.charCodeAt(0) * 3 + i * 11) % 5 - 2);
+    const cls = red ? 'r' : 'b';
+    h+='<div class="pm-card '+cls+'" style="transform:translateX(-50%) rotate('+angle.toFixed(1)+'deg) translateY(-'+lift.toFixed(0)+'px);">'+c.value+'<br>'+c.suit+'</div>';
+  });
+  h+='</div>';
+  return h;
+}
+
+function palmCardMiniHTML(card){
+  const red = palmIsRed(card.suit);
+  return '<div class="palm-card '+(red?'red':'black')+'" style="width:70px;height:98px;font-size:28px;">'+
+    '<div class="card-val">'+card.value+'</div>'+
+    '<div class="card-suit" style="font-size:14px;">'+card.suit+'</div>'+
+  '</div>';
+}
+
+/* --- Core flow: auto-draw on next turn --- */
+function palmGetRule(card){
+  const v = card.value;
+  const red = palmIsRed(card.suit);
+  const p = palmPlayer();
+  switch(v){
+    case 'A': return red
+      ? {d:' boit cul sec'}
+      : {d:' choisit qui doit boire cul sec'};
+    case '2': return red
+      ? {d:' boit 2 gorgées'}
+      : {d:' donne 2 gorgées'};
+    case '3': return red
+      ? {d:' boit 3 gorgées'}
+      : {d:' donne 3 gorgées'};
+    case '4': return {d:'Four to the floor !'};
+    case '5': return {d:'Five to the sky !'};
+    case '6': return {d:'Dans ma valise il y a…'};
+    case '7': return {d:' devient le Maître de la question', master:'question'};
+    case '8': return {d:' distribue 8 gorgées'};
+    case '9': return {d:'J\'ai déjà / J\'ai jamais'};
+    case '10': return {d:' devient le Maître du freeze', master:'freeze'};
+    case 'V': return {d:'Jeu du thème'};
+    case 'D': return {d:'Tout le monde boit une gorgée'};
+    case 'R':
+    palm.kingsDrawn++;
+
+    if (palm.kingsDrawn < 4) {
+      const left = 4 - palm.kingsDrawn;
+      return {
+        d:  ' doit inventer une règle',
+        kings: left
+      };
+    } else {
+      return {
+        d: ' a tiré le 4ème Roi — CUL SEC !'
+      };
+    }
+  
+      default: return {d:''};
+    }
+}
+
+function palmNextTurn(){
+  if(palm.deck.length===0){ palmEndGame(); return; }
+  palm.currentCard = palm.deck.pop();
+  palm.drawnCards.push(palm.currentCard);
+  palmUpdateHeader();
+  palmShowReveal();
+}
+
+/* --- Reveal: player name big, card, one rule line --- */
+function palmShowReveal(){
+  const card = palm.currentCard;
+  const red = palmIsRed(card.suit);
+  const rule = palmGetRule(card);
+  const body = document.getElementById('palm-body');
+  const footer = document.getElementById('palm-footer');
+
+  if(rule.master==='question') palm.questionMaster = palm.currentIdx % palm.players.length;
+  if(rule.master==='freeze') palm.freezeMaster = palm.currentIdx % palm.players.length;
+  palmUpdateHeader();
+
+  let kingsHTML = '';
+  if(rule.kings !== undefined){
+    kingsHTML = '<div class="palm-kings-left">'+rule.kings+' Roi'+(rule.kings>1?'s':'')+' restant'+(rule.kings>1?'s':'')+' avant le cul sec</div>';
+  }
+
+  body.innerHTML =
+    '<div class="palm-player-big">'+palmPlayer()+'</div>'+
+    '<div class="palm-card '+(red?'red':'black')+'">'+
+      '<div class="card-val">'+card.value+'</div>'+
+      '<div class="card-suit">'+card.suit+'</div>'+
+    '</div>'+
+    '<div class="palm-rule-line">'+rule.d+'</div>'+
+    kingsHTML;
+
+    footer.innerHTML =
+  '<button class="btn btn-primary" onclick="palmShowBalance()">Poser la carte</button>';
+ 
+}
+
+/* --- Balance: cursor + floating card + palm tree --- */
+function palmShowBalance(){
+  const body = document.getElementById('palm-body');
+  const footer = document.getElementById('palm-footer');
+  if(palm.balInterval) clearInterval(palm.balInterval);
+
+  const card = palm.currentCard;
+  const red = palmIsRed(card.suit);
+  const difficulty = Math.min(palm.palmHeight / 30, 1);
+  // Zone shrinks: 38% at start → 12% at max difficulty
+  const zoneWidth = Math.max(12, 38 - difficulty * 26);
+  // Base speed varies randomly each round + scales with difficulty
+  const baseSpeed = 1.2 + Math.random() * 1.5 + difficulty * 2.5;
+  const zoneLeft = (100 - zoneWidth) / 2;
+
+  body.innerHTML =
+    '<div class="palm-card '+(red?'red':'black')+' balance-card-float" id="palm-float-card" style="width:80px;height:112px;font-size:30px;">'+
+      '<div class="card-val">'+card.value+'</div>'+
+      '<div class="card-suit" style="font-size:16px;">'+card.suit+'</div>'+
+    '</div>'+
+    '<div class="balance-track" id="palm-track">'+
+      '<div class="balance-zone" style="left:'+zoneLeft+'%;width:'+zoneWidth+'%;"></div>'+
+      '<div class="balance-cursor" id="palm-cursor"></div>'+
+    '</div>'+
+    palmTreeHTML();
+
+  footer.innerHTML = '<button class="btn btn-primary" id="palm-tap-btn">Poser !</button>';
+
+  const cursor = document.getElementById('palm-cursor');
+  const floatCard = document.getElementById('palm-float-card');
+  let pos = Math.random() < 0.5 ? 0 : 100;
+  let dir = pos === 0 ? 1 : -1;
+  let tapped = false;
+  const speed = baseSpeed;
+
+  palm.balInterval = setInterval(()=>{
+    if(tapped) return;
+    pos += speed * dir;
+    if(pos >= 100 || pos <= 0) dir *= -1;
+    pos = Math.max(0, Math.min(100, pos));
+    cursor.style.left = pos + '%';
+    const tilt = (pos - 50) * 0.6;
+    floatCard.style.transform = 'rotate('+tilt+'deg)';
+  }, 16);
+
+  function doTap(e){
+    e.preventDefault();
+    if(tapped) return;
+    tapped = true;
+    clearInterval(palm.balInterval);
+
+    const inZone = pos >= zoneLeft && pos <= (zoneLeft + zoneWidth);
+    if(inZone){
+      cursor.classList.add('hit');
+      floatCard.style.transform = 'rotate(0deg) scale(0.6) translateY(40px)';
+      floatCard.style.transition = 'transform 0.4s ease-out, opacity 0.4s';
+      floatCard.style.opacity = '0.3';
+      if(navigator.vibrate) navigator.vibrate(50);
+      setTimeout(()=> palmCardPlaced(), 500);
+    } else {
+      cursor.classList.add('miss');
+      floatCard.style.transform = 'rotate('+(pos > 50 ? 45 : -45)+'deg) translateY(30px)';
+      floatCard.style.transition = 'transform 0.3s ease-out';
+      if(navigator.vibrate) navigator.vibrate([80,40,80,40,160]);
+      setTimeout(()=> palmCollapse(), 500);
+    }
+  }
+
+  document.getElementById('palm-tap-btn').addEventListener('click', doTap);
+}
+
+/* --- Card placed / collapse --- */
+function palmCardPlaced(){
+  palm.palmHeight++;
+  palm.maxHeight = Math.max(palm.maxHeight, palm.palmHeight);
+  const body = document.getElementById('palm-body');
+  const footer = document.getElementById('palm-footer');
+
+  body.innerHTML =
+    '<div style="color:var(--sage); font-size:18px; font-family:Fraunces,serif;">✓ Posée</div>'+
+    palmTreeHTML();
+
+  palm.currentIdx++;
+  footer.innerHTML = '<button class="btn btn-primary" onclick="palmNextTurn()">Joueur suivant</button>';
+}
+
+function palmCollapse(){
+  if(navigator.vibrate) navigator.vibrate([100,50,100,50,200]);
+  const body = document.getElementById('palm-body');
+  const footer = document.getElementById('palm-footer');
+  palm.collapseCount++;
+  const n = Math.max(1,Math.ceil(palm.palmHeight/3));
+  const penalty = palm.palmHeight >= 15 ? 'Cul sec !' : (n+' gorgée'+(n>1?'s':''));
+
+  body.innerHTML =
+    '<div class="palm-collapse">💥</div>'+
+    '<div style="font-family:Fraunces,serif; font-size:22px; color:var(--clay);">Effondrement !</div>'+
+    '<div class="palm-rule-line">'+palmPlayer()+' boit '+penalty+'</div>'+
+    '<div class="palm-kings-left">'+palm.collapseCount+'/5 chutes</div>';
+
+  palm.palmHeight = 0;
+  palm.currentIdx++;
+  palmUpdateHeader();
+
+  if(palm.collapseCount >= 5){
+    footer.innerHTML = '<button class="btn btn-primary" onclick="palmEndGame()">Fin de partie</button>';
+  } else {
+    footer.innerHTML = '<button class="btn btn-primary" onclick="palmNextTurn()">Joueur suivant</button>';
+  }
+}
+
+/* --- End game --- */
+function palmEndGame(){
+  if(palm.balInterval) clearInterval(palm.balInterval);
+  const body = document.getElementById('palm-body');
+  const footer = document.getElementById('palm-footer');
+  const won = palm.deck.length === 0 && palm.collapseCount < 5;
+
+  let creatorsHTML = '';
+  if(won){
+    creatorsGlasses++;
+    creatorsHTML = '<div class="creators-counter">🥂 '+creatorsGlasses+' verre'+(creatorsGlasses>1?'s':'')+' pour les créateurs</div>';
+  }
+
+  body.innerHTML =
+    '<div style="font-family:Fraunces,serif; font-size:24px; color:var(--text);">'+(won?'Bravo !':'Perdu !')+'</div>'+
+    '<div class="palm-rule-line" style="font-size:13px; line-height:2;">'+
+      palm.drawnCards.length+' cartes · '+palm.kingsDrawn+' Rois<br>'+
+      palm.collapseCount+' effondrement'+(palm.collapseCount!==1?'s':'')+'<br>'+
+      'Record : '+palm.maxHeight+' cartes empilées'+
+    '</div>'+
+    palmTreeHTML()+
+    creatorsHTML;
+
+  footer.innerHTML =
+    '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>'+
+    '<button class="btn btn-primary" onclick="palmierStartGame()" style="flex:1;">Rejouer</button>';
+}
+
+function palmierQuit(){
+  if(palm.balInterval) clearInterval(palm.balInterval);
+  goTo('games-list');
+}
+
+/* ==================== BUS GAME ==================== */
+
+const bus = {
+  players:[], currentIdx:0, round:0,
+  playerCards:[], revealedCards:[],
+  scores:{}, deck:[],
+  busCards:[], busIdx:0, busAttempts:0,
+  phase:'guess' // guess, reveal, busRide
+};
+
+function busMakeDeck(){
+  const d=[];
+  PALM_SUITS.forEach(s=> PALM_VALUES.forEach(v=> d.push({suit:s, value:v})));
+  for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+  return d;
+}
+
+function busCardVal(card){
+  const order = {A:1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,V:11,D:12,R:13};
+  return order[card.value]||0;
+}
+
+function busCardHTML(card, hidden){
+  if(hidden) return '<div class="palm-card" style="background:var(--surface);width:56px;height:78px;font-size:16px;color:var(--text-faint);">?</div>';
+  const red = palmIsRed(card.suit);
+  return '<div class="palm-card '+(red?'red':'black')+'" style="width:56px;height:78px;font-size:24px;">'+
+    '<div class="card-val">'+card.value+'</div>'+
+    '<div class="card-suit" style="font-size:13px;">'+card.suit+'</div>'+
+  '</div>';
+}
+
+/* --- Setup --- */
+function busSetup(){
+  bus.players=[];
+  document.getElementById('bus-chips').innerHTML='';
+  document.getElementById('bus-name-field').value='';
+  document.getElementById('bus-start-btn').disabled=true;
+  goTo('bus-setup');
+  setTimeout(()=> document.getElementById('bus-name-field').focus(), 100);
+}
+
+document.getElementById('bus-name-field').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    const val=e.target.value.trim();
+    if(val && bus.players.length<10){
+      bus.players.push(val);
+      e.target.value='';
+      busRenderChips();
+    }
+  }
+});
+
+function busRenderChips(){
+  const wrap=document.getElementById('bus-chips');
+  wrap.innerHTML='';
+  bus.players.forEach((name,i)=>{
+    const chip=document.createElement('div');
+    chip.className='chip';
+    chip.innerHTML=name+'<span class="x" onclick="busRemovePlayer('+i+')">×</span>';
+    wrap.appendChild(chip);
+  });
+  document.getElementById('bus-start-btn').disabled = bus.players.length < 2;
+}
+function busRemovePlayer(i){ bus.players.splice(i,1); busRenderChips(); }
+
+function busStartGame(){
+  if(bus.players.length<2) return;
+  bus.deck = busMakeDeck();
+  bus.currentIdx = 0;
+  bus.scores = {};
+  bus.players.forEach(p=> bus.scores[p]=0);
+  goTo('bus');
+  busNextPlayer();
+}
+
+function busPlayer(){ return bus.players[bus.currentIdx]; }
+
+function busUpdateHeader(){
+  document.getElementById('bus-header-info').innerHTML =
+    '<div class="badge">Joueur <span class="bv">'+(bus.currentIdx+1)+'/'+bus.players.length+'</span></div>';
+}
+
+/* --- Player turn: 4 rounds --- */
+function busNextPlayer(){
+  if(bus.currentIdx >= bus.players.length){ busShowResults(); return; }
+  bus.round = 0;
+  bus.playerCards = [bus.deck.pop(), bus.deck.pop(), bus.deck.pop(), bus.deck.pop()];
+  bus.revealedCards = [];
+  busUpdateHeader();
+  busShowRound();
+}
+
+function busShowRound(){
+  const body = document.getElementById('bus-body');
+  const footer = document.getElementById('bus-footer');
+  const p = busPlayer();
+  const r = bus.round;
+
+  // Show revealed cards so far
+  let cardsRow = '<div style="display:flex;gap:6px;margin-bottom:8px;">';
+  for(let i=0;i<4;i++){
+    cardsRow += i < bus.revealedCards.length ? busCardHTML(bus.revealedCards[i]) : busCardHTML(null,true);
+  }
+  cardsRow += '</div>';
+
+  const questions = [
+    {q:'Rouge ou Noir ?', opts:['Rouge','Noir']},
+    {q:'Plus haut ou Plus bas ?', opts:['Plus haut','Plus bas']},
+    {q:'Dedans ou Dehors ?', opts:['Dedans','Dehors']},
+    {q:'Devine la couleur', opts:['♥','♦','♣','♠']},
+  ];
+
+  body.innerHTML =
+    '<div class="palm-player-big">'+p+'</div>'+
+    cardsRow+
+    '<div class="palm-rule-line">'+questions[r].q+'</div>';
+
+  const opts = questions[r].opts;
+  footer.innerHTML = opts.map(o=>
+    '<button class="btn btn-primary" onclick="busGuess(\''+o+'\')" style="flex:1;">'+o+'</button>'
+  ).join('');
+}
+
+function busGuess(guess){
+  const card = bus.playerCards[bus.round];
+  bus.revealedCards.push(card);
+  const r = bus.round;
+  let correct = false;
+
+  if(r===0){
+    const isRed = palmIsRed(card.suit);
+    correct = (guess==='Rouge' && isRed) || (guess==='Noir' && !isRed);
+  } else if(r===1){
+    const prev = busCardVal(bus.revealedCards[0]);
+    const cur = busCardVal(card);
+    correct = (guess==='Plus haut' && cur > prev) || (guess==='Plus bas' && cur < prev) || cur===prev;
+  } else if(r===2){
+    const v1 = busCardVal(bus.revealedCards[0]);
+    const v2 = busCardVal(bus.revealedCards[1]);
+    const lo = Math.min(v1,v2), hi = Math.max(v1,v2);
+    const cur = busCardVal(card);
+    const inside = cur > lo && cur < hi;
+    correct = (guess==='Dedans' && inside) || (guess==='Dehors' && !inside);
+  } else if(r===3){
+    correct = (guess===card.suit);
+  }
+
+  const penalty = r + 1;
+  if(!correct) bus.scores[busPlayer()] += penalty;
+
+  busShowRoundResult(correct, penalty);
+}
+
+function busShowRoundResult(correct, penalty){
+  const body = document.getElementById('bus-body');
+  const footer = document.getElementById('bus-footer');
+  const card = bus.revealedCards[bus.revealedCards.length-1];
+
+  let cardsRow = '<div style="display:flex;gap:6px;margin-bottom:8px;">';
+  for(let i=0;i<4;i++){
+    cardsRow += i < bus.revealedCards.length ? busCardHTML(bus.revealedCards[i]) : busCardHTML(null,true);
+  }
+  cardsRow += '</div>';
+
+  body.innerHTML =
+    '<div class="palm-player-big">'+busPlayer()+'</div>'+
+    cardsRow+
+    '<div class="palm-rule-line" style="color:'+(correct?'var(--sage)':'var(--clay)')+';">'
+      +(correct ? '✓ Bien joué !' : '✗ Raté ! '+penalty+' gorgée'+(penalty>1?'s':''))+'</div>';
+
+  bus.round++;
+  if(bus.round >= 4){
+    footer.innerHTML = '<button class="btn btn-primary" onclick="busNextPlayerAdvance()">Joueur suivant</button>';
+  } else {
+    footer.innerHTML = '<button class="btn btn-primary" onclick="busShowRound()">Question suivante</button>';
+  }
+}
+
+function busNextPlayerAdvance(){
+  bus.currentIdx++;
+  busNextPlayer();
+}
+
+/* --- Results + Bus ride --- */
+function busShowResults(){
+  const body = document.getElementById('bus-body');
+  const footer = document.getElementById('bus-footer');
+
+  let worst = '', worstScore = -1;
+  bus.players.forEach(p=>{
+    if(bus.scores[p] > worstScore){ worstScore = bus.scores[p]; worst = p; }
+  });
+
+  let scoreHTML = '<div style="font-size:13px; line-height:2; color:var(--text-dim);">';
+  bus.players.forEach(p=>{
+    const s = bus.scores[p];
+    const highlight = p===worst ? ' style="color:var(--clay); font-weight:700;"' : '';
+    scoreHTML += '<div'+highlight+'>'+p+' : '+s+' erreur'+(s!==1?'s':'')+'</div>';
+  });
+  scoreHTML += '</div>';
+
+  document.getElementById('bus-header-info').textContent = 'Résultats';
+
+  body.innerHTML =
+    '<div style="font-family:Fraunces,serif; font-size:22px; color:var(--text);">Résultats</div>'+
+    scoreHTML+
+    '<div class="palm-rule-line" style="color:var(--clay); margin-top:8px;">'+worst+' monte dans le bus !</div>';
+
+  footer.innerHTML = '<button class="btn btn-primary" onclick="busStartRide(\''+worst+'\')">Monter dans le bus</button>';
+}
+
+/* --- The Bus Ride --- */
+function busStartRide(player){
+  bus.busCards = [bus.deck.pop(),bus.deck.pop(),bus.deck.pop(),bus.deck.pop(),bus.deck.pop()];
+  bus.busIdx = 0;
+  bus.busAttempts = 0;
+  bus.busPlayer = player;
+  busShowRideCard();
+}
+
+function busShowRideCard(){
+  const body = document.getElementById('bus-body');
+  const footer = document.getElementById('bus-footer');
+
+  document.getElementById('bus-header-info').textContent = 'Le Bus — Tentative '+(bus.busAttempts+1);
+
+  let cardsRow = '<div style="display:flex;gap:4px;margin-bottom:10px;">';
+  for(let i=0;i<5;i++){
+    if(i < bus.busIdx){
+      cardsRow += busCardHTML(bus.busCards[i]);
+    } else if(i === bus.busIdx){
+      cardsRow += busCardHTML(null,true);
+    } else {
+      cardsRow += busCardHTML(null,true);
+    }
+  }
+  cardsRow += '</div>';
+
+  body.innerHTML =
+    '<div class="palm-player-big">'+bus.busPlayer+'</div>'+
+    cardsRow+
+    '<div class="palm-rule-line">Carte '+(bus.busIdx+1)+'/5 — Retourne !</div>';
+
+  footer.innerHTML = '<button class="btn btn-primary" onclick="busFlipRideCard()">Retourner</button>';
+}
+
+function busFlipRideCard(){
+  const card = bus.busCards[bus.busIdx];
+  const isFace = card.value==='V' || card.value==='D' || card.value==='R';
+  const body = document.getElementById('bus-body');
+  const footer = document.getElementById('bus-footer');
+
+  let cardsRow = '<div style="display:flex;gap:4px;margin-bottom:10px;">';
+  for(let i=0;i<5;i++){
+    if(i <= bus.busIdx){
+      cardsRow += busCardHTML(bus.busCards[i]);
+    } else {
+      cardsRow += busCardHTML(null,true);
+    }
+  }
+  cardsRow += '</div>';
+
+  if(isFace){
+    if(navigator.vibrate) navigator.vibrate([80,40,80]);
+    body.innerHTML =
+      '<div class="palm-player-big">'+bus.busPlayer+'</div>'+
+      cardsRow+
+      '<div class="palm-rule-line" style="color:var(--clay);">Figure ! '+bus.busPlayer+' boit et recommence</div>';
+
+    // Reset with new cards
+    bus.busAttempts++;
+    bus.busCards = [bus.deck.pop()||bus.busCards[0],bus.deck.pop()||bus.busCards[1],bus.deck.pop()||bus.busCards[2],bus.deck.pop()||bus.busCards[3],bus.deck.pop()||bus.busCards[4]];
+    bus.busIdx = 0;
+    footer.innerHTML = '<button class="btn btn-primary" onclick="busShowRideCard()">Recommencer</button>';
+  } else {
+    bus.busIdx++;
+    if(bus.busIdx >= 5){
+      creatorsGlasses++;
+      body.innerHTML =
+        '<div class="palm-player-big" style="color:var(--sage);">'+bus.busPlayer+' descend du bus !</div>'+
+        cardsRow+
+        '<div class="palm-rule-line">Après '+(bus.busAttempts+1)+' tentative'+(bus.busAttempts>0?'s':'')+'</div>'+
+        '<div class="creators-counter">🥂 '+creatorsGlasses+' verre'+(creatorsGlasses>1?'s':'')+' pour les créateurs</div>';
+      footer.innerHTML =
+        '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>'+
+        '<button class="btn btn-primary" onclick="busStartGame()" style="flex:1;">Rejouer</button>';
+    } else {
+      body.innerHTML =
+        '<div class="palm-player-big">'+bus.busPlayer+'</div>'+
+        cardsRow+
+        '<div class="palm-rule-line" style="color:var(--sage);">✓ Ouf !</div>';
+      footer.innerHTML = '<button class="btn btn-primary" onclick="busShowRideCard()">Carte suivante</button>';
+    }
+  }
+}
+
+function busQuit(){ goTo('games-list'); }
+</script>
+</body>
+</html>
