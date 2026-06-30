@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -200,25 +201,40 @@
   .palm-collapse{font-family:'Fraunces',serif; font-size:32px; color:var(--clay); animation:shake 0.4s ease-in-out;}
   @keyframes shake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}}
 
-  /* Dice Duel */
-  #screen-special.dice-duel{background:#171712; border-color:var(--line);}
-  .dice-row{display:flex; align-items:center; justify-content:center; gap:30px; margin:18px 0 8px;}
-  .dice-col{display:flex; flex-direction:column; align-items:center; gap:10px;}
-  .dice-name{font-family:'Fraunces', serif; font-size:16px; color:var(--text-dim);}
-  .dice-name.loser{color:var(--clay); font-weight:600;}
-  .dice-name.winner{color:var(--sage);}
-  .die{width:68px; height:68px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-family:'Fraunces', serif; font-size:32px; font-weight:700; border:2px solid; transition:transform .08s ease;}
-  .die.color-a{background:rgba(201,123,74,0.12); border-color:var(--accent); color:var(--accent-bright);}
-  .die.color-b{background:rgba(138,154,126,0.12); border-color:var(--sage); color:var(--sage);}
-  .die.rolling{animation:diceShake .12s linear infinite;}
-  @keyframes diceShake{0%{transform:rotate(0deg)} 25%{transform:rotate(-6deg)} 75%{transform:rotate(6deg)} 100%{transform:rotate(0deg)}}
-  .dice-vs{font-family:'Fraunces', serif; font-size:14px; color:var(--text-faint); letter-spacing:2px;}
-  .dice-result-line{font-family:'Fraunces', serif; font-size:23px; color:var(--text); line-height:1.4; margin-top:10px;}
-
   /* Rules overlay */
   .rules-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100; display:flex; align-items:center; justify-content:center; padding:20px;}
   .rules-overlay.hidden{display:none !important;}
   .rules-modal{background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:18px; max-width:360px; width:100%; max-height:70vh; overflow-y:auto;}
+
+  /* Cible game */
+  #screen-cible-setup{padding-top:20px;}
+  #cible-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+  #cible-chips .chip{display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:13px; color:var(--text);}
+  #cible-chips .chip .x{cursor:pointer; margin-left:4px; color:var(--text-faint);}
+  #screen-cible{padding:0;}
+  .cible-wrap{position:relative; width:360px; height:360px; margin:0 auto; flex-shrink:0;}
+  .cible-ring{position:absolute; border-radius:50%; border:1px dashed; top:50%; left:50%; transform:translate(-50%,-50%); opacity:0.25;}
+  .cible-ring.z1{width:340px; height:340px; border-color:var(--sage);}
+  .cible-ring.z2{width:220px; height:220px; border-color:#C9AF4B;}
+  .cible-ring.z3{width:110px; height:110px; border-color:var(--accent);}
+  .cible-ring.z4{width:48px; height:48px; border-color:var(--clay); background:rgba(163,80,58,0.08);}
+  .cc{position:absolute; border-radius:5px; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; transform:translate(-50%,-50%); transition:transform 0.12s; font-family:'Fraunces',serif; flex-direction:column; line-height:1.1;}
+  .cc:active{transform:translate(-50%,-50%) scale(0.9);}
+  .cc.z1{width:34px; height:48px; font-size:14px; background:rgba(138,154,126,0.2); border:1px solid rgba(138,154,126,0.5);}
+  .cc.z2{width:38px; height:54px; font-size:15px; background:rgba(201,175,75,0.15); border:1px solid rgba(201,175,75,0.5);}
+  .cc.z3{width:42px; height:60px; font-size:17px; background:rgba(201,123,74,0.18); border:1px solid rgba(201,123,74,0.5);}
+  .cc.z4{width:50px; height:70px; font-size:22px; background:rgba(163,80,58,0.22); border:1px solid rgba(163,80,58,0.6);}
+  .cc.revealed{cursor:default; opacity:0.4;}
+  .cc.revealed.red-card{background:#1a0a0a; color:#C97B4A; border-color:#C97B4A; opacity:0.7;}
+  .cc.revealed.black-card{background:#0a0a0f; color:var(--text); border-color:var(--text-dim); opacity:0.7;}
+  .cc .cc-sip{font-size:6px; color:var(--text-faint); font-family:'Inter',sans-serif; font-weight:400;}
+  .cc .cc-val{font-size:inherit; line-height:1;}
+  .cc .cc-suit{font-size:0.6em;}
+  .sip-pot{font-family:'Fraunces',serif; font-size:42px; color:var(--accent); font-weight:600; text-align:center; line-height:1;}
+  .sip-pot-label{font-size:11px; color:var(--text-faint); text-align:center; margin-bottom:2px;}
+  .cible-question{font-family:'Fraunces',serif; font-size:18px; color:var(--text); text-align:center; margin-top:6px;}
+  .cible-result{font-family:'Fraunces',serif; font-size:18px; text-align:center; margin-top:4px;}
+  .cible-special{font-size:12px; color:var(--accent); text-align:center; margin-top:4px;}
 </style>
 </head>
 <body>
@@ -428,6 +444,35 @@
     </div>
     <div class="palm-body" id="bus-body"></div>
     <div class="palm-footer" id="bus-footer"></div>
+  </div>
+
+  <!-- Cible Setup -->
+  <div class="screen" id="screen-cible-setup">
+    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
+    <h2 style="font-size:22px;">Qui joue ?</h2>
+    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 à 10 joueurs)</div>
+    <div class="field-row" style="margin-bottom:12px;">
+      <input type="text" id="cible-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
+    </div>
+    <div id="cible-chips" class="chips-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="cible-start-btn" disabled onclick="cibleStartGame()">Lancer la partie</button>
+  </div>
+
+  <!-- Cible Game -->
+  <div class="screen" id="screen-cible">
+    <div class="palm-header">
+      <div>
+        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">✕ Quitter</div>
+        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <div class="palm-badges" id="cible-header"></div>
+        <div class="badge" onclick="showRulesOverlay('cible')" style="cursor:pointer;">?</div>
+      </div>
+    </div>
+    <div class="palm-body" id="cible-body"></div>
+    <div class="palm-footer" id="cible-footer"></div>
   </div>
 
   <!-- Rules Overlay -->
@@ -670,6 +715,19 @@ const GAMES = [
       {card:'Bus', text:'Le pire joueur retourne 5 cartes — figure = recommence'},
     ]
   },
+  {
+    id:"cible", name:"La Cible", joueurs:"2-10", duree:"15-30 min",
+    interactive: true, launchFn: 'cibleSetup',
+    desc:"25 cartes cachées en forme de cible. Plus tu vises le centre, plus tu risques gros. Devine juste ou bois.",
+    rules:[
+      {card:'Ext.', text:'Rouge ou Noir ? → 1 gorgée'},
+      {card:'Cercle 2', text:'Pair ou Impair ? → 2 gorgées'},
+      {card:'Cercle 3', text:'Devine le symbole → 3 gorgées'},
+      {card:'Centre', text:'Devine la valeur exacte → 5 gorgées'},
+      {card:'Réussi', text:'Tu distribues les gorgées'},
+      {card:'Raté', text:'Tu bois les gorgées'},
+    ]
+  },
 ];
 
 
@@ -757,11 +815,11 @@ const DURATIONS = [
   {min:60, label:"1 heure", sub:"16 mini-jeux · 24 votes · 16 défis · 7 cul secs"},
 ];
 const RECIPES = {
-  10: {minigame:2, vote:3, challenge:2, special:1, rule:1, light:1, dice:1},
-  20: {minigame:4, vote:6, challenge:4, special:2, rule:2, light:2, dice:2},
-  30: {minigame:6, vote:9, challenge:6, special:3, rule:3, light:3, dice:3},
-  45: {minigame:12, vote:18, challenge:12, special:5, rule:7, light:6, dice:5},
-  60: {minigame:16, vote:24, challenge:16, special:7, rule:8, light:9, dice:6},
+  10: {minigame:2, vote:3, challenge:2, special:1, rule:1, light:1},
+  20: {minigame:4, vote:6, challenge:4, special:2, rule:2, light:2},
+  30: {minigame:6, vote:9, challenge:6, special:3, rule:3, light:3},
+  45: {minigame:12, vote:18, challenge:12, special:5, rule:7, light:6},
+  60: {minigame:16, vote:24, challenge:16, special:7, rule:8, light:9},
 };
 
 function renderDurationChoices(){
@@ -933,12 +991,6 @@ function advanceQueue(){
     return;
   }
 
-  if(type === 'dice'){
-    // Le duel de dés nécessite au moins 2 joueurs (toujours vrai, min 2)
-    showDiceDuel();
-    return;
-  }
-
   if(type === 'rule'){
     const r = drawFromBag('rule', RULES);
     const players = pickPlayers(1);
@@ -1032,143 +1084,6 @@ function showSpecialEvent(){
   goTo('special');
   if(navigator.vibrate) navigator.vibrate([80,40,80]);
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 3200);
-}
-
-/* ==================== DICE DUEL ==================== */
-function showDiceDuel(){
-  const duo = pickPlayers(2);
-  // Sécurité : si jamais moins de 2 joueurs sont disponibles, on retombe sur un vote
-  if(duo.length < 2){
-    const v = drawFromBag('vote', VOTES);
-    renderItem('Vote', v.text, [], Math.round(20*speedFactor()));
-    return;
-  }
-  const screen = document.getElementById('screen-special');
-  screen.classList.remove('climax');
-  screen.classList.add('dice-duel');
-  document.getElementById('special-eyebrow').textContent = 'Duel de dés';
-  document.getElementById('special-icon').textContent = '';
-
-  document.getElementById('special-text').innerHTML =
-    '<div class="dice-row">'+
-      '<div class="dice-col"><div class="dice-name" id="dice-name-a">'+duo[0].name+'</div><div class="die color-a rolling" id="die-a">?</div>'+
-        '<button class="btn btn-primary dice-stop-btn" id="dice-stop-a" style="padding:10px 16px;font-size:13px;">Stop</button></div>'+
-      '<div class="dice-vs">VS</div>'+
-      '<div class="dice-col"><div class="dice-name" id="dice-name-b">'+duo[1].name+'</div><div class="die color-b rolling" id="die-b">?</div>'+
-        '<button class="btn btn-primary dice-stop-btn" id="dice-stop-b" style="padding:10px 16px;font-size:13px;">Stop</button></div>'+
-    '</div>'+
-    '<div class="dice-result-line" id="dice-result-line">Chacun arrête son dé d\'un clic !</div>';
-
-  goTo('special');
-  if(navigator.vibrate) navigator.vibrate(30);
-
-  const dieA = document.getElementById('die-a');
-  const dieB = document.getElementById('die-b');
-  const btnA = document.getElementById('dice-stop-a');
-  const btnB = document.getElementById('dice-stop-b');
-
-  let valA = null, valB = null;
-
-  // Chaque dé défile indéfiniment jusqu'à ce que son joueur clique sur "Stop"
-  const rollIntervalA = setInterval(()=>{ dieA.textContent = 1 + Math.floor(Math.random()*6); }, 80);
-  const rollIntervalB = setInterval(()=>{ dieB.textContent = 1 + Math.floor(Math.random()*6); }, 80);
-
-  function maybeFinish(){
-    if(valA === null || valB === null) return;
-    finishDiceDuel(duo, valA, valB, screen);
-  }
-
-  btnA.addEventListener('click', ()=>{
-    if(valA !== null) return;
-    clearInterval(rollIntervalA);
-    valA = 1 + Math.floor(Math.random()*6);
-    dieA.textContent = valA;
-    dieA.classList.remove('rolling');
-    btnA.disabled = true;
-    btnA.style.opacity = '0.4';
-    if(navigator.vibrate) navigator.vibrate(40);
-    maybeFinish();
-  });
-  btnB.addEventListener('click', ()=>{
-    if(valB !== null) return;
-    clearInterval(rollIntervalB);
-    valB = 1 + Math.floor(Math.random()*6);
-    dieB.textContent = valB;
-    dieB.classList.remove('rolling');
-    btnB.disabled = true;
-    btnB.style.opacity = '0.4';
-    if(navigator.vibrate) navigator.vibrate(40);
-    maybeFinish();
-  });
-}
-
-function finishDiceDuel(duo, valA, valB, screen){
-  document.getElementById('dice-result-line').textContent = 'Égalité ! On relance…';
-
-  if(valA === valB){
-    // En cas d'égalité, on relance automatiquement après un court instant
-    setTimeout(()=>{
-      const dieA = document.getElementById('die-a');
-      const dieB = document.getElementById('die-b');
-      const btnA = document.getElementById('dice-stop-a');
-      const btnB = document.getElementById('dice-stop-b');
-      let newValA = null, newValB = null;
-      dieA.classList.add('rolling'); dieB.classList.add('rolling');
-      btnA.disabled = false; btnA.style.opacity = '1';
-      btnB.disabled = false; btnB.style.opacity = '1';
-      document.getElementById('dice-result-line').textContent = "Chacun arrête son dé d'un clic !";
-
-      const rollIntervalA = setInterval(()=>{ dieA.textContent = 1 + Math.floor(Math.random()*6); }, 80);
-      const rollIntervalB = setInterval(()=>{ dieB.textContent = 1 + Math.floor(Math.random()*6); }, 80);
-
-      function maybeFinish(){
-        if(newValA === null || newValB === null) return;
-        finishDiceDuel(duo, newValA, newValB, screen);
-      }
-      btnA.onclick = ()=>{
-        if(newValA !== null) return;
-        clearInterval(rollIntervalA);
-        newValA = 1 + Math.floor(Math.random()*6);
-        dieA.textContent = newValA;
-        dieA.classList.remove('rolling');
-        btnA.disabled = true; btnA.style.opacity = '0.4';
-        if(navigator.vibrate) navigator.vibrate(40);
-        maybeFinish();
-      };
-      btnB.onclick = ()=>{
-        if(newValB !== null) return;
-        clearInterval(rollIntervalB);
-        newValB = 1 + Math.floor(Math.random()*6);
-        dieB.textContent = newValB;
-        dieB.classList.remove('rolling');
-        btnB.disabled = true; btnB.style.opacity = '0.4';
-        if(navigator.vibrate) navigator.vibrate(40);
-        maybeFinish();
-      };
-    }, 1200);
-    return;
-  }
-
-  document.getElementById('dice-stop-a').classList.add('hidden');
-  document.getElementById('dice-stop-b').classList.add('hidden');
-
-  const loserIsA = valA < valB;
-  const loser = loserIsA ? duo[0] : duo[1];
-  document.getElementById('dice-name-a').classList.add(loserIsA ? 'loser' : 'winner');
-  document.getElementById('dice-name-b').classList.add(loserIsA ? 'winner' : 'loser');
-
-  const gorgees = valA * valB;
-  state.stats.targets[loser.name] = (state.stats.targets[loser.name]||0) + 1;
-  document.getElementById('dice-result-line').textContent =
-    loser.name + ' a le plus petit chiffre — ' + gorgees + ' gorgée' + (gorgees>1?'s':'') + ' (' + valA + ' × ' + valB + ')';
-
-  if(navigator.vibrate) navigator.vibrate([100,50,150]);
-
-  setTimeout(()=>{
-    screen.classList.remove('dice-duel');
-    goTo('main');
-    advanceQueue();
-  }, 5000);
 }
 
 function fireClimax(){
@@ -1372,40 +1287,33 @@ function palmGetRule(card){
   const p = palmPlayer();
   switch(v){
     case 'A': return red
-      ? {d:' boit cul sec'}
-      : {d:' choisit qui doit boire cul sec'};
+      ? {d:p+' boit cul sec'}
+      : {d:p+' choisit qui doit boire cul sec'};
     case '2': return red
-      ? {d:' boit 2 gorgées'}
-      : {d:' donne 2 gorgées'};
+      ? {d:p+' doit boire 2 gorgées'}
+      : {d:p+' donne 2 gorgées'};
     case '3': return red
-      ? {d:' boit 3 gorgées'}
-      : {d:' donne 3 gorgées'};
-    case '4': return {d:'Four to the floor !'};
+      ? {d:p+' doit boire 3 gorgées'}
+      : {d:p+' donne 3 gorgées'};
+    case '4': return {d:'Floor to the floor !'};
     case '5': return {d:'Five to the sky !'};
     case '6': return {d:'Dans ma valise il y a…'};
-    case '7': return {d:' devient le Maître de la question', master:'question'};
-    case '8': return {d:' distribue 8 gorgées'};
+    case '7': return {d:p+' devient le Maître de la question', master:'question'};
+    case '8': return {d:p+' distribue 8 gorgées'};
     case '9': return {d:'J\'ai déjà / J\'ai jamais'};
-    case '10': return {d:' devient le Maître du freeze', master:'freeze'};
+    case '10': return {d:p+' devient le Maître du freeze', master:'freeze'};
     case 'V': return {d:'Jeu du thème'};
     case 'D': return {d:'Tout le monde boit une gorgée'};
     case 'R':
-    palm.kingsDrawn++;
-
-    if (palm.kingsDrawn < 4) {
-      const left = 4 - palm.kingsDrawn;
-      return {
-        d:  ' doit inventer une règle',
-        kings: left
-      };
-    } else {
-      return {
-        d: ' a tiré le 4ème Roi — CUL SEC !'
-      };
-    }
-  
-      default: return {d:''};
-    }
+      palm.kingsDrawn++;
+      if(palm.kingsDrawn < 4){
+        const left = 4 - palm.kingsDrawn;
+        return {d:p+' doit inventer une règle', kings:left};
+      } else {
+        return {d:p+' a tiré le 4ème Roi — CUL SEC !', gameover:true};
+      }
+    default: return {d:''};
+  }
 }
 
 function palmNextTurn(){
@@ -1442,9 +1350,11 @@ function palmShowReveal(){
     '<div class="palm-rule-line">'+rule.d+'</div>'+
     kingsHTML;
 
-    footer.innerHTML =
-  '<button class="btn btn-primary" onclick="palmShowBalance()">Poser la carte</button>';
- 
+  if(rule.gameover){
+    footer.innerHTML = '<button class="btn btn-primary" onclick="palmEndGame()">Fin de partie</button>';
+  } else {
+    footer.innerHTML = '<button class="btn btn-primary" onclick="palmShowBalance()">Poser la carte</button>';
+  }
 }
 
 /* --- Balance: cursor + floating card + palm tree --- */
@@ -1888,6 +1798,225 @@ function busFlipRideCard(){
 }
 
 function busQuit(){ goTo('games-list'); }
+
+/* ==================== LA CIBLE ==================== */
+
+const cible = {
+  players:[], currentIdx:0, cards:[], selectedIdx:null, direction:1, sipPot:0
+};
+
+function cibleSetup(){
+  cible.players=[];
+  document.getElementById('cible-chips').innerHTML='';
+  document.getElementById('cible-name-field').value='';
+  document.getElementById('cible-start-btn').disabled=true;
+  goTo('cible-setup');
+  setTimeout(()=> document.getElementById('cible-name-field').focus(), 100);
+}
+
+document.getElementById('cible-name-field').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    const val=e.target.value.trim();
+    if(val && cible.players.length<10){
+      cible.players.push(val);
+      e.target.value='';
+      cibleRenderChips();
+    }
+  }
+});
+
+function cibleRenderChips(){
+  const wrap=document.getElementById('cible-chips');
+  wrap.innerHTML='';
+  cible.players.forEach((name,i)=>{
+    const chip=document.createElement('div');
+    chip.className='chip';
+    chip.innerHTML=name+'<span class="x" onclick="cibleRemovePlayer('+i+')">×</span>';
+    wrap.appendChild(chip);
+  });
+  document.getElementById('cible-start-btn').disabled = cible.players.length < 2;
+}
+function cibleRemovePlayer(i){ cible.players.splice(i,1); cibleRenderChips(); }
+
+function cibleStartGame(){
+  if(cible.players.length<2) return;
+  cible.currentIdx = 0;
+  cible.direction = 1;
+  cible.sipPot = 0;
+  goTo('cible');
+  cibleNewTarget();
+}
+
+function ciblePlayer(){ return cible.players[cible.currentIdx]; }
+
+function cibleMakeDeck(){
+  const d=[];
+  PALM_SUITS.forEach(s=> PALM_VALUES.forEach(v=> d.push({suit:s, value:v})));
+  for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+  return d;
+}
+
+function cibleNewTarget(){
+  const deck = cibleMakeDeck();
+  cible.cards = [];
+  cible.selectedIdx = null;
+  // Zone 1: 12 cards, Zone 2: 8 cards, Zone 3: 4 cards, Zone 4: 1 card
+  const zones = [
+    {z:1,n:10,sips:1,r:165,offset:0},
+    {z:2,n:6,sips:2,r:108,offset:Math.PI/6},
+    {z:3,n:4,sips:3,r:54,offset:Math.PI/4},
+    {z:4,n:1,sips:5,r:0,offset:0}
+  ];
+  let di = 0;
+  zones.forEach(zone=>{
+    for(let i=0;i<zone.n;i++){
+      const card = deck[di++];
+      const angle = (i / zone.n) * Math.PI * 2 - Math.PI/2 + zone.offset;
+      cible.cards.push({
+        ...card, zone:zone.z, sips:zone.sips, revealed:false,
+        x: 180 + Math.cos(angle) * zone.r,
+        y: 180 + Math.sin(angle) * zone.r,
+      });
+    }
+  });
+  cibleUpdateHeader();
+  cibleRenderTarget();
+}
+
+function cibleUpdateHeader(){
+  document.getElementById('cible-header').innerHTML =
+    '<div class="badge">Joueur <span class="bv">'+(cible.currentIdx+1)+'/'+cible.players.length+'</span></div>';
+}
+
+function cibleRenderTarget(){
+  const body = document.getElementById('cible-body');
+  const footer = document.getElementById('cible-footer');
+  let h = '';
+  if(cible.sipPot > 0){
+    h += '<div class="sip-pot">'+cible.sipPot+'</div><div class="sip-pot-label">gorgée'+(cible.sipPot>1?'s':'')+' en jeu</div>';
+  }
+  h += '<div class="palm-player-big" style="font-size:22px;margin-bottom:2px;">'+ciblePlayer()+', choisis une carte</div>';
+  h += '<div class="cible-wrap">';
+  h += '<div class="cible-ring z1"></div><div class="cible-ring z2"></div><div class="cible-ring z3"></div><div class="cible-ring z4"></div>';
+  cible.cards.forEach((c,i)=>{
+    const zClass = 'z'+c.zone;
+    if(c.revealed){
+      const col = palmIsRed(c.suit) ? 'red-card' : 'black-card';
+      h += '<div class="cc '+zClass+' revealed '+col+'" style="left:'+c.x+'px;top:'+c.y+'px;"><span class="cc-val">'+c.value+'</span><span class="cc-suit">'+c.suit+'</span></div>';
+    } else {
+      h += '<div class="cc '+zClass+' hidden-card" style="left:'+c.x+'px;top:'+c.y+'px;" onclick="cibleSelectCard('+i+')"><span class="cc-val">'+c.sips+'</span><span class="cc-sip">gorgée'+(c.sips>1?'s':'')+'</span></div>';
+    }
+  });
+  h += '</div>';
+  body.innerHTML = h;
+  footer.innerHTML = '<button class="btn btn-ghost" onclick="cibleNewTarget()">Nouvelle cible</button>';
+}
+
+function cibleSelectCard(idx){
+  const card = cible.cards[idx];
+  if(card.revealed) return;
+  cible.selectedIdx = idx;
+  const body = document.getElementById('cible-body');
+  const footer = document.getElementById('cible-footer');
+  const z = card.zone;
+
+  let question = '', btns = '';
+  if(z === 1){
+    question = 'Rouge ou Noir ?';
+    btns = '<button class="btn btn-primary" onclick="cibleGuess(\'rouge\')" style="flex:1;background:#A3503A;">Rouge</button>'+
+           '<button class="btn btn-primary" onclick="cibleGuess(\'noir\')" style="flex:1;background:#2a2a2a;color:var(--text);">Noir</button>';
+  } else if(z === 2){
+    question = 'Pair ou Impair ?';
+    btns = '<button class="btn btn-primary" onclick="cibleGuess(\'pair\')" style="flex:1;">Pair</button>'+
+           '<button class="btn btn-primary" onclick="cibleGuess(\'impair\')" style="flex:1;">Impair</button>';
+  } else if(z === 3){
+    question = 'Devine le symbole';
+    btns = ['♥','♦','♣','♠'].map(s=>
+      '<button class="btn btn-primary" onclick="cibleGuess(\''+s+'\')" style="flex:1;padding:14px 8px;font-size:18px;">'+s+'</button>'
+    ).join('');
+  } else {
+    question = 'Devine la valeur';
+    btns = '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+    PALM_VALUES.forEach(v=>{
+      btns += '<button class="btn btn-ghost" onclick="cibleGuess(\''+v+'\')" style="width:auto;padding:10px 14px;flex:0;">'+v+'</button>';
+    });
+    btns += '</div>';
+  }
+
+  body.innerHTML =
+    '<div class="palm-player-big" style="font-size:22px;">'+ciblePlayer()+'</div>'+
+    '<div class="cible-question">'+question+'</div>';
+  footer.innerHTML = '<div style="display:flex;gap:8px;width:100%;">'+btns+'</div>';
+}
+
+function cibleGuess(answer){
+  const idx = cible.selectedIdx;
+  const card = cible.cards[idx];
+  const z = card.zone;
+  let correct = false;
+
+  if(z === 1){
+    const isRed = palmIsRed(card.suit);
+    correct = (answer==='rouge' && isRed) || (answer==='noir' && !isRed);
+  } else if(z === 2){
+    const numVal = parseInt(card.value);
+    if(isNaN(numVal)){
+      correct = Math.random() < 0.5; // figures: coin flip
+    } else {
+      correct = (answer==='pair' && numVal%2===0) || (answer==='impair' && numVal%2!==0);
+    }
+  } else if(z === 3){
+    correct = (answer === card.suit);
+  } else {
+    correct = (answer === card.value);
+  }
+
+  card.revealed = true;
+
+  // Special effects
+  let special = '';
+  if(card.value==='A') special = 'As — tout le monde boit 1 gorgée';
+  else if(card.value==='R') special = 'Roi 👑 — invente une règle';
+  else if(card.value==='D') special = 'Dame — duel avec le joueur de ton choix';
+  else if(card.value==='V') special = 'Valet — ton voisin de gauche boit';
+  else if(card.value==='7') special = '7 — sens de jeu inversé !';
+  else if(card.value==='10') special = '10 — double ou rien !';
+
+  if(card.value==='7') cible.direction *= -1;
+
+  let resultTitle = '', resultSub = '';
+  if(correct){
+    cible.sipPot += card.sips;
+    resultTitle = 'Gagné';
+    resultSub = '+'+card.sips+' gorgée'+(card.sips>1?'s':'')+' au compteur';
+  } else {
+    const totalDrink = cible.sipPot + card.sips;
+    resultTitle = 'Perdu';
+    resultSub = ciblePlayer()+' boit '+totalDrink+' gorgée'+(totalDrink>1?'s':'');
+    cible.sipPot = 0;
+  }
+
+  const body = document.getElementById('cible-body');
+  const footer = document.getElementById('cible-footer');
+  const red = palmIsRed(card.suit);
+
+  body.innerHTML =
+    '<div class="palm-card '+(red?'red':'black')+'" style="width:70px;height:98px;font-size:28px;">'+
+      '<div class="card-val">'+card.value+'</div>'+
+      '<div class="card-suit" style="font-size:14px;">'+card.suit+'</div>'+
+    '</div>'+
+    '<div style="font-family:Fraunces,serif;font-size:28px;color:'+(correct?'var(--sage)':'var(--clay)')+';">'+resultTitle+'</div>'+
+    '<div style="font-size:14px;color:var(--text-dim);">'+resultSub+'</div>'+
+    (special ? '<div class="cible-special">'+special+'</div>' : '');
+
+  footer.innerHTML = '<button class="btn btn-primary" onclick="cibleNextPlayer()">Joueur suivant</button>';
+}
+
+function cibleNextPlayer(){
+  cible.currentIdx = (cible.currentIdx + cible.direction + cible.players.length) % cible.players.length;
+  cibleUpdateHeader();
+  cibleRenderTarget();
+}
 </script>
 </body>
 </html>
