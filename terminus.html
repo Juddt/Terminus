@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -200,6 +199,21 @@
   .balance-card-float{transition:transform 0.05s linear;}
   .palm-collapse{font-family:'Fraunces',serif; font-size:32px; color:var(--clay); animation:shake 0.4s ease-in-out;}
   @keyframes shake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}}
+
+  /* Dice Duel */
+  #screen-special.dice-duel{background:#171712; border-color:var(--line);}
+  .dice-row{display:flex; align-items:center; justify-content:center; gap:30px; margin:18px 0 8px;}
+  .dice-col{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .dice-name{font-family:'Fraunces', serif; font-size:16px; color:var(--text-dim);}
+  .dice-name.loser{color:var(--clay); font-weight:600;}
+  .dice-name.winner{color:var(--sage);}
+  .die{width:68px; height:68px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-family:'Fraunces', serif; font-size:32px; font-weight:700; border:2px solid; transition:transform .08s ease;}
+  .die.color-a{background:rgba(201,123,74,0.12); border-color:var(--accent); color:var(--accent-bright);}
+  .die.color-b{background:rgba(138,154,126,0.12); border-color:var(--sage); color:var(--sage);}
+  .die.rolling{animation:diceShake .12s linear infinite;}
+  @keyframes diceShake{0%{transform:rotate(0deg)} 25%{transform:rotate(-6deg)} 75%{transform:rotate(6deg)} 100%{transform:rotate(0deg)}}
+  .dice-vs{font-family:'Fraunces', serif; font-size:14px; color:var(--text-faint); letter-spacing:2px;}
+  .dice-result-line{font-family:'Fraunces', serif; font-size:23px; color:var(--text); line-height:1.4; margin-top:10px;}
 
   /* Rules overlay */
   .rules-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100; display:flex; align-items:center; justify-content:center; padding:20px;}
@@ -743,11 +757,11 @@ const DURATIONS = [
   {min:60, label:"1 heure", sub:"16 mini-jeux · 24 votes · 16 défis · 7 cul secs"},
 ];
 const RECIPES = {
-  10: {minigame:2, vote:3, challenge:2, special:1, rule:1, light:1},
-  20: {minigame:4, vote:6, challenge:4, special:2, rule:2, light:2},
-  30: {minigame:6, vote:9, challenge:6, special:3, rule:3, light:3},
-  45: {minigame:12, vote:18, challenge:12, special:5, rule:7, light:6},
-  60: {minigame:16, vote:24, challenge:16, special:7, rule:8, light:9},
+  10: {minigame:2, vote:3, challenge:2, special:1, rule:1, light:1, dice:1},
+  20: {minigame:4, vote:6, challenge:4, special:2, rule:2, light:2, dice:2},
+  30: {minigame:6, vote:9, challenge:6, special:3, rule:3, light:3, dice:3},
+  45: {minigame:12, vote:18, challenge:12, special:5, rule:7, light:6, dice:5},
+  60: {minigame:16, vote:24, challenge:16, special:7, rule:8, light:9, dice:6},
 };
 
 function renderDurationChoices(){
@@ -919,6 +933,12 @@ function advanceQueue(){
     return;
   }
 
+  if(type === 'dice'){
+    // Le duel de dés nécessite au moins 2 joueurs (toujours vrai, min 2)
+    showDiceDuel();
+    return;
+  }
+
   if(type === 'rule'){
     const r = drawFromBag('rule', RULES);
     const players = pickPlayers(1);
@@ -1012,6 +1032,143 @@ function showSpecialEvent(){
   goTo('special');
   if(navigator.vibrate) navigator.vibrate([80,40,80]);
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 3200);
+}
+
+/* ==================== DICE DUEL ==================== */
+function showDiceDuel(){
+  const duo = pickPlayers(2);
+  // Sécurité : si jamais moins de 2 joueurs sont disponibles, on retombe sur un vote
+  if(duo.length < 2){
+    const v = drawFromBag('vote', VOTES);
+    renderItem('Vote', v.text, [], Math.round(20*speedFactor()));
+    return;
+  }
+  const screen = document.getElementById('screen-special');
+  screen.classList.remove('climax');
+  screen.classList.add('dice-duel');
+  document.getElementById('special-eyebrow').textContent = 'Duel de dés';
+  document.getElementById('special-icon').textContent = '';
+
+  document.getElementById('special-text').innerHTML =
+    '<div class="dice-row">'+
+      '<div class="dice-col"><div class="dice-name" id="dice-name-a">'+duo[0].name+'</div><div class="die color-a rolling" id="die-a">?</div>'+
+        '<button class="btn btn-primary dice-stop-btn" id="dice-stop-a" style="padding:10px 16px;font-size:13px;">Stop</button></div>'+
+      '<div class="dice-vs">VS</div>'+
+      '<div class="dice-col"><div class="dice-name" id="dice-name-b">'+duo[1].name+'</div><div class="die color-b rolling" id="die-b">?</div>'+
+        '<button class="btn btn-primary dice-stop-btn" id="dice-stop-b" style="padding:10px 16px;font-size:13px;">Stop</button></div>'+
+    '</div>'+
+    '<div class="dice-result-line" id="dice-result-line">Chacun arrête son dé d\'un clic !</div>';
+
+  goTo('special');
+  if(navigator.vibrate) navigator.vibrate(30);
+
+  const dieA = document.getElementById('die-a');
+  const dieB = document.getElementById('die-b');
+  const btnA = document.getElementById('dice-stop-a');
+  const btnB = document.getElementById('dice-stop-b');
+
+  let valA = null, valB = null;
+
+  // Chaque dé défile indéfiniment jusqu'à ce que son joueur clique sur "Stop"
+  const rollIntervalA = setInterval(()=>{ dieA.textContent = 1 + Math.floor(Math.random()*6); }, 80);
+  const rollIntervalB = setInterval(()=>{ dieB.textContent = 1 + Math.floor(Math.random()*6); }, 80);
+
+  function maybeFinish(){
+    if(valA === null || valB === null) return;
+    finishDiceDuel(duo, valA, valB, screen);
+  }
+
+  btnA.addEventListener('click', ()=>{
+    if(valA !== null) return;
+    clearInterval(rollIntervalA);
+    valA = 1 + Math.floor(Math.random()*6);
+    dieA.textContent = valA;
+    dieA.classList.remove('rolling');
+    btnA.disabled = true;
+    btnA.style.opacity = '0.4';
+    if(navigator.vibrate) navigator.vibrate(40);
+    maybeFinish();
+  });
+  btnB.addEventListener('click', ()=>{
+    if(valB !== null) return;
+    clearInterval(rollIntervalB);
+    valB = 1 + Math.floor(Math.random()*6);
+    dieB.textContent = valB;
+    dieB.classList.remove('rolling');
+    btnB.disabled = true;
+    btnB.style.opacity = '0.4';
+    if(navigator.vibrate) navigator.vibrate(40);
+    maybeFinish();
+  });
+}
+
+function finishDiceDuel(duo, valA, valB, screen){
+  document.getElementById('dice-result-line').textContent = 'Égalité ! On relance…';
+
+  if(valA === valB){
+    // En cas d'égalité, on relance automatiquement après un court instant
+    setTimeout(()=>{
+      const dieA = document.getElementById('die-a');
+      const dieB = document.getElementById('die-b');
+      const btnA = document.getElementById('dice-stop-a');
+      const btnB = document.getElementById('dice-stop-b');
+      let newValA = null, newValB = null;
+      dieA.classList.add('rolling'); dieB.classList.add('rolling');
+      btnA.disabled = false; btnA.style.opacity = '1';
+      btnB.disabled = false; btnB.style.opacity = '1';
+      document.getElementById('dice-result-line').textContent = "Chacun arrête son dé d'un clic !";
+
+      const rollIntervalA = setInterval(()=>{ dieA.textContent = 1 + Math.floor(Math.random()*6); }, 80);
+      const rollIntervalB = setInterval(()=>{ dieB.textContent = 1 + Math.floor(Math.random()*6); }, 80);
+
+      function maybeFinish(){
+        if(newValA === null || newValB === null) return;
+        finishDiceDuel(duo, newValA, newValB, screen);
+      }
+      btnA.onclick = ()=>{
+        if(newValA !== null) return;
+        clearInterval(rollIntervalA);
+        newValA = 1 + Math.floor(Math.random()*6);
+        dieA.textContent = newValA;
+        dieA.classList.remove('rolling');
+        btnA.disabled = true; btnA.style.opacity = '0.4';
+        if(navigator.vibrate) navigator.vibrate(40);
+        maybeFinish();
+      };
+      btnB.onclick = ()=>{
+        if(newValB !== null) return;
+        clearInterval(rollIntervalB);
+        newValB = 1 + Math.floor(Math.random()*6);
+        dieB.textContent = newValB;
+        dieB.classList.remove('rolling');
+        btnB.disabled = true; btnB.style.opacity = '0.4';
+        if(navigator.vibrate) navigator.vibrate(40);
+        maybeFinish();
+      };
+    }, 1200);
+    return;
+  }
+
+  document.getElementById('dice-stop-a').classList.add('hidden');
+  document.getElementById('dice-stop-b').classList.add('hidden');
+
+  const loserIsA = valA < valB;
+  const loser = loserIsA ? duo[0] : duo[1];
+  document.getElementById('dice-name-a').classList.add(loserIsA ? 'loser' : 'winner');
+  document.getElementById('dice-name-b').classList.add(loserIsA ? 'winner' : 'loser');
+
+  const gorgees = valA * valB;
+  state.stats.targets[loser.name] = (state.stats.targets[loser.name]||0) + 1;
+  document.getElementById('dice-result-line').textContent =
+    loser.name + ' a le plus petit chiffre — ' + gorgees + ' gorgée' + (gorgees>1?'s':'') + ' (' + valA + ' × ' + valB + ')';
+
+  if(navigator.vibrate) navigator.vibrate([100,50,150]);
+
+  setTimeout(()=>{
+    screen.classList.remove('dice-duel');
+    goTo('main');
+    advanceQueue();
+  }, 5000);
 }
 
 function fireClimax(){
