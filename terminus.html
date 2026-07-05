@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -10,18 +9,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #15110D;
-    --surface: #1E1812;
-    --surface-2: #251D15;
-    --line: #34291C;
-    --accent: #C97B4A;
-    --accent-bright: #E2944B;
-    --accent-deep: #A35E33;
+    --bg: #17120f;
+    --surface: #2a231e;
+    --surface-2: #241e19;
+    --line: rgba(244,236,226,0.14);
+    --accent: #b8814a;
+    --accent-bright: #c99a67;
+    --accent-deep: #8a6232;
     --sage: #8A9A7E;
     --clay: #A3503A;
-    --text: #F3ECDD;
-    --text-dim: #A89C8C;
-    --text-faint: #6E6354;
+    --text: #f4ece2;
+    --text-dim: rgba(244,236,226,0.6);
+    --text-faint: rgba(244,236,226,0.4);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
   html,body{margin:0; padding:0; height:100%; background:#000;}
@@ -31,7 +30,7 @@
   .screen.active{display:flex;}
   h1,h2,h3{font-family:'Fraunces', serif; font-weight:500; margin:0;}
   .eyebrow{font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
-  .btn{border:none; border-radius:6px; padding:18px 20px; font-family:'Inter', sans-serif; font-size:15px; font-weight:500; cursor:pointer; width:100%; transition: transform .08s ease, opacity .15s ease;}
+  .btn{border:none; border-radius:16px; padding:19px 20px; font-family:'Inter', sans-serif; font-size:15px; font-weight:500; cursor:pointer; width:100%; transition: transform .08s ease, opacity .15s ease;}
   .btn:active{transform:scale(0.97);}
   .btn-primary{background:var(--accent); color:#1A1208;}
   .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--text-dim);}
@@ -53,7 +52,7 @@
   .mark-dot{width:46px; height:46px; border-radius:50%; border:1px solid var(--accent); display:flex; align-items:center; justify-content:center;}
   .mark-name{font-size:13px; letter-spacing:4px; color:var(--text-dim);}
 
-  .mode-card{width:100%; border:1px solid var(--line); border-radius:10px; padding:20px; text-align:left; background:transparent; margin-bottom:12px; cursor:pointer;}
+  .mode-card{width:100%; border:1px solid var(--line); border-radius:20px; padding:20px; text-align:left; background:transparent; margin-bottom:12px; cursor:pointer;}
   .mode-card .mode-title{font-family:'Fraunces', serif; font-size:18px; color:var(--text); margin-bottom:4px;}
   .mode-card .mode-desc{font-size:12.5px; color:var(--text-faint); line-height:1.4;}
   .mode-card.primary{border-color:var(--accent);}
@@ -65,7 +64,7 @@
   .scroll-screen{overflow-y:auto; -webkit-overflow-scrolling:touch;}
   .scroll-screen::-webkit-scrollbar{display:none;}
 
-  .game-card{border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:9px; cursor:pointer;}
+  .game-card{border:1px solid var(--line); border-radius:18px; padding:14px 16px; margin-bottom:9px; cursor:pointer;}
   .game-card .game-name{font-family:'Fraunces', serif; font-size:16px; color:var(--text); margin-bottom:5px;}
   .game-card .game-meta{font-size:11px; color:var(--text-faint); display:flex; gap:10px;}
   .game-card .game-meta span{display:flex; align-items:center; gap:4px;}
@@ -74,9 +73,9 @@
   .game-detail-meta .gd-item{font-size:11px; color:var(--text-faint);}
   .game-detail-meta .gd-item b{color:var(--accent); font-weight:500; display:block; font-family:'Fraunces', serif; font-size:15px;}
   .game-desc{font-size:13.5px; color:var(--text-dim); line-height:1.5; margin-bottom:22px;}
-  .rule-step{display:flex; align-items:center; gap:10px; margin-bottom:6px; padding:8px 10px; background:var(--surface); border-radius:6px; border:1px solid var(--line);}
-  .rule-step .step-num{font-family:'Fraunces', serif; color:var(--accent); font-size:13px; font-weight:600; flex-shrink:0; min-width:36px;}
-  .rule-step .step-text{font-size:12.5px; color:var(--text-dim); line-height:1.3;}
+  .rule-step{display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid rgba(244,236,226,0.08);}
+  .rule-step .step-num{font-family:'Fraunces', serif; color:#c99a67; font-size:13px; font-weight:600; flex-shrink:0; min-width:36px;}
+  .rule-step .step-text{font-size:13px; color:rgba(244,236,226,0.6); line-height:1.4;}
 
   .progress{display:flex; gap:5px; margin-bottom:36px;}
   .progress div{flex:1; height:2px; background:var(--line); border-radius:2px;}
@@ -155,7 +154,7 @@
   #screen-end{padding-top:48px;}
   #screen-end h2{font-size:23px; text-align:center; margin-bottom:6px;}
   .end-sub{text-align:center; color:var(--text-dim); font-size:13px; margin-bottom:28px;}
-  .stat-card{border:1px solid var(--line); border-radius:6px; padding:14px 16px; margin-bottom:10px;}
+  .stat-card{background:#2a231e; border:none; border-radius:18px; padding:22px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;}
   .stat-label{font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-faint);}
   .stat-value{font-family:'Fraunces', serif; font-size:18px; color:var(--accent); margin-top:3px;}
   .hidden{display:none !important;}
@@ -169,17 +168,17 @@
   .palm-header{display:flex; justify-content:space-between; align-items:center; padding:12px 14px 4px;}
   .game-home-btn{font-size:11px; color:var(--text-dim); opacity:0.4; cursor:pointer;}
   .palm-badges{display:flex; gap:4px;}
-  .badge{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:3px 8px; font-size:10px; color:var(--text-dim); display:flex; align-items:center; gap:3px;}
+  .badge{background:rgba(244,236,226,0.06); border:none; border-radius:20px; padding:6px 10px; font-size:11px; color:rgba(244,236,226,0.6); display:flex; align-items:center; gap:3px;}
   .badge .bv{font-weight:700; color:var(--text); font-size:12px;}
   .palm-status-bar{padding:2px 14px 4px; display:flex; flex-wrap:wrap; gap:4px; min-height:8px;}
-  .master-pill{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:2px 8px; font-size:9px; color:var(--text-dim); display:inline-flex; gap:4px;}
-  .master-pill .mn{color:var(--accent); font-weight:600;}
+  .master-pill{background:rgba(184,129,74,0.14); border:none; border-radius:20px; padding:6px 10px; font-size:11px; color:#c99a67; display:inline-flex; gap:4px;}
+  .master-pill .mn{color:#c99a67; font-weight:600;}
   .palm-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 16px; gap:6px; overflow:visible;}
   .palm-footer{padding:8px 16px 22px; display:flex; gap:10px;}
   .palm-footer .btn{flex:1;}
-  .palm-card{width:90px; height:126px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; border:2px solid var(--line); position:relative; flex-shrink:0;}
-  .palm-card.red{background:#1a0a0a; color:#C97B4A; border-color:#C97B4A;}
-  .palm-card.black{background:#0a0a0f; color:var(--text); border-color:var(--text-dim);}
+  .palm-card{width:90px; height:126px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; position:relative; flex-shrink:0; box-shadow:0 8px 20px rgba(0,0,0,0.4);}
+  .palm-card.red{background:#f6f1e7; color:#a82020; border:none;}
+  .palm-card.black{background:#f6f1e7; color:#1a1a1a; border:none;}
   .palm-card .card-suit{position:absolute; bottom:8px; right:12px; font-size:18px;}
   .palm-card .card-val{font-family:'Fraunces',serif;}
   .palm-player-big{font-family:'Fraunces',serif; font-size:32px; color:var(--accent); font-weight:600;}
@@ -189,8 +188,8 @@
   .palmier-bottle{width:28px; height:56px; background:linear-gradient(to top, var(--text-faint), var(--surface)); border-radius:3px 3px 6px 6px; position:absolute; bottom:0; left:50%; transform:translateX(-50%); opacity:0.4;}
   .palmier-bottle::before{content:''; position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:14px; height:8px; background:var(--text-faint); border-radius:2px 2px 0 0; opacity:0.6;}
   .pm-card{position:absolute; width:80px; height:112px; border:1.5px solid var(--line); border-radius:6px; bottom:54px; left:50%; transform-origin:bottom center; font-size:14px; display:flex; align-items:center; justify-content:center; font-weight:700; line-height:1;}
-  .pm-card.r{background:#1a0a0a; color:#C97B4A; border-color:rgba(201,123,74,0.5);}
-  .pm-card.b{background:#0a0a0f; color:var(--text-dim); border-color:rgba(255,255,255,0.2);}
+  .pm-card.r{background:#f6f1e7; color:#a82020; border-color:rgba(0,0,0,0.12); box-shadow:0 3px 8px rgba(0,0,0,0.35);}
+  .pm-card.b{background:#f6f1e7; color:#1a1a1a; border-color:rgba(0,0,0,0.12); box-shadow:0 3px 8px rgba(0,0,0,0.35);}
   .creators-counter{text-align:center; font-size:11px; color:var(--text-faint); margin-top:12px; font-style:italic;}
   .balance-track{width:100%; max-width:240px; height:24px; background:var(--surface); border-radius:12px; border:1px solid var(--line); position:relative; overflow:hidden;}
   .balance-zone{position:absolute; top:0; bottom:0; background:rgba(138,154,126,0.25); border-left:2px solid var(--sage); border-right:2px solid var(--sage);}
@@ -224,9 +223,9 @@
   .cc.z2{width:38px; height:54px; font-size:15px; background:rgba(201,175,75,0.15); border:1px solid rgba(201,175,75,0.5);}
   .cc.z3{width:42px; height:60px; font-size:17px; background:rgba(201,123,74,0.18); border:1px solid rgba(201,123,74,0.5);}
   .cc.z4{width:50px; height:70px; font-size:22px; background:rgba(163,80,58,0.22); border:1px solid rgba(163,80,58,0.6);}
-  .cc.revealed{cursor:default; opacity:0.4;}
-  .cc.revealed.red-card{background:#1a0a0a; color:#C97B4A; border-color:#C97B4A; opacity:0.7;}
-  .cc.revealed.black-card{background:#0a0a0f; color:var(--text); border-color:var(--text-dim); opacity:0.7;}
+  .cc.revealed{cursor:default; opacity:0.7;}
+  .cc.revealed.red-card{background:#f6f1e7; color:#a82020; border-color:rgba(0,0,0,0.15); opacity:0.8; box-shadow:0 2px 6px rgba(0,0,0,0.3);}
+  .cc.revealed.black-card{background:#f6f1e7; color:#1a1a1a; border-color:rgba(0,0,0,0.15); opacity:0.8; box-shadow:0 2px 6px rgba(0,0,0,0.3);}
   .cc .cc-sip{font-size:6px; color:var(--text-faint); font-family:'Inter',sans-serif; font-weight:400;}
   .cc .cc-val{font-size:inherit; line-height:1;}
   .cc .cc-suit{font-size:0.6em;}
@@ -235,6 +234,71 @@
   .cible-question{font-family:'Fraunces',serif; font-size:18px; color:var(--text); text-align:center; margin-top:6px;}
   .cible-result{font-family:'Fraunces',serif; font-size:18px; text-align:center; margin-top:4px;}
   .cible-special{font-size:12px; color:var(--accent); text-align:center; margin-top:4px;}
+
+  /* PMU Race */
+  .pmu-track{width:100%; overflow-x:auto; margin:8px 0;}
+  .pmu-row{display:flex; align-items:center; gap:3px; margin-bottom:4px; height:42px;}
+  .pmu-label{width:24px; font-size:18px; text-align:center; flex-shrink:0;}
+  .pmu-cell{width:36px; height:36px; border-radius:6px; background:rgba(244,236,226,0.04); border:1px solid rgba(244,236,226,0.08); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(244,236,226,0.2); position:relative;}
+  .pmu-cell.finish{border-color:rgba(184,129,74,0.3); background:rgba(184,129,74,0.08);}
+  .pmu-cell.obstacle{border-color:rgba(163,80,58,0.3); background:rgba(163,80,58,0.06);}
+  .pmu-cell.obstacle.flipped{background:rgba(163,80,58,0.2);}
+  .pmu-horse{width:30px; height:42px; background:#f6f1e7; border-radius:5px; box-shadow:0 3px 8px rgba(0,0,0,0.4); display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:700; font-family:'Fraunces',serif; position:absolute; z-index:2;}
+  .pmu-horse.r{color:#a82020;}
+  .pmu-horse.b{color:#1a1a1a;}
+  .pmu-lastcard{display:flex; align-items:center; gap:10px; justify-content:center; margin:10px 0;}
+  .pmu-bets{font-size:12px; color:rgba(244,236,226,0.5); text-align:center; line-height:1.8;}
+
+  /* Dice */
+  .die{width:80px; height:80px; background:#f6f1e7; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.45); display:grid; grid-template:repeat(3,1fr)/repeat(3,1fr); padding:12px; gap:4px;}
+  .die .pip{width:100%; height:100%; border-radius:50%; background:transparent;}
+  .die .pip.on{background:#1a1a1a;}
+  .die-wrap{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .die-name{font-family:'Fraunces',serif; font-size:18px; color:var(--text);}
+  .die-vs{font-family:'Fraunces',serif; font-size:24px; color:rgba(244,236,226,0.3); margin:0 16px;}
+  @keyframes dieRoll{
+    0%{transform:rotate(0deg) scale(1)}
+    10%{transform:rotate(20deg) scale(0.85)}
+    20%{transform:rotate(-15deg) scale(1.1)}
+    30%{transform:rotate(25deg) scale(0.9)}
+    40%{transform:rotate(-20deg) scale(1.05)}
+    50%{transform:rotate(15deg) scale(0.88)}
+    60%{transform:rotate(-10deg) scale(1.08)}
+    70%{transform:rotate(12deg) scale(0.92)}
+    80%{transform:rotate(-5deg) scale(1.02)}
+    90%{transform:rotate(3deg) scale(0.98)}
+    100%{transform:rotate(0deg) scale(1)}
+  }
+  .die.rolling{animation:dieRoll 0.7s ease-out;}
+
+  /* Coin */
+  .coin-scene{width:100px; height:100px; perspective:400px; margin:0 auto;}
+  .coin{width:100px; height:100px; position:relative; transform-style:preserve-3d; transition:transform 0.1s;}
+  .coin.flipping{animation:coinFlip 1s ease-out forwards;}
+  .coin.flipping-tails{animation:coinFlipTails 1s ease-out forwards;}
+  @keyframes coinFlip{
+    0%{transform:rotateY(0deg) translateY(0)} 
+    30%{transform:rotateY(720deg) translateY(-60px)} 
+    60%{transform:rotateY(1440deg) translateY(-20px)} 
+    80%{transform:rotateY(1800deg) translateY(10px)} 
+    100%{transform:rotateY(1800deg) translateY(0)}
+  }
+  @keyframes coinFlipTails{
+    0%{transform:rotateY(0deg) translateY(0)} 
+    30%{transform:rotateY(720deg) translateY(-60px)} 
+    60%{transform:rotateY(1440deg) translateY(-20px)} 
+    80%{transform:rotateY(1980deg) translateY(10px)} 
+    100%{transform:rotateY(1980deg) translateY(0)}
+  }
+  .coin-face{position:absolute; inset:0; border-radius:50%; backface-visibility:hidden; display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; box-shadow:0 4px 16px rgba(0,0,0,0.5);}
+  .coin-pile{background:linear-gradient(135deg, #d4a44a, #b8814a, #967034); color:#1a1208; font-size:16px; border:3px solid #c99a67;}
+  .coin-face-back{transform:rotateY(180deg); background:linear-gradient(135deg, #967034, #b8814a, #d4a44a); color:#1a1208; font-size:16px; border:3px solid #c99a67;}
+  .pof-mode-card{width:100%; padding:22px; border-radius:18px; background:var(--surface); border:1px solid var(--line); cursor:pointer; text-align:left; margin-bottom:10px;}
+  .pof-mode-card.selected{border-color:var(--accent);}
+  .pof-mode-card h3{font-size:17px; color:var(--text); margin-bottom:4px;}
+  .pof-mode-card p{font-size:12px; color:rgba(244,236,226,0.5); margin:0; line-height:1.4;}
+  .pof-bet-btn{width:56px; height:56px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:20px; cursor:pointer; font-family:'Fraunces',serif;}
+  .pof-round-badge{font-size:12px; color:rgba(244,236,226,0.5); background:rgba(244,236,226,0.06); border-radius:20px; padding:6px 14px; margin-bottom:6px;}
 </style>
 </head>
 <body>
@@ -473,6 +537,137 @@
     </div>
     <div class="palm-body" id="cible-body"></div>
     <div class="palm-footer" id="cible-footer"></div>
+  </div>
+
+  <!-- Purple Setup -->
+  <div class="screen" id="screen-purple-setup">
+    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
+    <h2 style="font-size:22px;">Qui joue ?</h2>
+    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 à 10 joueurs)</div>
+    <div class="field-row" style="margin-bottom:12px;">
+      <input type="text" id="purple-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
+    </div>
+    <div id="purple-chips" class="chips-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="purple-start-btn" disabled onclick="purpleStartGame()">Lancer la partie</button>
+  </div>
+
+  <!-- Purple Game -->
+  <div class="screen" id="screen-purple">
+    <div class="palm-header">
+      <div>
+        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">✕ Quitter</div>
+        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <div class="palm-badges" id="purple-header"></div>
+        <div class="badge" onclick="showRulesOverlay('purple')" style="cursor:pointer;">?</div>
+      </div>
+    </div>
+    <div class="palm-body" id="purple-body"></div>
+    <div class="palm-footer" id="purple-footer"></div>
+  </div>
+
+  <!-- PMU Setup -->
+  <div class="screen" id="screen-pmu-setup">
+    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
+    <h2 style="font-size:22px;">Qui joue ?</h2>
+    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 à 8 joueurs)</div>
+    <div class="field-row" style="margin-bottom:12px;">
+      <input type="text" id="pmu-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
+    </div>
+    <div id="pmu-chips" class="chips-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="pmu-start-btn" disabled onclick="pmuBettingPhase()">Passer aux paris</button>
+  </div>
+
+  <!-- PMU Betting -->
+  <div class="screen" id="screen-pmu-bet">
+    <div class="palm-header">
+      <div class="back-link" onclick="goTo('pmu-setup')" style="font-size:13px;">← Retour</div>
+      <div></div>
+    </div>
+    <div class="palm-body" id="pmu-bet-body"></div>
+    <div class="palm-footer" id="pmu-bet-footer"></div>
+  </div>
+
+  <!-- PMU Race -->
+  <div class="screen" id="screen-pmu">
+    <div class="palm-header">
+      <div>
+        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">✕ Quitter</div>
+        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <div class="palm-badges" id="pmu-header"></div>
+        <div class="badge" onclick="showRulesOverlay('pmu')" style="cursor:pointer;">?</div>
+      </div>
+    </div>
+    <div class="palm-body" id="pmu-body" style="padding:0 10px;"></div>
+    <div class="palm-footer" id="pmu-footer"></div>
+  </div>
+
+  <!-- Pile ou Face Setup -->
+  <div class="screen" id="screen-pof-setup">
+    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
+    <h2 style="font-size:22px;">Qui joue ?</h2>
+    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 joueurs minimum)</div>
+    <div class="field-row" style="margin-bottom:12px;">
+      <input type="text" id="pof-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
+    </div>
+    <div id="pof-chips" class="chips-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="pof-start-btn" disabled onclick="pofChooseMode()">Choisir le mode</button>
+  </div>
+
+  <!-- Pile ou Face Mode Selection -->
+  <div class="screen" id="screen-pof-mode">
+    <div class="topnav"><div class="back-link" onclick="goTo('pof-setup')">← Retour</div></div>
+    <div class="palm-body" id="pof-mode-body"></div>
+    <div class="palm-footer" id="pof-mode-footer"></div>
+  </div>
+
+  <!-- Pile ou Face Game -->
+  <div class="screen" id="screen-pof">
+    <div class="palm-header">
+      <div>
+        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">✕ Quitter</div>
+        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <div class="palm-badges" id="pof-header"></div>
+        <div class="badge" onclick="showRulesOverlay('pof')" style="cursor:pointer;">?</div>
+      </div>
+    </div>
+    <div class="palm-body" id="pof-body"></div>
+    <div class="palm-footer" id="pof-footer"></div>
+  </div>
+
+  <!-- Duel de Dés -->
+  <div class="screen" id="screen-des-setup">
+    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
+    <h2 style="font-size:22px;">Qui s'affronte ?</h2>
+    <div class="step-sub" style="margin-bottom:16px;">Deux joueurs</div>
+    <div class="field-row" style="margin-bottom:12px;">
+      <input type="text" id="des-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
+    </div>
+    <div id="des-chips" class="chips-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="des-start-btn" disabled onclick="desStartGame()">Lancer le duel</button>
+  </div>
+
+  <div class="screen" id="screen-des">
+    <div class="palm-header">
+      <div>
+        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">✕ Quitter</div>
+        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <div class="badge" onclick="showRulesOverlay('des')" style="cursor:pointer;">?</div>
+      </div>
+    </div>
+    <div class="palm-body" id="des-body"></div>
+    <div class="palm-footer" id="des-footer"></div>
   </div>
 
   <!-- Rules Overlay -->
@@ -726,6 +921,54 @@ const GAMES = [
       {card:'Centre', text:'Devine la valeur exacte → 5 gorgées'},
       {card:'Réussi', text:'Tu distribues les gorgées'},
       {card:'Raté', text:'Tu bois les gorgées'},
+    ]
+  },
+  {
+    id:"purple", name:"Purple", joueurs:"2-10", duree:"10-20 min",
+    interactive: true, launchFn: 'purpleSetup',
+    desc:"Prédi la couleur des prochaines cartes. Rouge, Noir ou Purple — plus tu vises haut, plus tu risques.",
+    rules:[
+      {card:'Rouge', text:'Les 2 prochaines cartes sont rouges'},
+      {card:'Noir', text:'Les 2 prochaines cartes sont noires'},
+      {card:'Purple', text:'1 rouge + 1 noire (ordre libre)'},
+      {card:'x2', text:'Double Purple — 2 rouges + 2 noires (4 cartes)'},
+      {card:'x3', text:'Triple Purple — 3 rouges + 3 noires (6 cartes)'},
+      {card:'Perdu', text:'Tu bois autant de gorgées que de cartes piochées'},
+      {card:'Gagné', text:'Les gorgées s\'accumulent jusqu\'à ce que quelqu\'un perde'},
+    ]
+  },
+  {
+    id:"pmu", name:"Le PMU", joueurs:"2-8", duree:"5-15 min",
+    interactive: true, launchFn: 'pmuSetup',
+    desc:"Pariez sur le bon cheval et regardez la course. Le perdant boit sa mise, le gagnant distribue le double.",
+    rules:[
+      {card:'♥♦♣♠', text:'Les 4 As sont les chevaux'},
+      {card:'Mise', text:'Chaque joueur parie 1 à 5 gorgées sur un As'},
+      {card:'Course', text:'On retourne les cartes — le symbole avance'},
+      {card:'Obstacle', text:'Quand tous passent un obstacle, il recule un cheval'},
+      {card:'Gagné', text:'Tu distribues le double de ta mise'},
+      {card:'Perdu', text:'Tu bois ta mise'},
+    ]
+  },
+  {
+    id:"des", name:"Le Duel de Dés", joueurs:"2", duree:"5-10 min",
+    interactive: true, launchFn: 'desSetup',
+    desc:"Chacun lance un dé. Le plus bas boit la multiplication des deux. Simple, brutal, rapide.",
+    rules:[
+      {card:'🎲', text:'Chaque joueur lance un dé'},
+      {card:'Perdant', text:'Le plus bas boit le produit des deux dés'},
+      {card:'Égalité', text:'On relance automatiquement'},
+    ]
+  },
+  {
+    id:"pof", name:"Pile ou Face", joueurs:"2+", duree:"5-15 min",
+    interactive: true, launchFn: 'pofSetup',
+    desc:"Parie et retourne la pièce. Mode Fun pour les timides, Mode Prison pour les téméraires.",
+    rules:[
+      {card:'Fun', text:'Parie 1 à 3 gorgées, choisis Pile ou Face'},
+      {card:'Prison', text:'5 manches obligatoires, les gorgées doublent'},
+      {card:'Manche', text:'2 → 4 → 8 → 16 → cul sec'},
+      {card:'Perdu', text:'Tu bois. Gagné = l\'autre boit'},
     ]
   },
 ];
@@ -1524,11 +1767,11 @@ function busCardVal(card){
 }
 
 function busCardHTML(card, hidden){
-  if(hidden) return '<div class="palm-card" style="background:var(--surface);width:56px;height:78px;font-size:16px;color:var(--text-faint);">?</div>';
+  if(hidden) return '<div style="width:56px;height:80px;background:var(--surface);border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text-faint);">?</div>';
   const red = palmIsRed(card.suit);
-  return '<div class="palm-card '+(red?'red':'black')+'" style="width:56px;height:78px;font-size:24px;">'+
-    '<div class="card-val">'+card.value+'</div>'+
-    '<div class="card-suit" style="font-size:13px;">'+card.suit+'</div>'+
+  return '<div style="width:56px;height:80px;background:#f6f1e7;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;">'+
+    '<div style="font-family:Fraunces,serif;font-weight:600;font-size:18px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.value+'</div>'+
+    '<div style="font-size:14px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.suit+'</div>'+
   '</div>';
 }
 
@@ -2016,6 +2259,755 @@ function cibleNextPlayer(){
   cible.currentIdx = (cible.currentIdx + cible.direction + cible.players.length) % cible.players.length;
   cibleUpdateHeader();
   cibleRenderTarget();
+}
+
+/* ==================== PURPLE ==================== */
+
+const purple = {
+  players:[], currentIdx:0, deck:[], sipPot:0, drawnCards:[], cardsLeft:52
+};
+
+function purpleMakeDeck(){
+  const d=[];
+  PALM_SUITS.forEach(s=> PALM_VALUES.forEach(v=> d.push({suit:s, value:v})));
+  for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+  return d;
+}
+
+function purpleSetup(){
+  purple.players=[];
+  document.getElementById('purple-chips').innerHTML='';
+  document.getElementById('purple-name-field').value='';
+  document.getElementById('purple-start-btn').disabled=true;
+  goTo('purple-setup');
+  setTimeout(()=> document.getElementById('purple-name-field').focus(), 100);
+}
+
+document.getElementById('purple-name-field').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    const val=e.target.value.trim();
+    if(val && purple.players.length<10){
+      purple.players.push(val);
+      e.target.value='';
+      purpleRenderChips();
+    }
+  }
+});
+
+function purpleRenderChips(){
+  const wrap=document.getElementById('purple-chips');
+  wrap.innerHTML='';
+  purple.players.forEach((name,i)=>{
+    const chip=document.createElement('div');
+    chip.className='chip';
+    chip.innerHTML=name+'<span class="x" onclick="purpleRemovePlayer('+i+')">×</span>';
+    wrap.appendChild(chip);
+  });
+  document.getElementById('purple-start-btn').disabled = purple.players.length < 2;
+}
+function purpleRemovePlayer(i){ purple.players.splice(i,1); purpleRenderChips(); }
+
+function purpleStartGame(){
+  if(purple.players.length<2) return;
+  purple.deck = purpleMakeDeck();
+  purple.currentIdx = 0;
+  purple.sipPot = 0;
+  purple.drawnCards = [];
+  purple.cardsLeft = 52;
+  goTo('purple');
+  purpleShowTurn();
+}
+
+function purplePlayer(){ return purple.players[purple.currentIdx % purple.players.length]; }
+
+function purpleUpdateHeader(){
+  document.getElementById('purple-header').innerHTML =
+    '<div class="badge"><span class="bv">'+purple.deck.length+'</span> cartes</div>';
+}
+
+function purpleCardHTML(card){
+  const red = palmIsRed(card.suit);
+  return '<div style="width:52px;height:74px;background:#f6f1e7;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">'+
+    '<div style="font-family:Fraunces,serif;font-weight:600;font-size:18px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.value+'</div>'+
+    '<div style="font-size:14px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.suit+'</div>'+
+  '</div>';
+}
+
+function purpleShowTurn(){
+  purpleUpdateHeader();
+  if(purple.deck.length < 6){
+    purpleEndGame();
+    return;
+  }
+  const body = document.getElementById('purple-body');
+  const footer = document.getElementById('purple-footer');
+
+  let potHTML = '';
+  if(purple.sipPot > 0){
+    potHTML = '<div class="sip-pot">'+purple.sipPot+'</div><div class="sip-pot-label">gorgée'+(purple.sipPot>1?'s':'')+' en jeu</div>';
+  }
+
+  // Show last drawn cards if any
+  let lastCardsHTML = '';
+  if(purple.drawnCards.length > 0){
+    lastCardsHTML = '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;justify-content:center;">';
+    purple.drawnCards.forEach(c => lastCardsHTML += purpleCardHTML(c));
+    lastCardsHTML += '</div>';
+  }
+
+  body.innerHTML =
+    potHTML+
+    '<div class="palm-player-big" style="font-size:26px;">'+purplePlayer()+'</div>'+
+    '<div style="font-size:14px;color:rgba(244,236,226,0.5);margin-top:4px;">Fais ta prédiction</div>'+
+    lastCardsHTML;
+
+  footer.innerHTML =
+    '<div style="display:flex;flex-direction:column;gap:8px;width:100%;">'+
+      '<div style="display:flex;gap:8px;">'+
+        '<button class="btn btn-primary" onclick="purpleGuess(\'rouge\')" style="flex:1;background:#a82020;color:#fff;padding:16px;">Rouge</button>'+
+        '<button class="btn btn-primary" onclick="purpleGuess(\'noir\')" style="flex:1;background:#1a1a1a;color:#fff;padding:16px;border:1px solid rgba(244,236,226,0.2);">Noir</button>'+
+        '<button class="btn btn-primary" onclick="purpleGuess(\'purple\')" style="flex:1;background:#7B2D8E;color:#fff;padding:16px;">Purple</button>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<button class="btn btn-ghost" onclick="purpleGuess(\'double\')" style="flex:1;padding:14px;font-size:13px;">Double Purple</button>'+
+        '<button class="btn btn-ghost" onclick="purpleGuess(\'triple\')" style="flex:1;padding:14px;font-size:13px;">Triple Purple</button>'+
+      '</div>'+
+    '</div>';
+}
+
+function purpleGuess(choice){
+  let numCards = 2;
+  if(choice === 'double') numCards = 4;
+  if(choice === 'triple') numCards = 6;
+
+  if(purple.deck.length < numCards){
+    purpleEndGame();
+    return;
+  }
+
+  // Draw cards
+  const drawn = [];
+  for(let i=0;i<numCards;i++) drawn.push(purple.deck.pop());
+
+  const reds = drawn.filter(c => palmIsRed(c.suit)).length;
+  const blacks = numCards - reds;
+
+  let correct = false;
+  if(choice === 'rouge') correct = (reds === 2 && blacks === 0);
+  else if(choice === 'noir') correct = (blacks === 2 && reds === 0);
+  else if(choice === 'purple') correct = (reds === 1 && blacks === 1);
+  else if(choice === 'double') correct = (reds === 2 && blacks === 2);
+  else if(choice === 'triple') correct = (reds === 3 && blacks === 3);
+
+  // Show result
+  const body = document.getElementById('purple-body');
+  const footer = document.getElementById('purple-footer');
+
+  let cardsHTML = '<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:center;">';
+  drawn.forEach(c => cardsHTML += purpleCardHTML(c));
+  cardsHTML += '</div>';
+
+  let resultTitle, resultSub;
+  if(correct){
+    purple.sipPot += numCards;
+    purple.drawnCards = purple.drawnCards.concat(drawn);
+    resultTitle = 'Gagné';
+    resultSub = '+'+numCards+' gorgée'+(numCards>1?'s':'')+' au compteur';
+  } else {
+    const total = purple.sipPot + numCards;
+    resultTitle = 'Perdu';
+    resultSub = purplePlayer()+' boit '+total+' gorgée'+(total>1?'s':'');
+    purple.sipPot = 0;
+    purple.drawnCards = [];
+  }
+
+  body.innerHTML =
+    cardsHTML+
+    '<div style="font-family:Fraunces,serif;font-size:30px;color:'+(correct?'var(--sage)':'var(--clay)')+';margin-top:16px;">'+resultTitle+'</div>'+
+    '<div style="font-size:15px;color:rgba(244,236,226,0.6);margin-top:6px;">'+resultSub+'</div>';
+
+  purple.currentIdx++;
+  purpleUpdateHeader();
+
+  footer.innerHTML = '<button class="btn btn-primary" onclick="purpleShowTurn()">Joueur suivant</button>';
+}
+
+function purpleEndGame(){
+  const body = document.getElementById('purple-body');
+  const footer = document.getElementById('purple-footer');
+
+  body.innerHTML =
+    '<div style="font-family:Fraunces,serif;font-size:26px;color:var(--text);">Partie terminée</div>'+
+    '<div style="font-size:14px;color:rgba(244,236,226,0.5);margin-top:8px;">Plus assez de cartes dans le paquet</div>';
+
+  footer.innerHTML =
+    '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>'+
+    '<button class="btn btn-primary" onclick="purpleStartGame()" style="flex:1;">Rejouer</button>';
+}
+
+/* ==================== PMU (COURSE DES AS) ==================== */
+
+const pmu = {
+  players:[], // {name, horse, bet}
+  deck:[], obstacles:[], // 7 obstacle cards
+  horses:{'♥':0,'♦':0,'♣':0,'♠':0},
+  currentCard:null, winner:null,
+  betPlayerIdx:0
+};
+
+const PMU_SUITS = ['♥','♦','♣','♠'];
+
+function pmuSetup(){
+  pmu.players=[];
+  document.getElementById('pmu-chips').innerHTML='';
+  document.getElementById('pmu-name-field').value='';
+  document.getElementById('pmu-start-btn').disabled=true;
+  goTo('pmu-setup');
+  setTimeout(()=> document.getElementById('pmu-name-field').focus(), 100);
+}
+
+document.getElementById('pmu-name-field').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    const val=e.target.value.trim();
+    if(val && pmu.players.length<8){
+      pmu.players.push({name:val, horse:null, bet:1});
+      e.target.value='';
+      pmuRenderChips();
+    }
+  }
+});
+
+function pmuRenderChips(){
+  const wrap=document.getElementById('pmu-chips');
+  wrap.innerHTML='';
+  pmu.players.forEach((p,i)=>{
+    const chip=document.createElement('div');
+    chip.className='chip';
+    chip.innerHTML=p.name+'<span class="x" onclick="pmuRemovePlayer('+i+')">×</span>';
+    wrap.appendChild(chip);
+  });
+  document.getElementById('pmu-start-btn').disabled = pmu.players.length < 2;
+}
+function pmuRemovePlayer(i){ pmu.players.splice(i,1); pmuRenderChips(); }
+
+/* --- Betting phase --- */
+function pmuBettingPhase(){
+  if(pmu.players.length<2) return;
+  pmu.betPlayerIdx = 0;
+  goTo('pmu-bet');
+  pmuShowBet();
+}
+
+function pmuShowBet(){
+  if(pmu.betPlayerIdx >= pmu.players.length){
+    pmuStartRace();
+    return;
+  }
+  const p = pmu.players[pmu.betPlayerIdx];
+  const body = document.getElementById('pmu-bet-body');
+  const footer = document.getElementById('pmu-bet-footer');
+
+  body.innerHTML =
+    '<div class="palm-player-big" style="font-size:26px;">'+p.name+'</div>'+
+    '<div style="font-size:14px;color:rgba(244,236,226,0.5);margin-top:6px;">Choisis ton cheval</div>'+
+    '<div style="display:flex;gap:10px;margin-top:20px;">'+
+      PMU_SUITS.map(s=>{
+        const red = s==='♥'||s==='♦';
+        const sel = p.horse===s;
+        return '<div onclick="pmuSelectHorse(\''+s+'\')" style="cursor:pointer;width:60px;height:84px;background:'+(sel?'#f6f1e7':'var(--surface)')+';border-radius:8px;border:2px solid '+(sel?'var(--accent)':'var(--line)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:'+(sel?'0 4px 12px rgba(0,0,0,0.4)':'none')+';">'+
+          '<div style="font-family:Fraunces,serif;font-weight:600;font-size:16px;color:'+(sel?(red?'#a82020':'#1a1a1a'):'var(--text-dim)')+';">As</div>'+
+          '<div style="font-size:22px;color:'+(sel?(red?'#a82020':'#1a1a1a'):'var(--text-faint)')+';">'+s+'</div>'+
+        '</div>';
+      }).join('')+
+    '</div>'+
+    '<div style="margin-top:20px;font-size:14px;color:rgba(244,236,226,0.5);">Mise : combien de gorgées ?</div>'+
+    '<div style="display:flex;gap:8px;margin-top:10px;">'+
+      [1,2,3,4,5].map(n=>{
+        const sel = p.bet===n;
+        return '<div onclick="pmuSelectBet('+n+')" style="cursor:pointer;width:44px;height:44px;border-radius:10px;background:'+(sel?'var(--accent)':'var(--surface)')+';border:1px solid '+(sel?'var(--accent)':'var(--line)')+';display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;color:'+(sel?'#251c13':'var(--text)')+';">'+n+'</div>';
+      }).join('')+
+    '</div>';
+
+  footer.innerHTML = '<button class="btn btn-primary" onclick="pmuConfirmBet()" '+(p.horse?'':'disabled')+'>Valider le pari</button>';
+}
+
+function pmuSelectHorse(suit){
+  pmu.players[pmu.betPlayerIdx].horse = suit;
+  pmuShowBet();
+}
+function pmuSelectBet(n){
+  pmu.players[pmu.betPlayerIdx].bet = n;
+  pmuShowBet();
+}
+function pmuConfirmBet(){
+  if(!pmu.players[pmu.betPlayerIdx].horse) return;
+  pmu.betPlayerIdx++;
+  pmuShowBet();
+}
+
+/* --- Race --- */
+function pmuStartRace(){
+  // Build deck without aces
+  const d=[];
+  PALM_SUITS.forEach(s=> PALM_VALUES.forEach(v=>{
+    if(v!=='A') d.push({suit:s, value:v});
+  }));
+  for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+
+  pmu.deck = d.slice(7); // rest is the draw pile
+  pmu.obstacles = d.slice(0,7); // 7 obstacle cards
+  pmu.horses = {'♥':0,'♦':0,'♣':0,'♠':0};
+  pmu.winner = null;
+  pmu.currentCard = null;
+
+  goTo('pmu');
+  pmuUpdateHeader();
+  pmuRenderRace();
+}
+
+function pmuUpdateHeader(){
+  document.getElementById('pmu-header').innerHTML =
+    '<div class="badge"><span class="bv">'+pmu.deck.length+'</span> cartes</div>';
+}
+
+function pmuRenderRace(){
+  const body = document.getElementById('pmu-body');
+  const footer = document.getElementById('pmu-footer');
+  const FINISH = 8; // positions 0 to 8
+
+  // Last card drawn
+  let lastHTML = '';
+  if(pmu.currentCard){
+    const red = palmIsRed(pmu.currentCard.suit);
+    lastHTML = '<div class="pmu-lastcard">'+
+      '<div style="font-size:13px;color:rgba(244,236,226,0.5);">Dernière carte :</div>'+
+      '<div style="width:36px;height:50px;background:#f6f1e7;border-radius:5px;box-shadow:0 3px 8px rgba(0,0,0,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;">'+
+        '<div style="font-family:Fraunces,serif;font-weight:600;font-size:14px;color:'+(red?'#a82020':'#1a1a1a')+';">'+pmu.currentCard.value+'</div>'+
+        '<div style="font-size:12px;color:'+(red?'#a82020':'#1a1a1a')+';">'+pmu.currentCard.suit+'</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  // Race track
+  let trackHTML = '<div class="pmu-track">';
+  PMU_SUITS.forEach(suit=>{
+    const red = suit==='♥'||suit==='♦';
+    const pos = pmu.horses[suit];
+    trackHTML += '<div class="pmu-row">';
+    trackHTML += '<div class="pmu-label">'+suit+'</div>';
+    for(let col=0; col<=FINISH; col++){
+      const isFinish = col===FINISH;
+      const isObstacle = col>=1 && col<=7;
+      let cls = 'pmu-cell';
+      if(isFinish) cls += ' finish';
+      trackHTML += '<div class="'+cls+'" style="position:relative;">';
+      if(pos===col){
+        trackHTML += '<div class="pmu-horse '+(red?'r':'b')+'"><div style="font-size:10px;">As</div><div style="font-size:14px;">'+suit+'</div></div>';
+      }
+      trackHTML += '</div>';
+    }
+    trackHTML += '</div>';
+  });
+
+  // Obstacles row
+  trackHTML += '<div class="pmu-row"><div class="pmu-label" style="font-size:10px;color:rgba(244,236,226,0.3);">⚡</div>';
+  for(let col=0; col<=FINISH; col++){
+    if(col>=1 && col<=7){
+      const obs = pmu.obstacles[col-1];
+      const flipped = obs.flipped;
+      if(flipped){
+        const red = palmIsRed(obs.suit);
+        trackHTML += '<div class="pmu-cell obstacle flipped"><span style="font-size:9px;color:'+(red?'#a82020':'rgba(244,236,226,0.6)')+';">'+obs.value+obs.suit+'</span></div>';
+      } else {
+        trackHTML += '<div class="pmu-cell obstacle"><span style="font-size:8px;">?</span></div>';
+      }
+    } else {
+      trackHTML += '<div class="pmu-cell" style="border:none;background:none;"></div>';
+    }
+  }
+  trackHTML += '</div></div>';
+
+  // Bets summary
+  let betsHTML = '<div class="pmu-bets">';
+  pmu.players.forEach(p=>{
+    betsHTML += p.name+' → '+p.horse+' ('+p.bet+' gorgée'+(p.bet>1?'s':'')+')<br>';
+  });
+  betsHTML += '</div>';
+
+  body.innerHTML = lastHTML + trackHTML + betsHTML;
+
+  if(pmu.winner){
+    const winSuit = pmu.winner;
+    const winners = pmu.players.filter(p=>p.horse===winSuit);
+    const losers = pmu.players.filter(p=>p.horse!==winSuit);
+
+    let resultHTML = '<div style="font-family:Fraunces,serif;font-size:24px;color:var(--text);text-align:center;margin-top:10px;">'+winSuit+' gagne !</div>';
+    if(winners.length>0) resultHTML += '<div style="font-size:13px;color:var(--sage);text-align:center;margin-top:6px;">'+winners.map(p=>p.name+' distribue '+(p.bet*2)).join(', ')+' gorgées</div>';
+    if(losers.length>0) resultHTML += '<div style="font-size:13px;color:var(--clay);text-align:center;margin-top:4px;">'+losers.map(p=>p.name+' boit '+p.bet).join(', ')+' gorgée'+(losers.some(p=>p.bet>1)?'s':'')+'</div>';
+    body.innerHTML += resultHTML;
+
+    footer.innerHTML =
+      '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>'+
+      '<button class="btn btn-primary" onclick="pmuBettingPhase()" style="flex:1;">Rejouer</button>';
+  } else {
+    footer.innerHTML = '<button class="btn btn-primary" onclick="pmuFlipCard()">Retourner une carte</button>';
+  }
+}
+
+function pmuFlipCard(){
+  if(pmu.deck.length===0 || pmu.winner) return;
+
+  const card = pmu.deck.pop();
+  pmu.currentCard = card;
+
+  // Advance the horse of that suit
+  pmu.horses[card.suit] = Math.min(8, pmu.horses[card.suit] + 1);
+
+  // Check obstacles: if ALL horses have passed obstacle col, flip it
+  for(let o=0; o<7; o++){
+    if(!pmu.obstacles[o].flipped){
+      const col = o+1;
+      const allPassed = PMU_SUITS.every(s => pmu.horses[s] >= col);
+      if(allPassed){
+        pmu.obstacles[o].flipped = true;
+        // The horse matching obstacle suit goes back 1
+        const obsSuit = pmu.obstacles[o].suit;
+        pmu.horses[obsSuit] = Math.max(0, pmu.horses[obsSuit] - 1);
+      }
+      break; // only check the next unflipped obstacle
+    }
+  }
+
+  // Check winner
+  const FINISH = 8;
+  PMU_SUITS.forEach(s=>{
+    if(pmu.horses[s] >= FINISH && !pmu.winner) pmu.winner = s;
+  });
+
+  pmuUpdateHeader();
+  pmuRenderRace();
+}
+
+/* ==================== PILE OU FACE ==================== */
+
+const pof = {
+  players:[], currentIdx:0, mode:'fun',
+  round:0, maxRounds:5, currentBet:1, playerChoice:null
+};
+
+function pofSetup(){
+  pof.players=[];
+  document.getElementById('pof-chips').innerHTML='';
+  document.getElementById('pof-name-field').value='';
+  document.getElementById('pof-start-btn').disabled=true;
+  goTo('pof-setup');
+  setTimeout(()=> document.getElementById('pof-name-field').focus(), 100);
+}
+
+document.getElementById('pof-name-field').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    const val=e.target.value.trim();
+    if(val && pof.players.length<10){
+      pof.players.push(val);
+      e.target.value='';
+      pofRenderChips();
+    }
+  }
+});
+
+function pofRenderChips(){
+  const wrap=document.getElementById('pof-chips');
+  wrap.innerHTML='';
+  pof.players.forEach((name,i)=>{
+    const chip=document.createElement('div');
+    chip.className='chip';
+    chip.innerHTML=name+'<span class="x" onclick="pofRemovePlayer('+i+')">×</span>';
+    wrap.appendChild(chip);
+  });
+  document.getElementById('pof-start-btn').disabled = pof.players.length < 2;
+}
+function pofRemovePlayer(i){ pof.players.splice(i,1); pofRenderChips(); }
+
+function pofChooseMode(){
+  goTo('pof-mode');
+  const body = document.getElementById('pof-mode-body');
+  const footer = document.getElementById('pof-mode-footer');
+
+  body.innerHTML =
+    '<div style="font-family:Fraunces,serif;font-size:24px;margin-bottom:16px;">Choisis ton mode</div>'+
+    '<div class="pof-mode-card'+(pof.mode==='fun'?' selected':'')+'" onclick="pof.mode=\'fun\';pofChooseMode()">'+
+      '<h3>Mode Fun</h3><p>Parie 1 à 3 gorgées par lancer. Tranquille.</p>'+
+    '</div>'+
+    '<div class="pof-mode-card'+(pof.mode==='prison'?' selected':'')+'" onclick="pof.mode=\'prison\';pofChooseMode()">'+
+      '<h3>Mode Prison</h3><p>5 manches obligatoires. 2 → 4 → 8 → 16 → cul sec. Pas d\'échappatoire.</p>'+
+    '</div>';
+
+  footer.innerHTML = '<button class="btn btn-primary" onclick="pofStartGame()">Lancer</button>';
+}
+
+function pofStartGame(){
+  pof.currentIdx = 0;
+  pof.round = 0;
+  pof.currentBet = 1;
+  pof.playerChoice = null;
+  goTo('pof');
+  pofShowTurn();
+}
+
+function pofPlayer(){ return pof.players[pof.currentIdx % pof.players.length]; }
+function pofOpponent(){ return pof.players[(pof.currentIdx+1) % pof.players.length]; }
+
+function pofGetStake(){
+  if(pof.mode==='prison'){
+    if(pof.round >= 4) return 'cul sec';
+    return Math.pow(2, pof.round + 1);
+  }
+  return pof.currentBet;
+}
+
+function pofUpdateHeader(){
+  let h = '';
+  if(pof.mode==='prison'){
+    h = '<div class="badge">Prison <span class="bv">'+(pof.round+1)+'/5</span></div>';
+  } else {
+    h = '<div class="badge">Fun</div>';
+  }
+  document.getElementById('pof-header').innerHTML = h;
+}
+
+function pofCoinHTML(){
+  return '<div class="coin-scene"><div class="coin" id="pof-coin">'+
+    '<div class="coin-face coin-pile">PILE</div>'+
+    '<div class="coin-face coin-face-back">FACE</div>'+
+  '</div></div>';
+}
+
+function pofShowTurn(){
+  pofUpdateHeader();
+  const body = document.getElementById('pof-body');
+  const footer = document.getElementById('pof-footer');
+  const stake = pofGetStake();
+  const stakeText = stake === 'cul sec' ? 'CUL SEC' : stake+' gorgée'+(stake>1?'s':'');
+
+  if(pof.mode==='fun'){
+    // Show bet selection + pile/face choice
+    body.innerHTML =
+      '<div class="palm-player-big" style="font-size:24px;">'+pofPlayer()+'</div>'+
+      '<div style="font-size:13px;color:rgba(244,236,226,0.5);margin-top:4px;">contre '+pofOpponent()+'</div>'+
+      pofCoinHTML()+
+      '<div style="font-size:13px;color:rgba(244,236,226,0.5);margin-top:10px;">Mise :</div>'+
+      '<div style="display:flex;gap:10px;margin-top:6px;">'+
+        [1,2,3].map(n=>{
+          const sel = pof.currentBet===n;
+          return '<div class="pof-bet-btn" onclick="pof.currentBet='+n+';pofShowTurn()" style="background:'+(sel?'var(--accent)':'var(--surface)')+';border:1px solid '+(sel?'var(--accent)':'var(--line)')+';color:'+(sel?'#251c13':'var(--text)')+';">'+n+'</div>';
+        }).join('')+
+      '</div>';
+
+    footer.innerHTML =
+      '<button class="btn btn-primary" onclick="pofFlip(\'pile\')" style="flex:1;background:linear-gradient(135deg,#b8814a,#967034);color:#1a1208;">Pile</button>'+
+      '<button class="btn btn-primary" onclick="pofFlip(\'face\')" style="flex:1;background:var(--surface);color:var(--text);border:1px solid var(--line);">Face</button>';
+  } else {
+    // Prison mode - show round info
+    body.innerHTML =
+      '<div class="pof-round-badge">Manche '+(pof.round+1)+' / 5</div>'+
+      '<div class="palm-player-big" style="font-size:24px;">'+pofPlayer()+'</div>'+
+      '<div style="font-size:13px;color:rgba(244,236,226,0.5);margin-top:4px;">contre '+pofOpponent()+'</div>'+
+      pofCoinHTML()+
+      '<div style="font-family:Fraunces,serif;font-size:22px;color:var(--accent);margin-top:10px;">'+stakeText+'</div>';
+
+    footer.innerHTML =
+      '<button class="btn btn-primary" onclick="pofFlip(\'pile\')" style="flex:1;background:linear-gradient(135deg,#b8814a,#967034);color:#1a1208;">Pile</button>'+
+      '<button class="btn btn-primary" onclick="pofFlip(\'face\')" style="flex:1;background:var(--surface);color:var(--text);border:1px solid var(--line);">Face</button>';
+  }
+}
+
+function pofFlip(choice){
+  pof.playerChoice = choice;
+  const result = Math.random() < 0.5 ? 'pile' : 'face';
+  const won = choice === result;
+  const stake = pofGetStake();
+  const stakeText = stake === 'cul sec' ? 'CUL SEC' : stake+' gorgée'+(typeof stake==='number'&&stake>1?'s':'');
+
+  const body = document.getElementById('pof-body');
+  const footer = document.getElementById('pof-footer');
+  footer.innerHTML = '';
+
+  // Coin flip animation
+  const animClass = result === 'pile' ? 'flipping' : 'flipping-tails';
+
+  body.innerHTML =
+    (pof.mode==='prison' ? '<div class="pof-round-badge">Manche '+(pof.round+1)+' / 5</div>' : '')+
+    '<div class="palm-player-big" style="font-size:22px;">'+pofPlayer()+' choisit '+choice+'</div>'+
+    '<div class="coin-scene"><div class="coin '+animClass+'" id="pof-coin">'+
+      '<div class="coin-face coin-pile">PILE</div>'+
+      '<div class="coin-face coin-face-back">FACE</div>'+
+    '</div></div>';
+
+  if(navigator.vibrate) navigator.vibrate([40,30,40,30,40,30,80]);
+
+  setTimeout(()=>{
+    const loser = won ? pofOpponent() : pofPlayer();
+
+    body.innerHTML =
+      (pof.mode==='prison' ? '<div class="pof-round-badge">Manche '+(pof.round+1)+' / 5</div>' : '')+
+      '<div class="coin-scene"><div class="coin" style="transform:rotateY('+(result==='pile'?'1800':'1980')+'deg);">'+
+        '<div class="coin-face coin-pile">PILE</div>'+
+        '<div class="coin-face coin-face-back">FACE</div>'+
+      '</div></div>'+
+      '<div style="font-family:Fraunces,serif;font-size:20px;color:rgba(244,236,226,0.5);margin-top:14px;">La pièce tombe sur '+result+'</div>'+
+      '<div style="font-family:Fraunces,serif;font-size:28px;color:'+(won?'var(--sage)':'var(--clay)')+';margin-top:10px;">'+(won?'Gagné':'Perdu')+'</div>'+
+      '<div style="font-size:16px;color:var(--text);margin-top:6px;">'+loser+' boit '+stakeText+'</div>';
+
+    if(pof.mode==='prison'){
+      pof.round++;
+      if(pof.round >= 5){
+        footer.innerHTML =
+          '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>'+
+          '<button class="btn btn-primary" onclick="pofStartGame()" style="flex:1;">Rejouer</button>';
+      } else {
+        pof.currentIdx++;
+        footer.innerHTML = '<button class="btn btn-primary" onclick="pofShowTurn()">Manche suivante</button>';
+      }
+    } else {
+      pof.currentIdx++;
+      footer.innerHTML =
+        '<button class="btn btn-primary" onclick="pofShowTurn()" style="flex:2;">Joueur suivant</button>'+
+        '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>';
+    }
+  }, 1100);
+}
+
+/* ==================== DUEL DE DÉS ==================== */
+
+const des = { players:[] };
+
+function desSetup(){
+  des.players=[];
+  document.getElementById('des-chips').innerHTML='';
+  document.getElementById('des-name-field').value='';
+  document.getElementById('des-start-btn').disabled=true;
+  goTo('des-setup');
+  setTimeout(()=> document.getElementById('des-name-field').focus(), 100);
+}
+
+document.getElementById('des-name-field').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    const val=e.target.value.trim();
+    if(val && des.players.length<2){
+      des.players.push(val);
+      e.target.value='';
+      desRenderChips();
+    }
+  }
+});
+
+function desRenderChips(){
+  const wrap=document.getElementById('des-chips');
+  wrap.innerHTML='';
+  des.players.forEach((name,i)=>{
+    const chip=document.createElement('div');
+    chip.className='chip';
+    chip.innerHTML=name+'<span class="x" onclick="desRemovePlayer('+i+')">×</span>';
+    wrap.appendChild(chip);
+  });
+  document.getElementById('des-start-btn').disabled = des.players.length !== 2;
+}
+function desRemovePlayer(i){ des.players.splice(i,1); desRenderChips(); }
+
+function desDieHTML(value, rolling){
+  const pips = {
+    1:[0,0,0,0,1,0,0,0,0],
+    2:[0,0,1,0,0,0,1,0,0],
+    3:[0,0,1,0,1,0,1,0,0],
+    4:[1,0,1,0,0,0,1,0,1],
+    5:[1,0,1,0,1,0,1,0,1],
+    6:[1,0,1,1,0,1,1,0,1],
+  };
+  const p = pips[value] || pips[1];
+  return '<div class="die'+(rolling?' rolling':'')+'">'
+    + p.map(on => '<div class="pip'+(on?' on':'')+'"></div>').join('')
+    + '</div>';
+}
+
+function desStartGame(){
+  if(des.players.length!==2) return;
+  goTo('des');
+  desShowReady();
+}
+
+function desShowReady(){
+  const body = document.getElementById('des-body');
+  const footer = document.getElementById('des-footer');
+  body.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:center;">'+
+      '<div class="die-wrap"><div class="die-name">'+des.players[0]+'</div>'+desDieHTML(1,false)+'</div>'+
+      '<div class="die-vs">VS</div>'+
+      '<div class="die-wrap"><div class="die-name">'+des.players[1]+'</div>'+desDieHTML(1,false)+'</div>'+
+    '</div>';
+  footer.innerHTML = '<button class="btn btn-primary" onclick="desRoll()">Lancer les dés</button>';
+}
+
+function desRoll(){
+  const body = document.getElementById('des-body');
+  const footer = document.getElementById('des-footer');
+  footer.innerHTML = '';
+
+  // Animate random faces for 700ms
+  let rollCount = 0;
+  const rollInterval = setInterval(()=>{
+    const r1 = Math.floor(Math.random()*6)+1;
+    const r2 = Math.floor(Math.random()*6)+1;
+    body.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;">'+
+        '<div class="die-wrap"><div class="die-name">'+des.players[0]+'</div>'+desDieHTML(r1,true)+'</div>'+
+        '<div class="die-vs">×</div>'+
+        '<div class="die-wrap"><div class="die-name">'+des.players[1]+'</div>'+desDieHTML(r2,true)+'</div>'+
+      '</div>';
+    rollCount++;
+  }, 80);
+
+  setTimeout(()=>{
+    clearInterval(rollInterval);
+    const d1 = Math.floor(Math.random()*6)+1;
+    const d2 = Math.floor(Math.random()*6)+1;
+    const product = d1 * d2;
+
+    if(d1 === d2){
+      // Tie — show briefly then auto-reroll
+      body.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:center;">'+
+          '<div class="die-wrap"><div class="die-name">'+des.players[0]+'</div>'+desDieHTML(d1,false)+
+            '<div style="font-family:Fraunces,serif;font-size:28px;margin-top:6px;">'+d1+'</div></div>'+
+          '<div class="die-vs">=</div>'+
+          '<div class="die-wrap"><div class="die-name">'+des.players[1]+'</div>'+desDieHTML(d2,false)+
+            '<div style="font-family:Fraunces,serif;font-size:28px;margin-top:6px;">'+d2+'</div></div>'+
+        '</div>'+
+        '<div style="font-family:Fraunces,serif;font-size:24px;color:var(--accent);margin-top:16px;">Égalité !</div>'+
+        '<div style="font-size:14px;color:rgba(244,236,226,0.5);margin-top:6px;">On relance...</div>';
+      if(navigator.vibrate) navigator.vibrate([40,30,40,30,40]);
+      setTimeout(()=> desRoll(), 1200);
+      return;
+    }
+
+    const loser = d1 < d2 ? 0 : 1;
+    const winner = 1 - loser;
+
+    body.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;">'+
+        '<div class="die-wrap"><div class="die-name" style="color:'+(loser===0?'var(--clay)':'var(--sage)')+';">'+des.players[0]+'</div>'+desDieHTML(d1,false)+
+          '<div style="font-family:Fraunces,serif;font-size:28px;margin-top:6px;">'+d1+'</div></div>'+
+        '<div class="die-vs">×</div>'+
+        '<div class="die-wrap"><div class="die-name" style="color:'+(loser===1?'var(--clay)':'var(--sage)')+';">'+des.players[1]+'</div>'+desDieHTML(d2,false)+
+          '<div style="font-family:Fraunces,serif;font-size:28px;margin-top:6px;">'+d2+'</div></div>'+
+      '</div>'+
+      '<div style="font-family:Fraunces,serif;font-size:28px;color:var(--clay);margin-top:20px;">'+des.players[loser]+' perd</div>'+
+      '<div style="font-family:Fraunces,serif;font-size:22px;color:var(--text);margin-top:8px;">'+product+' gorgée'+(product>1?'s':'')+'</div>';
+
+    if(navigator.vibrate) navigator.vibrate([80,40,80]);
+    footer.innerHTML =
+      '<button class="btn btn-primary" onclick="desRoll()" style="flex:2;">Relancer</button>'+
+      '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>';
+  }, 700);
 }
 </script>
 </body>
