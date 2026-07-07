@@ -1,0 +1,5 @@
+#screen-bus-setup{padding-top:20px;}
+#bus-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+#bus-chips .chip{display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:13px; color:var(--text);}
+#bus-chips .chip .x{cursor:pointer; margin-left:4px; color:var(--text-faint);}
+#screen-bus{padding:0;}

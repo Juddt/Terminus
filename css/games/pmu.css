@@ -1,0 +1,12 @@
+.pmu-track{width:100%; overflow-x:auto; margin:8px 0;}
+.pmu-row{display:flex; align-items:center; gap:3px; margin-bottom:4px; height:42px;}
+.pmu-label{width:24px; font-size:18px; text-align:center; flex-shrink:0;}
+.pmu-cell{width:36px; height:36px; border-radius:6px; background:rgba(244,236,226,0.04); border:1px solid rgba(244,236,226,0.08); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(244,236,226,0.2); position:relative;}
+.pmu-cell.finish{border-color:rgba(184,129,74,0.3); background:rgba(184,129,74,0.08);}
+.pmu-cell.obstacle{border-color:rgba(163,80,58,0.3); background:rgba(163,80,58,0.06);}
+.pmu-cell.obstacle.flipped{background:rgba(163,80,58,0.2);}
+.pmu-horse{width:30px; height:42px; background:#f6f1e7; border-radius:5px; box-shadow:0 3px 8px rgba(0,0,0,0.4); display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:700; font-family:'Fraunces',serif; position:absolute; z-index:2;}
+.pmu-horse.r{color:#a82020;}
+.pmu-horse.b{color:#1a1a1a;}
+.pmu-lastcard{display:flex; align-items:center; gap:10px; justify-content:center; margin:10px 0;}
+.pmu-bets{font-size:12px; color:rgba(244,236,226,0.5); text-align:center; line-height:1.8;}

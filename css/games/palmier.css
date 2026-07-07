@@ -1,0 +1,20 @@
+#screen-palmier-setup{padding-top:20px;}
+#palm-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+#palm-chips .chip{display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:13px; color:var(--text);}
+#palm-chips .chip .x{cursor:pointer; margin-left:4px; color:var(--text-faint);}
+#screen-palmier{padding:0;}
+.palmier-visual{position:relative; width:100%; height:300px; display:flex; align-items:flex-end; justify-content:center; flex-shrink:0; overflow:visible;}
+.palmier-bottle{width:28px; height:56px; background:linear-gradient(to top, var(--text-faint), var(--surface)); border-radius:3px 3px 6px 6px; position:absolute; bottom:0; left:50%; transform:translateX(-50%); opacity:0.4;}
+.palmier-bottle::before{content:''; position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:14px; height:8px; background:var(--text-faint); border-radius:2px 2px 0 0; opacity:0.6;}
+.pm-card{position:absolute; width:80px; height:112px; border:1.5px solid var(--line); border-radius:6px; bottom:54px; left:50%; transform-origin:bottom center; font-size:14px; display:flex; align-items:center; justify-content:center; font-weight:700; line-height:1;}
+.pm-card.r{background:#f6f1e7; color:#a82020; border-color:rgba(0,0,0,0.12); box-shadow:0 3px 8px rgba(0,0,0,0.35);}
+.pm-card.b{background:#f6f1e7; color:#1a1a1a; border-color:rgba(0,0,0,0.12); box-shadow:0 3px 8px rgba(0,0,0,0.35);}
+.creators-counter{text-align:center; font-size:11px; color:var(--text-faint); margin-top:12px; font-style:italic;}
+.balance-track{width:100%; max-width:240px; height:24px; background:var(--surface); border-radius:12px; border:1px solid var(--line); position:relative; overflow:hidden;}
+.balance-zone{position:absolute; top:0; bottom:0; background:rgba(138,154,126,0.25); border-left:2px solid var(--sage); border-right:2px solid var(--sage);}
+.balance-cursor{position:absolute; top:2px; bottom:2px; width:6px; background:var(--accent); border-radius:3px;}
+.balance-cursor.hit{background:var(--sage);}
+.balance-cursor.miss{background:var(--clay);}
+.balance-card-float{transition:transform 0.05s linear;}
+.palm-collapse{font-family:'Fraunces',serif; font-size:32px; color:var(--clay); animation:shake 0.4s ease-in-out;}
+@keyframes shake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}}
