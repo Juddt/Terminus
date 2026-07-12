@@ -2,7 +2,7 @@
 // ouverte au moins une fois. Bumper CACHE_NAME force le remplacement de tous les
 // fichiers au prochain déploiement (sinon un vieux JS resterait servi indéfiniment
 // depuis le cache).
-const CACHE_NAME = 'soiree-cache-v2';
+const CACHE_NAME = 'soiree-cache-v3';
 
 const PRECACHE_URLS = [
   './terminus.html',
