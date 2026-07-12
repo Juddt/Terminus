@@ -1,6 +1,10 @@
+// difficulty : intensité du jeu ('Facile'|'Modéré'|'Intense'), category : type de mécanique
+// ('Adresse'|'Devinette'|'Bluff'|'Rapide'). Utilisées par le filtre de screen-games-list
+// (voir navigation.js) pour trouver un jeu adapté quand le groupe grandit.
 const GAMES = [
   {
     id:"palmier", name:"Le Palmier", joueurs:"2-10", duree:"20-40 min",
+    difficulty:"Modéré", category:"Adresse",
     interactive: true, launchFn: 'palmierSetup',
     desc:"Pioche une carte, applique la règle, et pose-la en équilibre sur le palmier — sans le faire s'écrouler. 5 chutes = perdu !",
     rules:[
@@ -19,6 +23,7 @@ const GAMES = [
   },
   {
     id:"bus", name:"Le Bus", joueurs:"2-10", duree:"10-20 min",
+    difficulty:"Modéré", category:"Devinette",
     interactive: true, launchFn: 'busSetup',
     desc:"Devine les caractéristiques de tes 4 cartes cachées. Le pire joueur monte dans le bus — et là, bonne chance.",
     rules:[
@@ -32,6 +37,7 @@ const GAMES = [
   },
   {
     id:"cible", name:"La Cible", joueurs:"2-10", duree:"15-30 min",
+    difficulty:"Facile", category:"Devinette",
     interactive: true, launchFn: 'cibleSetup',
     desc:"25 cartes cachées en forme de cible. Plus tu vises le centre, plus tu risques gros. Devine juste ou bois.",
     rules:[
@@ -45,6 +51,7 @@ const GAMES = [
   },
   {
     id:"purple", name:"Purple", joueurs:"2-10", duree:"10-20 min",
+    difficulty:"Facile", category:"Bluff",
     interactive: true, launchFn: 'purpleSetup',
     desc:"Prédi la couleur des prochaines cartes. Rouge, Noir ou Purple — plus tu vises haut, plus tu risques.",
     rules:[
@@ -59,6 +66,7 @@ const GAMES = [
   },
   {
     id:"pmu", name:"Le PMU", joueurs:"2-8", duree:"5-15 min",
+    difficulty:"Facile", category:"Bluff",
     interactive: true, launchFn: 'pmuSetup',
     desc:"Pariez sur le bon cheval et regardez la course. Le perdant boit sa mise, le gagnant distribue le double.",
     rules:[
@@ -72,6 +80,7 @@ const GAMES = [
   },
   {
     id:"des", name:"Le Duel de Dés", joueurs:"2", duree:"5-10 min",
+    difficulty:"Intense", category:"Rapide",
     interactive: true, launchFn: 'desSetup',
     desc:"Chacun lance un dé. Le plus bas boit la multiplication des deux. Simple, brutal, rapide.",
     rules:[
@@ -82,6 +91,7 @@ const GAMES = [
   },
   {
     id:"pof", name:"Pile ou Face", joueurs:"2+", duree:"5-15 min",
+    difficulty:"Intense", category:"Rapide",
     interactive: true, launchFn: 'pofSetup',
     desc:"Parie et retourne la pièce. Mode Fun pour les timides, Mode Prison pour les téméraires.",
     rules:[
