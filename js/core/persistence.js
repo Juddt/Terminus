@@ -81,13 +81,13 @@ function resumeSession(){
 
   if(state.lastItem){
     document.getElementById('item-eyebrow').textContent = state.lastItem.eyebrow;
-    document.getElementById('item-text').textContent = state.lastItem.text;
+    document.getElementById('item-text').textContent = soberize(state.lastItem.text);
     const tagsWrap = document.getElementById('item-players');
     tagsWrap.innerHTML = '';
     (state.lastItem.players||[]).forEach(p=>{
       const tag = document.createElement('div');
       tag.className = 'player-tag';
-      tag.innerHTML = '<span class="dot" style="background:'+p.color+'"></span>'+p.name;
+      tag.innerHTML = '<span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+p.name;
       tagsWrap.appendChild(tag);
     });
   }

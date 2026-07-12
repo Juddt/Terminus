@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Soirée</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#17120f">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -53,6 +56,7 @@
           <span onclick="openCustomScreen()">Mes ajouts</span>
           <span class="feedback-toggle-sound" onclick="toggleFeedbackPref('sound')">Son</span>
           <span class="feedback-toggle-vibration" onclick="toggleFeedbackPref('vibration')">Vibration</span>
+          <span class="sober-mode-toggle" onclick="toggleSoberMode()">Sans alcool</span>
         </div>
       </div>
     </div>
@@ -158,6 +162,7 @@
     <div id="podium-wrap"></div>
     <div id="stats-wrap"></div>
     <div class="spacer"></div>
+    <button class="btn btn-ghost" style="margin-bottom:10px;" onclick="openRecapScreen()">Partager le récap</button>
     <button class="btn btn-primary" onclick="resetAll()">Relancer une soirée</button>
   </div>
 
@@ -414,12 +419,23 @@
     <div class="step-sub" id="share-copy-feedback" style="text-align:center; margin-top:10px; margin-bottom:0;"></div>
   </div>
 
+  <!-- Carte-souvenir (image partageable) -->
+  <div class="screen scroll-screen" id="screen-recap">
+    <div class="topnav"><div class="back-link" onclick="goTo('end')">← Retour</div></div>
+    <h2 style="font-size:20px; margin-bottom:16px;">Récap de la soirée</h2>
+    <div id="recap-preview" class="recap-preview"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost" style="margin-bottom:10px;" onclick="downloadRecapImage()">Télécharger l'image</button>
+    <button class="btn btn-primary" onclick="shareRecapImage()">Partager</button>
+  </div>
+
   <!-- Historique cumulé des soirées -->
   <div class="screen scroll-screen" id="screen-history">
     <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
     <h2 style="font-size:20px; margin-bottom:4px;">Historique</h2>
     <div class="step-sub" style="margin-bottom:22px;">Les records de ce groupe, cumulés sur cet appareil</div>
     <div id="history-wrap"></div>
+    <div id="hall-of-fame-wrap"></div>
     <div class="spacer"></div>
     <button class="btn btn-ghost" onclick="clearHistory()">Effacer l'historique</button>
   </div>
@@ -475,12 +491,14 @@
 <script src="js/core/setup-wizard.js"></script>
 <script src="js/core/custom-content.js"></script>
 <script src="js/core/feedback.js"></script>
+<script src="js/core/sober-mode.js"></script>
 <script src="js/core/session-engine.js"></script>
 <script src="js/core/persistence.js"></script>
 <script src="js/core/history.js"></script>
 <script src="js/core/display-mode.js"></script>
 <script src="js/lib/qrcode.js"></script>
 <script src="js/core/share.js"></script>
+<script src="js/core/recap-card.js"></script>
 <script src="js/games/shared-cards.js"></script>
 <script src="js/games/palmier.js"></script>
 <script src="js/games/bus.js"></script>
@@ -495,8 +513,16 @@
   // les préférences visuelles/sonores persistées.
   applyTvModeClass();
   renderFeedbackToggles();
+  renderSoberModeToggle();
   const hadSharedConfig = applySharedConfigFromUrl();
   if(!hadSharedConfig) checkForResumableSession();
+
+  // Enregistre le service worker pour le mode hors-ligne (voir sw.js). Échoue
+  // silencieusement sur file:// ou http non-localhost (contexte non sécurisé) : l'app
+  // reste utilisable en ligne, seul le cache offline n'est pas actif.
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
 </script>
 </body>
 </html>

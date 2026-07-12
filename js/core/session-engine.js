@@ -138,13 +138,13 @@ function advanceQueue(){
 
 function renderItem(eyebrow, text, players, seconds){
   document.getElementById('item-eyebrow').textContent = eyebrow;
-  document.getElementById('item-text').textContent = text;
+  document.getElementById('item-text').textContent = soberize(text);
   const tagsWrap = document.getElementById('item-players');
   tagsWrap.innerHTML = '';
   players.forEach(p=>{
     const tag = document.createElement('div');
     tag.className = 'player-tag';
-    tag.innerHTML = '<span class="dot" style="background:'+p.color+'"></span>'+p.name;
+    tag.innerHTML = '<span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+p.name;
     tagsWrap.appendChild(tag);
   });
   // Sauvegardé pour la reprise de session (persistence.js) : permet de réafficher
@@ -197,7 +197,7 @@ function renderRulesBanner(){
   state.activeRules.forEach(r=>{
     const pill = document.createElement('div');
     pill.className = 'rule-pill';
-    pill.innerHTML = '<span class="ic">·</span>' + r;
+    pill.innerHTML = '<span class="ic">·</span>' + soberize(r);
     wrap.appendChild(pill);
   });
 }
@@ -210,7 +210,7 @@ function showSpecialEvent(){
   document.getElementById('screen-special').classList.remove('climax');
   document.getElementById('special-eyebrow').textContent = 'Moment';
   document.getElementById('special-icon').textContent = '▲';
-  document.getElementById('special-text').textContent = text;
+  document.getElementById('special-text').textContent = soberize(text);
   goTo('special');
   vibrate([80,40,80]);
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 3200);
@@ -222,7 +222,7 @@ function fireClimax(){
   document.getElementById('screen-special').classList.add('climax');
   document.getElementById('special-eyebrow').textContent = "L'instant";
   document.getElementById('special-icon').textContent = '◆';
-  document.getElementById('special-text').textContent = text;
+  document.getElementById('special-text').textContent = soberize(text);
   goTo('special');
   vibrate([100,60,100,60,220]);
   playClimaxSound();
@@ -237,7 +237,7 @@ function closePause(){ state.paused = false; goTo('main'); }
 // afficher) ou si tout le monde est à égalité (pas de podium pertinent).
 function computeTargetPodium(){
   const ranked = state.players
-    .map(p=>({ name:p.name, color:p.color, count: state.stats.targets[p.name]||0 }))
+    .map(p=>({ name:p.name, color:p.color, avatar:p.avatar, count: state.stats.targets[p.name]||0 }))
     .sort((a,b)=> b.count - a.count);
   if(!ranked.length || ranked[0].count === 0) return null;
   const mvp = ranked[0];
@@ -255,14 +255,14 @@ function renderTargetPodium(){
   const mvpCard = document.createElement('div');
   mvpCard.className = 'podium-card podium-mvp';
   mvpCard.innerHTML = '<div class="podium-icon">🏆</div><div><div class="stat-label">MVP DE LA SOIRÉE</div>'+
-    '<div class="podium-name"><span class="dot" style="background:'+podium.mvp.color+'"></span>'+podium.mvp.name+'</div></div>'+
+    '<div class="podium-name"><span class="avatar-badge avatar-badge-sm" style="background:'+podium.mvp.color+'">'+(podium.mvp.avatar||'')+'</span>'+podium.mvp.name+'</div></div>'+
     '<div class="podium-count">'+podium.mvp.count+'</div>';
   wrap.appendChild(mvpCard);
 
   const chillCard = document.createElement('div');
   chillCard.className = 'podium-card podium-chill';
   chillCard.innerHTML = '<div class="podium-icon">😌</div><div><div class="stat-label">LE PLUS TRANQUILLE</div>'+
-    '<div class="podium-name"><span class="dot" style="background:'+podium.chill.color+'"></span>'+podium.chill.name+'</div></div>'+
+    '<div class="podium-name"><span class="avatar-badge avatar-badge-sm" style="background:'+podium.chill.color+'">'+(podium.chill.avatar||'')+'</span>'+podium.chill.name+'</div></div>'+
     '<div class="podium-count">'+podium.chill.count+'</div>';
   wrap.appendChild(chillCard);
 }
