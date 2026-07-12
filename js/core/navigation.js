@@ -59,7 +59,7 @@ function openGamesList(){
 function openGameDetail(id){
   const g = GAMES.find(x=>x.id===id);
   document.getElementById('gd-name').textContent = g.name;
-  document.getElementById('gd-desc').textContent = g.desc;
+  document.getElementById('gd-desc').textContent = soberize(g.desc);
   let metaHTML = '<div class="gd-item"><b>'+g.joueurs+'</b>Joueurs</div>'+
     '<div class="gd-item"><b>'+g.duree+'</b>Durée</div>';
   if(g.materiel) metaHTML += '<div class="gd-item"><b>'+g.materiel+'</b>Matériel</div>';
@@ -70,9 +70,9 @@ function openGameDetail(id){
     const step = document.createElement('div');
     step.className = 'rule-step';
     if(typeof r === 'object' && r.card){
-      step.innerHTML = '<div class="step-num" style="min-width:28px; font-size:13px;">'+r.card+'</div><div class="step-text">'+r.text+'</div>';
+      step.innerHTML = '<div class="step-num" style="min-width:28px; font-size:13px;">'+r.card+'</div><div class="step-text">'+soberize(r.text)+'</div>';
     } else {
-      step.innerHTML = '<div class="step-text">'+r+'</div>';
+      step.innerHTML = '<div class="step-text">'+soberize(r)+'</div>';
     }
     rulesWrap.appendChild(step);
   });
@@ -96,9 +96,9 @@ function showRulesOverlay(gameId){
     const el = document.createElement('div');
     el.className = 'rule-step';
     if(typeof r === 'object' && r.card){
-      el.innerHTML = '<div class="step-num">'+r.card+'</div><div class="step-text">'+r.text+'</div>';
+      el.innerHTML = '<div class="step-num">'+r.card+'</div><div class="step-text">'+soberize(r.text)+'</div>';
     } else {
-      el.innerHTML = '<div class="step-text">'+r+'</div>';
+      el.innerHTML = '<div class="step-text">'+soberize(r)+'</div>';
     }
     wrap.appendChild(el);
   });
