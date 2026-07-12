@@ -121,7 +121,7 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 
 /* Pause */
 #screen-pause{align-items:center; justify-content:center; gap:18px; text-align:center; color:var(--text-faint);}
-#screen-pause .btn-ghost{width:auto; padding:14px 30px;}
+.end-early-link{font-size:12px; color:var(--text-faint); text-decoration:underline; cursor:pointer; margin-top:6px;}
 
 /* End */
 #screen-end{padding-top:48px;}

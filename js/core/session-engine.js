@@ -267,12 +267,28 @@ function renderTargetPodium(){
   wrap.appendChild(chillCard);
 }
 
+// Termine la soirée avant la fin du minuteur (bouton "Terminer la soirée" depuis la
+// pause). Réutilise endSession() telle quelle : le podium et les stats sont déjà
+// calculés à partir de ce qui s'est réellement passé, pas de la durée prévue, donc rien
+// à distinguer côté affichage — seule la durée réellement jouée (voir endSession) diffère
+// de la durée planifiée.
+function endSessionEarly(){
+  if(!confirm('Terminer la soirée maintenant ? Le récap et les gagnants s\'afficheront quand même.')) return;
+  endSession();
+}
+
 function endSession(){
   clearInterval(state.globalInterval);
   clearInterval(state.ringInterval);
   state.sessionActive = false;
   clearSessionSnapshot();
   goTo('end');
+
+  // Durée réellement jouée plutôt que la durée planifiée (state.durationMin) : identique
+  // en fin normale (le minuteur est à 0), mais plus courte si la soirée s'est terminée en
+  // avance via endSessionEarly(). On met à jour state.durationMin pour que l'historique et
+  // la carte-souvenir (qui le relisent) reflètent aussi la durée réelle.
+  state.durationMin = Math.max(1, Math.round((state.globalSecondsTotal - state.globalSecondsLeft) / 60));
   const h = Math.floor(state.durationMin/60);
   const m = state.durationMin % 60;
   document.getElementById('end-duration').textContent = h + 'h' + (m? (m<10?'0'+m:m) : '') + ' de soirée jouée';
