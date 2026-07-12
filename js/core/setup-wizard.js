@@ -35,7 +35,9 @@ function renderChips(){
   state.players.forEach((p, idx)=>{
     const chip = document.createElement('div');
     chip.className = 'chip';
-    chip.innerHTML = '<span class="dot" style="background:'+p.color+'"></span>' + p.name + '<span class="x" onclick="removePlayer('+idx+')">×</span>';
+    // L'avatar est cliquable pour changer d'emoji (voir cycleChipAvatar) ; stopPropagation
+    // évite de déclencher un clic parasite sur le chip lui-même.
+    chip.innerHTML = '<span class="avatar-badge" style="background:'+p.color+'" onclick="event.stopPropagation();cycleChipAvatar('+idx+')">'+(p.avatar||'')+'</span>' + p.name + '<span class="x" onclick="removePlayer('+idx+')">×</span>';
     wrap.appendChild(chip);
   });
   const remaining = state.playerCount - state.players.length;
@@ -49,11 +51,25 @@ function renderChips(){
 }
 function removePlayer(idx){ state.players.splice(idx,1); renderChips(); }
 
+// Fait défiler l'avatar emoji d'un joueur au clic, pour laisser un peu de personnalisation
+// sans construire un vrai sélecteur (juste un cycle sur PLAYER_AVATARS).
+function cycleChipAvatar(idx){
+  const p = state.players[idx];
+  if(!p) return;
+  const current = PLAYER_AVATARS.indexOf(p.avatar);
+  p.avatar = PLAYER_AVATARS[(current + 1) % PLAYER_AVATARS.length];
+  renderChips();
+}
+
 document.getElementById('name-field').addEventListener('keydown', (e)=>{
   if(e.key === 'Enter'){
     const val = e.target.value.trim();
     if(val && state.players.length < state.playerCount){
-      state.players.push({name:val, color: PLAYER_COLORS[state.players.length % PLAYER_COLORS.length]});
+      state.players.push({
+        name:val,
+        color: PLAYER_COLORS[state.players.length % PLAYER_COLORS.length],
+        avatar: PLAYER_AVATARS[state.players.length % PLAYER_AVATARS.length]
+      });
       e.target.value = '';
       renderChips();
     }

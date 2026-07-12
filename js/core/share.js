@@ -82,7 +82,11 @@ function applySharedConfigFromUrl(){
   const cfg = decodeShareConfig(payload);
   if(!cfg || !Array.isArray(cfg.n) || !cfg.n.length) return false;
 
-  state.players = cfg.n.map((name, idx)=>({name, color: PLAYER_COLORS[idx % PLAYER_COLORS.length]}));
+  state.players = cfg.n.map((name, idx)=>({
+    name,
+    color: PLAYER_COLORS[idx % PLAYER_COLORS.length],
+    avatar: PLAYER_AVATARS[idx % PLAYER_AVATARS.length]
+  }));
   state.playerCount = state.players.length;
   state.durationMin = DURATIONS.some(d=>d.min===cfg.d) ? cfg.d : state.durationMin;
   state.intensityValue = Number.isFinite(cfg.i) ? Math.max(0, Math.min(100, cfg.i)) : state.intensityValue;
