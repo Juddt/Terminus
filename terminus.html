@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Soirée</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#17120f">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -28,7 +31,13 @@
       <div class="grain"></div>
     </div>
     <div class="home-content">
-      <div></div>
+      <div id="resume-banner" class="resume-banner hidden">
+        <div id="resume-banner-text">Soirée en cours</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary" style="padding:10px 16px;" onclick="resumeSession()">Reprendre</button>
+          <button class="btn btn-ghost" style="padding:10px 16px;" onclick="dismissResumableSession()">Ignorer</button>
+        </div>
+      </div>
       <div style="display:flex; flex-direction:column; align-items:center;">
         <div class="hero-title">SOIRÉE</div>
         <div class="hero-tag">Ce soir, personne ne gère</div>
@@ -42,6 +51,13 @@
           <div class="mode-title">Mode Jeux</div>
           <div class="mode-desc">La bibliothèque des classiques. Choisissez un jeu, lisez les règles complètes, jouez une partie entière.</div>
         </button>
+        <div class="home-links">
+          <span onclick="openHistoryScreen()">Historique</span>
+          <span onclick="openCustomScreen()">Mes ajouts</span>
+          <span class="feedback-toggle-sound" onclick="toggleFeedbackPref('sound')">Son</span>
+          <span class="feedback-toggle-vibration" onclick="toggleFeedbackPref('vibration')">Vibration</span>
+          <span class="sober-mode-toggle" onclick="toggleSoberMode()">Sans alcool</span>
+        </div>
       </div>
     </div>
   </div>
@@ -89,6 +105,7 @@
       <div class="slider-label" id="intensity-label">Fun</div>
       <div class="slider-sub" id="intensity-sub">Le standard, ça commence à bouger</div>
       <div class="spacer"></div>
+      <button class="btn btn-ghost" style="margin-bottom:10px;" onclick="openShareScreen()">Partager cette config</button>
       <button class="btn btn-primary" onclick="launchSession()">Lancer</button>
     </div>
   </div>
@@ -101,11 +118,12 @@
   <div class="screen" id="screen-main">
     <div class="topbar">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div class="game-home-btn" onclick="if(confirm('Quitter la soirée ?')){clearInterval(state.globalInterval);clearInterval(state.ringInterval);goTo('home');}">Accueil</div>
-        <div></div>
+        <div class="game-home-btn" onclick="if(confirm('Quitter la soirée ?')){clearInterval(state.globalInterval);clearInterval(state.ringInterval);state.sessionActive=false;clearSessionSnapshot();goTo('home');}">Accueil</div>
+        <div class="tv-mode-toggle" onclick="toggleTvMode()" title="Mode grand écran">⛶</div>
       </div>
       <div class="global-track"><div class="global-fill" id="global-fill"></div></div>
       <div id="rules-banner"></div>
+      <div id="challenge-counter" class="challenge-counter"></div>
     </div>
     <div class="main-body">
       <div class="item-eyebrow" id="item-eyebrow" style="color:var(--accent);">Défi</div>
@@ -120,10 +138,11 @@
         </svg>
         <div class="ring-label" id="ring-label">10</div>
       </div>
-      <div class="footer-buttons">
+      <div class="footer-buttons" id="footer-buttons">
         <button class="btn btn-ghost footer-btn" onclick="openPause()">Pause</button>
         <button class="btn btn-ghost footer-btn" id="next-btn" onclick="advanceManually()">Suivant</button>
       </div>
+      <div class="end-early-link" onclick="endSessionEarly()">Terminer la soirée maintenant</div>
     </div>
   </div>
 
@@ -136,21 +155,26 @@
   <div class="screen" id="screen-pause">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
     <div style="font-size:14px; letter-spacing:1px;">En pause</div>
-    <button class="btn btn-ghost" onclick="closePause()">Reprendre</button>
+    <button class="btn btn-primary" style="width:auto; padding:14px 30px;" onclick="closePause()">Reprendre</button>
+    <div class="end-early-link" onclick="endSessionEarly()">Terminer la soirée maintenant</div>
   </div>
 
-  <div class="screen" id="screen-end">
+  <div class="screen scroll-screen" id="screen-end">
     <h2>Soirée terminée</h2>
     <div class="end-sub" id="end-duration">—</div>
+    <div id="podium-wrap"></div>
+    <div id="player-results-wrap"></div>
     <div id="stats-wrap"></div>
     <div class="spacer"></div>
+    <button class="btn btn-ghost" style="margin-bottom:10px;" onclick="openRecapScreen()">Partager le récap</button>
     <button class="btn btn-primary" onclick="resetAll()">Relancer une soirée</button>
   </div>
 
   <div class="screen scroll-screen" id="screen-games-list">
     <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
     <h2 style="font-size:20px; margin-bottom:4px;">Les classiques</h2>
-    <div class="step-sub" style="margin-bottom:22px;">Choisis un jeu, lis les règles, lance la partie</div>
+    <div class="step-sub" style="margin-bottom:16px;">Choisis un jeu, lis les règles, lance la partie</div>
+    <div id="games-filter-wrap" class="games-filter-wrap"></div>
     <div id="games-list-wrap"></div>
   </div>
 
@@ -386,6 +410,71 @@
     <div class="palm-footer" id="des-footer"></div>
   </div>
 
+  <!-- Partage de configuration (lien + QR code) -->
+  <div class="screen scroll-screen" id="screen-share">
+    <div class="topnav"><div class="back-link" onclick="goTo('setup')">← Retour</div></div>
+    <h2 style="font-size:20px; margin-bottom:4px;">Partager cette soirée</h2>
+    <div class="step-sub" style="margin-bottom:22px;">Envoie ce lien ou fais scanner le QR code : joueurs, durée et intensité seront pré-remplis.</div>
+    <div id="share-qr-wrap" class="share-qr-wrap"></div>
+    <div class="field-row" style="margin:18px 0 6px;">
+      <input type="text" id="share-url-field" class="name-input" readonly style="flex:1; margin-bottom:0;">
+    </div>
+    <button class="btn btn-primary" onclick="copyShareUrl()">Copier le lien</button>
+    <div class="step-sub" id="share-copy-feedback" style="text-align:center; margin-top:10px; margin-bottom:0;"></div>
+  </div>
+
+  <!-- Carte-souvenir (image partageable) -->
+  <div class="screen scroll-screen" id="screen-recap">
+    <div class="topnav"><div class="back-link" onclick="goTo('end')">← Retour</div></div>
+    <h2 style="font-size:20px; margin-bottom:16px;">Récap de la soirée</h2>
+    <div id="recap-preview" class="recap-preview"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost" style="margin-bottom:10px;" onclick="downloadRecapImage()">Télécharger l'image</button>
+    <button class="btn btn-primary" onclick="shareRecapImage()">Partager</button>
+  </div>
+
+  <!-- Historique cumulé des soirées -->
+  <div class="screen scroll-screen" id="screen-history">
+    <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
+    <h2 style="font-size:20px; margin-bottom:4px;">Historique</h2>
+    <div class="step-sub" style="margin-bottom:22px;">Les records de ce groupe, cumulés sur cet appareil</div>
+    <div id="history-wrap"></div>
+    <div id="hall-of-fame-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost" onclick="clearHistory()">Effacer l'historique</button>
+  </div>
+
+  <!-- Contenu personnalisé (mode solo custom) -->
+  <div class="screen scroll-screen" id="screen-custom">
+    <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
+    <h2 style="font-size:20px; margin-bottom:4px;">Mes ajouts</h2>
+    <div class="step-sub" style="margin-bottom:18px;">Ajoute tes propres règles et défis. {p1} et {p2} sont remplacés par des prénoms tirés au hasard.</div>
+
+    <h3 style="font-size:15px; margin-bottom:8px;">Règles perso</h3>
+    <div class="field-row" style="margin-bottom:10px; gap:8px;">
+      <input type="text" id="custom-rule-field" class="name-input" placeholder="Ex : Interdit de dire « soirée »" style="flex:1; margin-bottom:0;">
+      <select id="custom-rule-tier" class="tier-select">
+        <option value="0">Soft</option>
+        <option value="1">Fun</option>
+        <option value="2">Chaos</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost" style="margin-bottom:16px;" onclick="submitCustomRule()">Ajouter la règle</button>
+    <div id="custom-rules-list" class="chips" style="flex-direction:column; margin-bottom:24px;"></div>
+
+    <h3 style="font-size:15px; margin-bottom:8px;">Défis perso</h3>
+    <div class="field-row" style="margin-bottom:10px; gap:8px;">
+      <input type="text" id="custom-challenge-field" class="name-input" placeholder="Ex : {p1}, fais rire {p2}" style="flex:1; margin-bottom:0;">
+      <select id="custom-challenge-tier" class="tier-select">
+        <option value="0">Soft</option>
+        <option value="1">Fun</option>
+        <option value="2">Chaos</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost" style="margin-bottom:16px;" onclick="submitCustomChallenge()">Ajouter le défi</button>
+    <div id="custom-challenges-list" class="chips" style="flex-direction:column;"></div>
+  </div>
+
   <!-- Rules Overlay -->
   <div id="rules-overlay" class="rules-overlay hidden" onclick="closeRulesOverlay()">
     <div class="rules-modal" onclick="event.stopPropagation()">
@@ -404,7 +493,16 @@
 <script src="js/core/state.js"></script>
 <script src="js/core/navigation.js"></script>
 <script src="js/core/setup-wizard.js"></script>
+<script src="js/core/custom-content.js"></script>
+<script src="js/core/feedback.js"></script>
+<script src="js/core/sober-mode.js"></script>
 <script src="js/core/session-engine.js"></script>
+<script src="js/core/persistence.js"></script>
+<script src="js/core/history.js"></script>
+<script src="js/core/display-mode.js"></script>
+<script src="js/lib/qrcode.js"></script>
+<script src="js/core/share.js"></script>
+<script src="js/core/recap-card.js"></script>
 <script src="js/games/shared-cards.js"></script>
 <script src="js/games/palmier.js"></script>
 <script src="js/games/bus.js"></script>
@@ -413,5 +511,22 @@
 <script src="js/games/pmu.js"></script>
 <script src="js/games/pof.js"></script>
 <script src="js/games/des.js"></script>
+<script>
+  // Initialisation au chargement : applique un lien de config partagé s'il y en a un
+  // (prioritaire), sinon propose de reprendre une soirée interrompue. Restaure aussi
+  // les préférences visuelles/sonores persistées.
+  applyTvModeClass();
+  renderFeedbackToggles();
+  renderSoberModeToggle();
+  const hadSharedConfig = applySharedConfigFromUrl();
+  if(!hadSharedConfig) checkForResumableSession();
+
+  // Enregistre le service worker pour le mode hors-ligne (voir sw.js). Échoue
+  // silencieusement sur file:// ou http non-localhost (contexte non sécurisé) : l'app
+  // reste utilisable en ligne, seul le cache offline n'est pas actif.
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+</script>
 </body>
 </html>

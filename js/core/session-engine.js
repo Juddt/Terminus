@@ -41,9 +41,15 @@ function launchSession(){
   state.activeRules = [];
   state.bags = {};
   state.climaxFired = false;
-  state.stats = { challenges:0, specials:0, rulesAdded:0, targets:{} };
+  // playerChallenges : {done, failed} par joueur (boutons ✓ Fait / ✗ Raté). playerDrinks :
+  // verres bus par joueur — convention du jeu, incrémenté uniquement quand un défi est
+  // marqué "Raté" (pas de tentative de deviner un nombre de gorgées dans le texte libre
+  // des règles/événements, trop peu fiable).
+  state.stats = { challenges:0, specials:0, rulesAdded:0, targets:{}, playerChallenges:{}, playerDrinks:{} };
   state.typesQueue = buildQueue(RECIPES[state.durationMin]);
   state.queueIndex = 0;
+  state.sessionActive = true;
+  document.getElementById('challenge-counter').textContent = '';
   goTo('countdown');
   let n = 3;
   document.getElementById('cd-number').textContent = n;
@@ -66,6 +72,9 @@ function tickGlobal(){
   state.globalSecondsLeft--;
   const pct = Math.max(0, (state.globalSecondsLeft / state.globalSecondsTotal) * 100);
   document.getElementById('global-fill').style.width = pct + '%';
+  // Snapshot périodique (toutes les 5s) pour la reprise de session : suffisant pour ne
+  // jamais perdre plus de quelques secondes, sans écrire dans localStorage à chaque tick.
+  if(state.globalSecondsLeft % 5 === 0) saveSessionSnapshot();
   // Safety net : force le climax s'il n'a pas encore eu lieu et qu'il reste peu de temps
   if(!state.climaxFired && state.globalSecondsLeft > 5 && state.globalSecondsLeft <= 30){
     fireClimax();
@@ -104,7 +113,7 @@ function advanceQueue(){
   }
 
   if(type === 'rule'){
-    const r = drawFromBag('rule', RULES);
+    const r = drawFromBag('rule', getEffectiveRules());
     const players = pickPlayers(1);
     const text = fillTemplate(r.text, players);
     state.activeRules.push(text);
@@ -112,7 +121,7 @@ function advanceQueue(){
     renderRulesBanner();
     renderItem('Nouvelle règle', text, [], Math.round(4*speedFactor()));
   } else if(type === 'challenge'){
-    const c = drawFromBag('challenge', CHALLENGES);
+    const c = drawFromBag('challenge', getEffectiveChallenges());
     const players = pickPlayers(c.n);
     const text = fillTemplate(c.text, players);
     state.stats.challenges++;
@@ -134,26 +143,80 @@ function advanceQueue(){
 
 function renderItem(eyebrow, text, players, seconds){
   document.getElementById('item-eyebrow').textContent = eyebrow;
-  document.getElementById('item-text').textContent = text;
+  document.getElementById('item-text').textContent = soberize(text);
   const tagsWrap = document.getElementById('item-players');
   tagsWrap.innerHTML = '';
   players.forEach(p=>{
     const tag = document.createElement('div');
     tag.className = 'player-tag';
-    tag.innerHTML = '<span class="dot" style="background:'+p.color+'"></span>'+p.name;
+    tag.innerHTML = '<span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+p.name;
     tagsWrap.appendChild(tag);
   });
+  // Sauvegardé pour la reprise de session (persistence.js) : permet de réafficher
+  // l'item courant sans avoir à le retirer une seconde fois du bag.
+  state.lastItem = { eyebrow, text, players };
+  renderMainFooter(eyebrow === 'Défi');
   startRing(Math.max(4,seconds));
+  saveSessionSnapshot();
+}
+
+// Remplace "Pause / Suivant" par "✗ Raté / ✓ Fait" quand l'item affiché est un défi, pour
+// forcer une réponse qui alimente les stats par joueur (voir markChallengeResult). Les
+// autres types d'item (règle, mini-jeu, vote, moment) gardent l'avancement libre.
+function renderMainFooter(isChallenge){
+  const wrap = document.getElementById('footer-buttons');
+  if(isChallenge){
+    wrap.innerHTML = '<button class="btn btn-ghost footer-btn challenge-btn-fail" onclick="markChallengeResult(false)">✗ Raté</button>'+
+      '<button class="btn btn-primary footer-btn challenge-btn-done" onclick="markChallengeResult(true)">✓ Fait</button>';
+  } else {
+    wrap.innerHTML = '<button class="btn btn-ghost footer-btn" onclick="openPause()">Pause</button>'+
+      '<button class="btn btn-ghost footer-btn" id="next-btn" onclick="advanceManually()">Suivant</button>';
+  }
+}
+
+// Enregistre le résultat d'un défi pour chaque joueur ciblé (state.lastItem.players) puis
+// avance — un seul tap fait à la fois office de "Suivant" et de vote fait/raté.
+function markChallengeResult(done){
+  clearInterval(state.ringInterval);
+  const players = (state.lastItem && state.lastItem.players) || [];
+  players.forEach(p=>{
+    const rec = state.stats.playerChallenges[p.name] || (state.stats.playerChallenges[p.name] = {done:0, failed:0});
+    if(done){
+      rec.done++;
+    } else {
+      rec.failed++;
+      // Raté = tu bois, convention classique des jeux à gages.
+      state.stats.playerDrinks[p.name] = (state.stats.playerDrinks[p.name]||0) + 1;
+    }
+  });
+  renderChallengeCounter();
+  advanceQueue();
+}
+
+function renderChallengeCounter(){
+  const el = document.getElementById('challenge-counter');
+  let done = 0, failed = 0;
+  Object.values(state.stats.playerChallenges).forEach(r=>{ done += r.done; failed += r.failed; });
+  el.textContent = (done === 0 && failed === 0) ? '' :
+    '🎯 ' + done + ' relevé' + (done!==1?'s':'') + ' · ' + failed + ' raté' + (failed!==1?'s':'');
 }
 
 function startRing(seconds){
-  state.ringTotal = seconds;
-  state.ringLeft = seconds;
+  resumeRingFrom(seconds, seconds);
+}
+
+// Démarre (ou reprend) l'anneau de progression. `total` est la durée complète de la
+// manche, `left` le temps restant à afficher — identiques pour un démarrage normal,
+// différents quand on reprend une session interrompue (persistence.js).
+function resumeRingFrom(total, left){
+  state.ringTotal = total;
+  state.ringLeft = left;
   const fg = document.getElementById('ring-fg');
   const circumference = 125.6;
-  document.getElementById('ring-label').textContent = seconds;
-  fg.setAttribute('stroke-dashoffset', 0);
-  fg.style.stroke = 'var(--accent)';
+  document.getElementById('ring-label').textContent = Math.max(0, left);
+  fg.setAttribute('stroke-dashoffset', circumference * (1 - left/total));
+  fg.style.stroke = left > 0 ? 'var(--accent)' : 'var(--sage)';
+  clearInterval(state.ringInterval);
   state.ringInterval = setInterval(()=>{
     if(state.paused) return;
     state.ringLeft--;
@@ -164,6 +227,8 @@ function startRing(seconds){
       clearInterval(state.ringInterval);
       fg.style.stroke = 'var(--sage)';
       document.getElementById('ring-label').textContent = '✓';
+      playTimerEndSound();
+      vibrate([60]);
     }
   }, 1000);
 }
@@ -179,7 +244,7 @@ function renderRulesBanner(){
   state.activeRules.forEach(r=>{
     const pill = document.createElement('div');
     pill.className = 'rule-pill';
-    pill.innerHTML = '<span class="ic">·</span>' + r;
+    pill.innerHTML = '<span class="ic">·</span>' + soberize(r);
     wrap.appendChild(pill);
   });
 }
@@ -192,9 +257,9 @@ function showSpecialEvent(){
   document.getElementById('screen-special').classList.remove('climax');
   document.getElementById('special-eyebrow').textContent = 'Moment';
   document.getElementById('special-icon').textContent = '▲';
-  document.getElementById('special-text').textContent = text;
+  document.getElementById('special-text').textContent = soberize(text);
   goTo('special');
-  if(navigator.vibrate) navigator.vibrate([80,40,80]);
+  vibrate([80,40,80]);
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 3200);
 }
 
@@ -204,30 +269,104 @@ function fireClimax(){
   document.getElementById('screen-special').classList.add('climax');
   document.getElementById('special-eyebrow').textContent = "L'instant";
   document.getElementById('special-icon').textContent = '◆';
-  document.getElementById('special-text').textContent = text;
+  document.getElementById('special-text').textContent = soberize(text);
   goTo('special');
-  if(navigator.vibrate) navigator.vibrate([100,60,100,60,220]);
+  vibrate([100,60,100,60,220]);
+  playClimaxSound();
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 4500);
 }
 
 function openPause(){ state.paused = true; goTo('pause'); }
 function closePause(){ state.paused = false; goTo('main'); }
 
+// Classe les joueurs par nombre de fois ciblés (state.stats.targets) pour le podium
+// MVP/Loser de fin de soirée. Renvoie null si aucun défi n'a ciblé personne (rien à
+// afficher) ou si tout le monde est à égalité (pas de podium pertinent).
+function computeTargetPodium(){
+  const ranked = state.players
+    .map(p=>({ name:p.name, color:p.color, avatar:p.avatar, count: state.stats.targets[p.name]||0 }))
+    .sort((a,b)=> b.count - a.count);
+  if(!ranked.length || ranked[0].count === 0) return null;
+  const mvp = ranked[0];
+  const chill = ranked[ranked.length-1];
+  if(mvp.count === chill.count) return null; // tout le monde à égalité : pas de distinction
+  return { mvp, chill };
+}
+
+function renderTargetPodium(){
+  const wrap = document.getElementById('podium-wrap');
+  wrap.innerHTML = '';
+  const podium = computeTargetPodium();
+  if(!podium) return;
+
+  const mvpCard = document.createElement('div');
+  mvpCard.className = 'podium-card podium-mvp';
+  mvpCard.innerHTML = '<div class="podium-icon">🏆</div><div><div class="stat-label">MVP DE LA SOIRÉE</div>'+
+    '<div class="podium-name"><span class="avatar-badge avatar-badge-sm" style="background:'+podium.mvp.color+'">'+(podium.mvp.avatar||'')+'</span>'+podium.mvp.name+'</div></div>'+
+    '<div class="podium-count">'+podium.mvp.count+'</div>';
+  wrap.appendChild(mvpCard);
+
+  const chillCard = document.createElement('div');
+  chillCard.className = 'podium-card podium-chill';
+  chillCard.innerHTML = '<div class="podium-icon">😌</div><div><div class="stat-label">LE PLUS TRANQUILLE</div>'+
+    '<div class="podium-name"><span class="avatar-badge avatar-badge-sm" style="background:'+podium.chill.color+'">'+(podium.chill.avatar||'')+'</span>'+podium.chill.name+'</div></div>'+
+    '<div class="podium-count">'+podium.chill.count+'</div>';
+  wrap.appendChild(chillCard);
+}
+
+// Détail par joueur pour l'écran de fin : nombre de défis réussis et de verres bus
+// (state.stats.playerChallenges / playerDrinks, alimentés par markChallengeResult).
+function renderPlayerResults(){
+  const wrap = document.getElementById('player-results-wrap');
+  wrap.innerHTML = '';
+  if(!state.players.length) return;
+
+  const title = document.createElement('h3');
+  title.className = 'player-results-title';
+  title.textContent = 'Par joueur';
+  wrap.appendChild(title);
+
+  state.players.forEach(p=>{
+    const c = state.stats.playerChallenges[p.name] || {done:0, failed:0};
+    const drinks = state.stats.playerDrinks[p.name] || 0;
+    const row = document.createElement('div');
+    row.className = 'player-result-row';
+    row.innerHTML = '<div class="player-result-name"><span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+p.name+'</div>'+
+      '<div class="player-result-stats"><span>'+c.done+' défi'+(c.done!==1?'s':'')+'</span><span>'+drinks+' verre'+(drinks!==1?'s':'')+'</span></div>';
+    wrap.appendChild(row);
+  });
+}
+
+// Termine la soirée avant la fin du minuteur (bouton "Terminer la soirée" depuis la
+// pause). Réutilise endSession() telle quelle : le podium et les stats sont déjà
+// calculés à partir de ce qui s'est réellement passé, pas de la durée prévue, donc rien
+// à distinguer côté affichage — seule la durée réellement jouée (voir endSession) diffère
+// de la durée planifiée.
+function endSessionEarly(){
+  if(!confirm('Terminer la soirée maintenant ? Le récap et les gagnants s\'afficheront quand même.')) return;
+  endSession();
+}
+
 function endSession(){
   clearInterval(state.globalInterval);
   clearInterval(state.ringInterval);
+  state.sessionActive = false;
+  clearSessionSnapshot();
   goTo('end');
+
+  // Durée réellement jouée plutôt que la durée planifiée (state.durationMin) : identique
+  // en fin normale (le minuteur est à 0), mais plus courte si la soirée s'est terminée en
+  // avance via endSessionEarly(). On met à jour state.durationMin pour que l'historique et
+  // la carte-souvenir (qui le relisent) reflètent aussi la durée réelle.
+  state.durationMin = Math.max(1, Math.round((state.globalSecondsTotal - state.globalSecondsLeft) / 60));
   const h = Math.floor(state.durationMin/60);
   const m = state.durationMin % 60;
   document.getElementById('end-duration').textContent = h + 'h' + (m? (m<10?'0'+m:m) : '') + ' de soirée jouée';
 
-  let topTarget = '—', topCount = 0;
-  Object.keys(state.stats.targets).forEach(name=>{
-    if(state.stats.targets[name] > topCount){ topCount = state.stats.targets[name]; topTarget = name; }
-  });
+  renderTargetPodium();
+  renderPlayerResults();
 
   const stats = [
-    {label:'Le plus sollicité', value: topTarget + (topCount? ' ('+topCount+')' : '')},
     {label:'Défis lancés', value: state.stats.challenges},
     {label:'Règles imposées', value: state.stats.rulesAdded},
     {label:'Événements spéciaux', value: state.stats.specials},
@@ -245,9 +384,13 @@ function endSession(){
   cc.className = 'creators-counter';
   cc.textContent = '🥂 '+creatorsGlasses+' verre'+(creatorsGlasses>1?'s':'')+' pour les créateurs du jeu';
   wrap.appendChild(cc);
+
+  recordSessionInHistory();
 }
 
 function resetAll(){
+  state.sessionActive = false;
+  clearSessionSnapshot();
   state.step = 0; state.playerCount = 4; state.players = []; state.durationMin = 20;
   document.getElementById('player-count').value = 4;
   document.getElementById('intensity-slider').value = 50;
