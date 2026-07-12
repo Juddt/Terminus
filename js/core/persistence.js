@@ -73,11 +73,16 @@ function resumeSession(){
 
   SNAPSHOT_FIELDS.forEach(k=>{ if(k in snapshot) state[k] = snapshot[k]; });
   state.sessionActive = true;
+  // Compatibilité avec une snapshot enregistrée avant l'ajout des stats fait/raté par
+  // joueur : évite un throw dans markChallengeResult/renderPlayerResults si absentes.
+  state.stats.playerChallenges = state.stats.playerChallenges || {};
+  state.stats.playerDrinks = state.stats.playerDrinks || {};
 
   goTo('main');
   document.getElementById('global-fill').style.width =
     Math.max(0, (state.globalSecondsLeft / state.globalSecondsTotal) * 100) + '%';
   renderRulesBanner();
+  renderChallengeCounter();
 
   if(state.lastItem){
     document.getElementById('item-eyebrow').textContent = state.lastItem.eyebrow;
@@ -90,6 +95,7 @@ function resumeSession(){
       tag.innerHTML = '<span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+p.name;
       tagsWrap.appendChild(tag);
     });
+    renderMainFooter(state.lastItem.eyebrow === 'Défi');
   }
 
   // Reprend le minuteur de la manche là où il s'est arrêté, plutôt que d'en relancer un neuf.

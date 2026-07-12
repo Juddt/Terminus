@@ -132,6 +132,15 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 .stat-value{font-family:'Fraunces', serif; font-size:18px; color:var(--accent); margin-top:3px;}
 .stat-sub{font-size:11px; color:var(--text-faint); margin-top:2px;}
 
+/* Compteur live de défis (topbar, pendant la partie) */
+.challenge-counter{font-size:11px; color:var(--text-dim); margin-top:4px;}
+
+/* Résultats par joueur (défis + verres) sur l'écran de fin */
+.player-results-title{font-size:14px; color:var(--text-faint); text-transform:uppercase; letter-spacing:1px; margin:18px 0 10px; font-weight:500;}
+.player-result-row{display:flex; align-items:center; justify-content:space-between; padding:12px 4px; border-bottom:1px solid rgba(244,236,226,0.08);}
+.player-result-name{display:flex; align-items:center; gap:10px; font-size:14px; color:var(--text);}
+.player-result-stats{display:flex; gap:14px; font-size:12px; color:var(--text-dim);}
+
 /* Podium MVP / Loser (fin de soirée) */
 .podium-card{background:#2a231e; border-radius:18px; padding:18px 20px; margin-bottom:10px; display:flex; align-items:center; gap:14px;}
 .podium-card.podium-mvp{border:1px solid var(--accent);}

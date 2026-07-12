@@ -41,10 +41,15 @@ function launchSession(){
   state.activeRules = [];
   state.bags = {};
   state.climaxFired = false;
-  state.stats = { challenges:0, specials:0, rulesAdded:0, targets:{} };
+  // playerChallenges : {done, failed} par joueur (boutons ✓ Fait / ✗ Raté). playerDrinks :
+  // verres bus par joueur — convention du jeu, incrémenté uniquement quand un défi est
+  // marqué "Raté" (pas de tentative de deviner un nombre de gorgées dans le texte libre
+  // des règles/événements, trop peu fiable).
+  state.stats = { challenges:0, specials:0, rulesAdded:0, targets:{}, playerChallenges:{}, playerDrinks:{} };
   state.typesQueue = buildQueue(RECIPES[state.durationMin]);
   state.queueIndex = 0;
   state.sessionActive = true;
+  document.getElementById('challenge-counter').textContent = '';
   goTo('countdown');
   let n = 3;
   document.getElementById('cd-number').textContent = n;
@@ -150,8 +155,50 @@ function renderItem(eyebrow, text, players, seconds){
   // Sauvegardé pour la reprise de session (persistence.js) : permet de réafficher
   // l'item courant sans avoir à le retirer une seconde fois du bag.
   state.lastItem = { eyebrow, text, players };
+  renderMainFooter(eyebrow === 'Défi');
   startRing(Math.max(4,seconds));
   saveSessionSnapshot();
+}
+
+// Remplace "Pause / Suivant" par "✗ Raté / ✓ Fait" quand l'item affiché est un défi, pour
+// forcer une réponse qui alimente les stats par joueur (voir markChallengeResult). Les
+// autres types d'item (règle, mini-jeu, vote, moment) gardent l'avancement libre.
+function renderMainFooter(isChallenge){
+  const wrap = document.getElementById('footer-buttons');
+  if(isChallenge){
+    wrap.innerHTML = '<button class="btn btn-ghost footer-btn challenge-btn-fail" onclick="markChallengeResult(false)">✗ Raté</button>'+
+      '<button class="btn btn-primary footer-btn challenge-btn-done" onclick="markChallengeResult(true)">✓ Fait</button>';
+  } else {
+    wrap.innerHTML = '<button class="btn btn-ghost footer-btn" onclick="openPause()">Pause</button>'+
+      '<button class="btn btn-ghost footer-btn" id="next-btn" onclick="advanceManually()">Suivant</button>';
+  }
+}
+
+// Enregistre le résultat d'un défi pour chaque joueur ciblé (state.lastItem.players) puis
+// avance — un seul tap fait à la fois office de "Suivant" et de vote fait/raté.
+function markChallengeResult(done){
+  clearInterval(state.ringInterval);
+  const players = (state.lastItem && state.lastItem.players) || [];
+  players.forEach(p=>{
+    const rec = state.stats.playerChallenges[p.name] || (state.stats.playerChallenges[p.name] = {done:0, failed:0});
+    if(done){
+      rec.done++;
+    } else {
+      rec.failed++;
+      // Raté = tu bois, convention classique des jeux à gages.
+      state.stats.playerDrinks[p.name] = (state.stats.playerDrinks[p.name]||0) + 1;
+    }
+  });
+  renderChallengeCounter();
+  advanceQueue();
+}
+
+function renderChallengeCounter(){
+  const el = document.getElementById('challenge-counter');
+  let done = 0, failed = 0;
+  Object.values(state.stats.playerChallenges).forEach(r=>{ done += r.done; failed += r.failed; });
+  el.textContent = (done === 0 && failed === 0) ? '' :
+    '🎯 ' + done + ' relevé' + (done!==1?'s':'') + ' · ' + failed + ' raté' + (failed!==1?'s':'');
 }
 
 function startRing(seconds){
@@ -267,6 +314,29 @@ function renderTargetPodium(){
   wrap.appendChild(chillCard);
 }
 
+// Détail par joueur pour l'écran de fin : nombre de défis réussis et de verres bus
+// (state.stats.playerChallenges / playerDrinks, alimentés par markChallengeResult).
+function renderPlayerResults(){
+  const wrap = document.getElementById('player-results-wrap');
+  wrap.innerHTML = '';
+  if(!state.players.length) return;
+
+  const title = document.createElement('h3');
+  title.className = 'player-results-title';
+  title.textContent = 'Par joueur';
+  wrap.appendChild(title);
+
+  state.players.forEach(p=>{
+    const c = state.stats.playerChallenges[p.name] || {done:0, failed:0};
+    const drinks = state.stats.playerDrinks[p.name] || 0;
+    const row = document.createElement('div');
+    row.className = 'player-result-row';
+    row.innerHTML = '<div class="player-result-name"><span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+p.name+'</div>'+
+      '<div class="player-result-stats"><span>'+c.done+' défi'+(c.done!==1?'s':'')+'</span><span>'+drinks+' verre'+(drinks!==1?'s':'')+'</span></div>';
+    wrap.appendChild(row);
+  });
+}
+
 // Termine la soirée avant la fin du minuteur (bouton "Terminer la soirée" depuis la
 // pause). Réutilise endSession() telle quelle : le podium et les stats sont déjà
 // calculés à partir de ce qui s'est réellement passé, pas de la durée prévue, donc rien
@@ -294,6 +364,7 @@ function endSession(){
   document.getElementById('end-duration').textContent = h + 'h' + (m? (m<10?'0'+m:m) : '') + ' de soirée jouée';
 
   renderTargetPodium();
+  renderPlayerResults();
 
   const stats = [
     {label:'Défis lancés', value: state.stats.challenges},
