@@ -1,8 +1,10 @@
-// Service worker minimal : cache-first pour jouer hors connexion une fois l'app
-// ouverte au moins une fois. Bumper CACHE_NAME force le remplacement de tous les
-// fichiers au prochain déploiement (sinon un vieux JS resterait servi indéfiniment
-// depuis le cache).
-const CACHE_NAME = 'soiree-cache-v4';
+// Service worker minimal : réseau d'abord (network-first) pour toujours servir la
+// dernière version quand une connexion est dispo, avec repli sur le cache pour jouer
+// hors connexion. On avait démarré en cache-first, mais ça laissait les utilisateurs
+// bloqués sur une vieille version jusqu'à un rechargement supplémentaire après chaque
+// mise à jour — gênant tant que l'app change encore souvent. Bumper CACHE_NAME force
+// quand même le remplacement complet du cache au prochain déploiement.
+const CACHE_NAME = 'soiree-cache-v5';
 
 const PRECACHE_URLS = [
   './terminus.html',
@@ -57,22 +59,20 @@ self.addEventListener('activate', (event)=>{
   );
 });
 
-// Cache-first : sert le cache immédiatement si présent (offline-friendly), va sur le
-// réseau sinon et met à jour le cache pour la prochaine fois. On ignore les requêtes
-// non-GET (ex: rien de tel ici, mais par prudence) et les origines externes (fonts
-// Google) pour ne jamais bloquer un chargement sur une ressource qu'on ne maîtrise pas.
+// Network-first : tente toujours le réseau en premier pour avoir la dernière version,
+// met à jour le cache au passage, et ne retombe sur le cache que si le réseau échoue
+// (offline). On ignore les requêtes non-GET (ex: rien de tel ici, mais par prudence) et
+// les origines externes (fonts Google) pour ne jamais bloquer un chargement sur une
+// ressource qu'on ne maîtrise pas.
 self.addEventListener('fetch', (event)=>{
   if(event.request.method !== 'GET') return;
   if(new URL(event.request.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(event.request).then(cached=>{
-      if(cached) return cached;
-      return fetch(event.request).then(response=>{
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache=> cache.put(event.request, clone));
-        return response;
-      }).catch(()=> cached);
-    })
+    fetch(event.request).then(response=>{
+      const clone = response.clone();
+      caches.open(CACHE_NAME).then(cache=> cache.put(event.request, clone));
+      return response;
+    }).catch(()=> caches.match(event.request))
   );
 });
