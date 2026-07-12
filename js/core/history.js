@@ -66,6 +66,37 @@ function computeHistoryRecords(history){
   };
 }
 
+// Classement des joueurs les plus souvent MVP (topTarget) toutes soirées confondues.
+// Les noms sont regroupés en ignorant casse/espaces (deux soirées où quelqu'un tape
+// "Alice" puis "alice " doivent compter pour la même personne), mais on garde
+// l'orthographe la plus récente pour l'affichage.
+function computeHallOfFame(history){
+  const tally = {}; // clé normalisée -> { name, count }
+  history.forEach(h=>{
+    if(!h.topTarget) return;
+    const key = h.topTarget.trim().toLowerCase();
+    if(!tally[key]) tally[key] = { name: h.topTarget.trim(), count: 0 };
+    tally[key].name = h.topTarget.trim(); // garde l'orthographe la plus récente
+    tally[key].count++;
+  });
+  return Object.values(tally).sort((a,b)=> b.count - a.count).slice(0, 5);
+}
+
+function renderHallOfFame(history){
+  const wrap = document.getElementById('hall-of-fame-wrap');
+  const ranking = computeHallOfFame(history);
+  if(!ranking.length){ wrap.innerHTML = ''; return; }
+
+  const medals = ['🥇','🥈','🥉'];
+  const rows = ranking.map((r, i)=>
+    '<div class="stat-card" style="padding:14px 22px;">'+
+      '<div class="stat-label">'+(medals[i]||'#'+(i+1))+' '+r.name+'</div>'+
+      '<div class="stat-value">'+r.count+'&times; MVP</div>'+
+    '</div>'
+  ).join('');
+  wrap.innerHTML = '<h3 style="font-size:15px; margin:24px 0 10px;">Hall of Fame</h3>' + rows;
+}
+
 function formatHistoryDate(iso){
   const d = new Date(iso);
   return d.toLocaleDateString('fr-FR', {day:'numeric', month:'short', year:'numeric'});
@@ -79,6 +110,7 @@ function openHistoryScreen(){
   const records = computeHistoryRecords(history);
   if(!records){
     wrap.innerHTML = '<div class="step-sub">Aucune soirée enregistrée pour l\'instant. Lance ta première partie !</div>';
+    document.getElementById('hall-of-fame-wrap').innerHTML = '';
     goTo('history');
     return;
   }
@@ -99,6 +131,7 @@ function openHistoryScreen(){
     wrap.appendChild(card);
   });
 
+  renderHallOfFame(history);
   goTo('history');
 }
 
