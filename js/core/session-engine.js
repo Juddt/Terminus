@@ -44,6 +44,7 @@ function launchSession(){
   state.stats = { challenges:0, specials:0, rulesAdded:0, targets:{} };
   state.typesQueue = buildQueue(RECIPES[state.durationMin]);
   state.queueIndex = 0;
+  state.sessionActive = true;
   goTo('countdown');
   let n = 3;
   document.getElementById('cd-number').textContent = n;
@@ -66,6 +67,9 @@ function tickGlobal(){
   state.globalSecondsLeft--;
   const pct = Math.max(0, (state.globalSecondsLeft / state.globalSecondsTotal) * 100);
   document.getElementById('global-fill').style.width = pct + '%';
+  // Snapshot périodique (toutes les 5s) pour la reprise de session : suffisant pour ne
+  // jamais perdre plus de quelques secondes, sans écrire dans localStorage à chaque tick.
+  if(state.globalSecondsLeft % 5 === 0) saveSessionSnapshot();
   // Safety net : force le climax s'il n'a pas encore eu lieu et qu'il reste peu de temps
   if(!state.climaxFired && state.globalSecondsLeft > 5 && state.globalSecondsLeft <= 30){
     fireClimax();
@@ -104,7 +108,7 @@ function advanceQueue(){
   }
 
   if(type === 'rule'){
-    const r = drawFromBag('rule', RULES);
+    const r = drawFromBag('rule', getEffectiveRules());
     const players = pickPlayers(1);
     const text = fillTemplate(r.text, players);
     state.activeRules.push(text);
@@ -112,7 +116,7 @@ function advanceQueue(){
     renderRulesBanner();
     renderItem('Nouvelle règle', text, [], Math.round(4*speedFactor()));
   } else if(type === 'challenge'){
-    const c = drawFromBag('challenge', CHALLENGES);
+    const c = drawFromBag('challenge', getEffectiveChallenges());
     const players = pickPlayers(c.n);
     const text = fillTemplate(c.text, players);
     state.stats.challenges++;
@@ -143,17 +147,29 @@ function renderItem(eyebrow, text, players, seconds){
     tag.innerHTML = '<span class="dot" style="background:'+p.color+'"></span>'+p.name;
     tagsWrap.appendChild(tag);
   });
+  // Sauvegardé pour la reprise de session (persistence.js) : permet de réafficher
+  // l'item courant sans avoir à le retirer une seconde fois du bag.
+  state.lastItem = { eyebrow, text, players };
   startRing(Math.max(4,seconds));
+  saveSessionSnapshot();
 }
 
 function startRing(seconds){
-  state.ringTotal = seconds;
-  state.ringLeft = seconds;
+  resumeRingFrom(seconds, seconds);
+}
+
+// Démarre (ou reprend) l'anneau de progression. `total` est la durée complète de la
+// manche, `left` le temps restant à afficher — identiques pour un démarrage normal,
+// différents quand on reprend une session interrompue (persistence.js).
+function resumeRingFrom(total, left){
+  state.ringTotal = total;
+  state.ringLeft = left;
   const fg = document.getElementById('ring-fg');
   const circumference = 125.6;
-  document.getElementById('ring-label').textContent = seconds;
-  fg.setAttribute('stroke-dashoffset', 0);
-  fg.style.stroke = 'var(--accent)';
+  document.getElementById('ring-label').textContent = Math.max(0, left);
+  fg.setAttribute('stroke-dashoffset', circumference * (1 - left/total));
+  fg.style.stroke = left > 0 ? 'var(--accent)' : 'var(--sage)';
+  clearInterval(state.ringInterval);
   state.ringInterval = setInterval(()=>{
     if(state.paused) return;
     state.ringLeft--;
@@ -164,6 +180,8 @@ function startRing(seconds){
       clearInterval(state.ringInterval);
       fg.style.stroke = 'var(--sage)';
       document.getElementById('ring-label').textContent = '✓';
+      playTimerEndSound();
+      vibrate([60]);
     }
   }, 1000);
 }
@@ -194,7 +212,7 @@ function showSpecialEvent(){
   document.getElementById('special-icon').textContent = '▲';
   document.getElementById('special-text').textContent = text;
   goTo('special');
-  if(navigator.vibrate) navigator.vibrate([80,40,80]);
+  vibrate([80,40,80]);
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 3200);
 }
 
@@ -206,28 +224,62 @@ function fireClimax(){
   document.getElementById('special-icon').textContent = '◆';
   document.getElementById('special-text').textContent = text;
   goTo('special');
-  if(navigator.vibrate) navigator.vibrate([100,60,100,60,220]);
+  vibrate([100,60,100,60,220]);
+  playClimaxSound();
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 4500);
 }
 
 function openPause(){ state.paused = true; goTo('pause'); }
 function closePause(){ state.paused = false; goTo('main'); }
 
+// Classe les joueurs par nombre de fois ciblés (state.stats.targets) pour le podium
+// MVP/Loser de fin de soirée. Renvoie null si aucun défi n'a ciblé personne (rien à
+// afficher) ou si tout le monde est à égalité (pas de podium pertinent).
+function computeTargetPodium(){
+  const ranked = state.players
+    .map(p=>({ name:p.name, color:p.color, count: state.stats.targets[p.name]||0 }))
+    .sort((a,b)=> b.count - a.count);
+  if(!ranked.length || ranked[0].count === 0) return null;
+  const mvp = ranked[0];
+  const chill = ranked[ranked.length-1];
+  if(mvp.count === chill.count) return null; // tout le monde à égalité : pas de distinction
+  return { mvp, chill };
+}
+
+function renderTargetPodium(){
+  const wrap = document.getElementById('podium-wrap');
+  wrap.innerHTML = '';
+  const podium = computeTargetPodium();
+  if(!podium) return;
+
+  const mvpCard = document.createElement('div');
+  mvpCard.className = 'podium-card podium-mvp';
+  mvpCard.innerHTML = '<div class="podium-icon">🏆</div><div><div class="stat-label">MVP DE LA SOIRÉE</div>'+
+    '<div class="podium-name"><span class="dot" style="background:'+podium.mvp.color+'"></span>'+podium.mvp.name+'</div></div>'+
+    '<div class="podium-count">'+podium.mvp.count+'</div>';
+  wrap.appendChild(mvpCard);
+
+  const chillCard = document.createElement('div');
+  chillCard.className = 'podium-card podium-chill';
+  chillCard.innerHTML = '<div class="podium-icon">😌</div><div><div class="stat-label">LE PLUS TRANQUILLE</div>'+
+    '<div class="podium-name"><span class="dot" style="background:'+podium.chill.color+'"></span>'+podium.chill.name+'</div></div>'+
+    '<div class="podium-count">'+podium.chill.count+'</div>';
+  wrap.appendChild(chillCard);
+}
+
 function endSession(){
   clearInterval(state.globalInterval);
   clearInterval(state.ringInterval);
+  state.sessionActive = false;
+  clearSessionSnapshot();
   goTo('end');
   const h = Math.floor(state.durationMin/60);
   const m = state.durationMin % 60;
   document.getElementById('end-duration').textContent = h + 'h' + (m? (m<10?'0'+m:m) : '') + ' de soirée jouée';
 
-  let topTarget = '—', topCount = 0;
-  Object.keys(state.stats.targets).forEach(name=>{
-    if(state.stats.targets[name] > topCount){ topCount = state.stats.targets[name]; topTarget = name; }
-  });
+  renderTargetPodium();
 
   const stats = [
-    {label:'Le plus sollicité', value: topTarget + (topCount? ' ('+topCount+')' : '')},
     {label:'Défis lancés', value: state.stats.challenges},
     {label:'Règles imposées', value: state.stats.rulesAdded},
     {label:'Événements spéciaux', value: state.stats.specials},
@@ -245,9 +297,13 @@ function endSession(){
   cc.className = 'creators-counter';
   cc.textContent = '🥂 '+creatorsGlasses+' verre'+(creatorsGlasses>1?'s':'')+' pour les créateurs du jeu';
   wrap.appendChild(cc);
+
+  recordSessionInHistory();
 }
 
 function resetAll(){
+  state.sessionActive = false;
+  clearSessionSnapshot();
   state.step = 0; state.playerCount = 4; state.players = []; state.durationMin = 20;
   document.getElementById('player-count').value = 4;
   document.getElementById('intensity-slider').value = 50;

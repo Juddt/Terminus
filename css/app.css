@@ -127,3 +127,47 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 .stat-card{background:#2a231e; border:none; border-radius:18px; padding:22px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;}
 .stat-label{font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-faint);}
 .stat-value{font-family:'Fraunces', serif; font-size:18px; color:var(--accent); margin-top:3px;}
+.stat-sub{font-size:11px; color:var(--text-faint); margin-top:2px;}
+
+/* Podium MVP / Loser (fin de soirée) */
+.podium-card{background:#2a231e; border-radius:18px; padding:18px 20px; margin-bottom:10px; display:flex; align-items:center; gap:14px;}
+.podium-card.podium-mvp{border:1px solid var(--accent);}
+.podium-icon{font-size:26px;}
+.podium-card > div:nth-child(2){flex:1;}
+.podium-name{font-family:'Fraunces', serif; font-size:16px; color:var(--text); margin-top:3px; display:flex; align-items:center; gap:8px;}
+.podium-name .dot{width:8px; height:8px; border-radius:50%;}
+.podium-count{font-family:'Fraunces', serif; font-size:20px; color:var(--accent);}
+
+/* Home : bandeau de reprise + liens utilitaires */
+.resume-banner{position:absolute; top:16px; left:16px; right:16px; z-index:5; background:#2a231e; border:1px solid var(--accent); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; font-size:13px;}
+.home-links{display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:18px;}
+.home-links span{font-size:12px; color:var(--text-faint); cursor:pointer; letter-spacing:0.3px;}
+.home-links span.active{color:var(--accent);}
+
+/* Filtre catégories du catalogue de jeux */
+.games-filter-wrap{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
+.games-filter-chip{font-size:12px; padding:8px 14px; border-radius:30px; border:1px solid var(--line); color:var(--text-dim); cursor:pointer;}
+.games-filter-chip.selected{border-color:var(--accent); color:var(--accent);}
+.game-difficulty{font-weight:500;}
+.game-difficulty-facile{color:var(--sage);}
+.game-difficulty-modere{color:var(--accent-bright);}
+.game-difficulty-intense{color:var(--clay);}
+
+/* Partage de session (lien + QR code) */
+.share-qr-wrap{display:flex; justify-content:center; background:#fff; border-radius:16px; padding:16px;}
+.share-qr-wrap svg{width:100%; height:auto; max-width:220px;}
+
+/* Sélecteur d'intensité pour le contenu perso (Mes ajouts) */
+.tier-select{background:var(--surface); border:1px solid var(--line); color:var(--text); border-radius:6px; padding:0 10px; font-size:13px; font-family:'Inter'; height:48px;}
+
+/* Toggle mode grand écran (topbar session) */
+.tv-mode-toggle{width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--line); color:var(--text-dim); font-size:14px; cursor:pointer;}
+.tv-mode-toggle.active{border-color:var(--accent); color:var(--accent);}
+
+/* Mode grand écran : agrandit le contenu principal pour une lecture à distance */
+#frame.tv-mode .item-text{font-size:38px;}
+#frame.tv-mode .item-eyebrow{font-size:14px;}
+#frame.tv-mode .player-tag{font-size:16px; padding:10px 18px;}
+#frame.tv-mode .ring-wrap{width:72px; height:72px;}
+#frame.tv-mode .ring-wrap svg{width:72px; height:72px;}
+#frame.tv-mode .ring-label{font-size:16px;}
