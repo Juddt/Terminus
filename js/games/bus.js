@@ -43,6 +43,7 @@ document.getElementById('bus-name-field').addEventListener('keydown', (e)=>{
     if(val && bus.players.length<10){
       bus.players.push(val);
       e.target.value='';
+      Sound.play('tick');
       busRenderChips();
     }
   }
@@ -150,6 +151,7 @@ function busGuess(guess){
 }
 
 function busShowRoundResult(correct, penalty){
+  Sound.play(correct ? 'success' : 'fail');
   const body = document.getElementById('bus-body');
   const footer = document.getElementById('bus-footer');
   const card = bus.revealedCards[bus.revealedCards.length-1];
@@ -243,6 +245,7 @@ function busShowRideCard(){
 }
 
 function busFlipRideCard(){
+  Sound.play('cardFlip');
   const card = bus.busCards[bus.busIdx];
   const isFace = card.value==='V' || card.value==='D' || card.value==='R';
   const body = document.getElementById('bus-body');
@@ -260,6 +263,7 @@ function busFlipRideCard(){
 
   if(isFace){
     if(navigator.vibrate) navigator.vibrate([80,40,80]);
+    Sound.play('fail');
     body.innerHTML =
       '<div class="palm-player-big">'+bus.busPlayer+'</div>'+
       cardsRow+
@@ -273,6 +277,7 @@ function busFlipRideCard(){
   } else {
     bus.busIdx++;
     if(bus.busIdx >= 5){
+      Sound.play('win');
       creatorsGlasses++;
       body.innerHTML =
         '<div class="palm-player-big" style="color:var(--sage);">'+bus.busPlayer+' descend du bus !</div>'+
@@ -283,6 +288,7 @@ function busFlipRideCard(){
         '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>'+
         '<button class="btn btn-primary" onclick="busStartGame()" style="flex:1;">Rejouer</button>';
     } else {
+      Sound.play('success');
       body.innerHTML =
         '<div class="palm-player-big">'+bus.busPlayer+'</div>'+
         cardsRow+

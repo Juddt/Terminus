@@ -71,6 +71,7 @@ document.getElementById('name-field').addEventListener('keydown', (e)=>{
         avatar: PLAYER_AVATARS[state.players.length % PLAYER_AVATARS.length]
       });
       e.target.value = '';
+      Sound.play('tick');
       renderChips();
     }
   }

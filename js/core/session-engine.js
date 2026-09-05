@@ -55,8 +55,8 @@ function launchSession(){
   document.getElementById('cd-number').textContent = n;
   const cdInterval = setInterval(()=>{
     n--;
-    if(n > 0){ document.getElementById('cd-number').textContent = n; }
-    else { clearInterval(cdInterval); startMainLoop(); }
+    if(n > 0){ document.getElementById('cd-number').textContent = n; Sound.play('tick'); }
+    else { clearInterval(cdInterval); Sound.play('ding'); startMainLoop(); }
   }, 800);
 }
 
@@ -227,8 +227,10 @@ function resumeRingFrom(total, left){
       clearInterval(state.ringInterval);
       fg.style.stroke = 'var(--sage)';
       document.getElementById('ring-label').textContent = '✓';
-      playTimerEndSound();
-      vibrate([60]);
+      Sound.play('ding');
+      if(navigator.vibrate) navigator.vibrate([60]);
+    } else if(state.ringLeft <= 3){
+      Sound.play('tick');
     }
   }, 1000);
 }
@@ -259,7 +261,8 @@ function showSpecialEvent(){
   document.getElementById('special-icon').textContent = '▲';
   document.getElementById('special-text').textContent = soberize(text);
   goTo('special');
-  vibrate([80,40,80]);
+  if(navigator.vibrate) navigator.vibrate([80,40,80]);
+  Sound.play('ding');
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 3200);
 }
 
@@ -271,8 +274,8 @@ function fireClimax(){
   document.getElementById('special-icon').textContent = '◆';
   document.getElementById('special-text').textContent = soberize(text);
   goTo('special');
-  vibrate([100,60,100,60,220]);
-  playClimaxSound();
+  if(navigator.vibrate) navigator.vibrate([100,60,100,60,220]);
+  Sound.play('sting');
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 4500);
 }
 
@@ -353,6 +356,7 @@ function endSession(){
   state.sessionActive = false;
   clearSessionSnapshot();
   goTo('end');
+  Sound.play('win');
 
   // Durée réellement jouée plutôt que la durée planifiée (state.durationMin) : identique
   // en fin normale (le minuteur est à 0), mais plus courte si la soirée s'est terminée en

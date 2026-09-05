@@ -1,0 +1,83 @@
+:root{
+  --bg:#17120f; --surface:#2a231e; --surface-2:#241e19;
+  --line:rgba(244,236,226,0.14); --accent:#b8814a; --accent-bright:#c99a67;
+  --sage:#8A9A7E; --clay:#A3503A; --text:#f4ece2;
+  --text-dim:rgba(244,236,226,0.6); --text-faint:rgba(244,236,226,0.4);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0; min-height:100%; background:#000;}
+body{font-family:'Inter',sans-serif; color:var(--text); display:flex; align-items:center; justify-content:center; min-height:100vh; min-height:100dvh;}
+h1,h2,h3{font-family:'Fraunces',serif; font-weight:500; margin:0;}
+#frame{width:100%; max-width:480px; min-height:100vh; min-height:100dvh; background:var(--bg); padding:32px 24px; box-sizing:border-box; display:flex; flex-direction:column;}
+.btn{border:none; border-radius:16px; padding:18px 20px; font-family:'Inter',sans-serif; font-size:15px; font-weight:500; cursor:pointer; width:100%; transition:transform .08s ease, opacity .15s ease;}
+.btn:active{transform:scale(0.97);}
+.btn:disabled{opacity:0.4; cursor:default;}
+.btn-primary{background:var(--accent); color:#1A1208;}
+.btn-ghost{background:transparent; border:1px solid var(--line); color:var(--text-dim);}
+.spacer{flex:1;}
+.hidden{display:none !important;}
+
+.title{font-family:'Fraunces',serif; font-size:32px; text-align:center; margin-bottom:6px;}
+.subtitle{font-size:13px; color:var(--text-faint); text-align:center; margin-bottom:30px;}
+
+.landing-choice{border:1px solid var(--line); border-radius:18px; padding:20px; margin-bottom:14px; cursor:pointer; background:transparent;}
+.landing-choice h3{font-size:17px; color:var(--text); margin-bottom:4px;}
+.landing-choice p{font-size:12.5px; color:var(--text-faint); margin:0;}
+.landing-choice.primary{border-color:var(--accent);}
+.landing-choice.primary h3{color:var(--accent);}
+
+.field{width:100%; padding:14px 16px; border-radius:8px; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:16px; font-family:'Inter'; margin-bottom:12px;}
+.field:focus{outline:none; border-color:var(--accent);}
+.field.code{text-transform:uppercase; letter-spacing:6px; text-align:center; font-family:'Fraunces',serif; font-size:22px;}
+.error-msg{color:var(--clay); font-size:13px; text-align:center; margin-top:-4px; margin-bottom:12px; min-height:16px;}
+
+.room-code-display{text-align:center; margin:14px 0 22px;}
+.room-code-display .lbl{font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint);}
+.room-code-display .code{font-family:'Fraunces',serif; font-size:56px; letter-spacing:10px; color:var(--accent); margin-top:6px;}
+
+.player-list{display:flex; flex-direction:column; gap:8px; margin:16px 0;}
+.player-row{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border:1px solid var(--line); border-radius:10px; font-size:14px;}
+.player-row .dot{width:8px; height:8px; border-radius:50%; background:var(--sage); display:inline-block; margin-right:8px;}
+.count-hint{font-size:12px; color:var(--text-faint); text-align:center; margin-top:8px;}
+.count-hint.ok{color:var(--sage);}
+
+.role-badge-mini{position:fixed; top:14px; left:14px; font-size:11px; padding:6px 10px; border-radius:20px; background:rgba(0,0,0,0.4); border:1px solid var(--line); color:var(--text-dim); z-index:10;}
+
+.pil-pass-card{font-size:13px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase; text-align:center;}
+.pil-pass-name{font-family:'Fraunces',serif; font-size:30px; color:var(--text); margin-top:8px; text-align:center;}
+
+.pil-role-card{width:100%; max-width:260px; margin:16px auto 0; border-radius:16px; padding:24px 18px; box-shadow:0 10px 30px rgba(0,0,0,0.4); text-align:center;}
+.pil-role-card.camp-pilliers{background:linear-gradient(160deg,#3a1414,#210a0a); border:1px solid var(--clay);}
+.pil-role-card.camp-village{background:linear-gradient(160deg,#20301f,#131f13); border:1px solid var(--sage);}
+.pil-role-card.camp-solo{background:linear-gradient(160deg,#2c2412,#1c160a); border:1px solid var(--accent);}
+.pil-role-camp{font-size:10px; letter-spacing:2px; text-transform:uppercase; opacity:0.7;}
+.pil-role-name{font-family:'Fraunces',serif; font-size:24px; color:var(--text); margin:8px 0 10px;}
+.pil-role-desc{font-size:13px; color:rgba(244,236,226,0.75); line-height:1.5;}
+
+.pil-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:6px; padding:20px 0;}
+.pil-rule-line{font-family:'Fraunces',serif; font-size:19px; color:var(--text); line-height:1.4; max-width:320px;}
+
+.pil-night-pulse{width:70px; height:70px; border-radius:50%; background:radial-gradient(circle, rgba(163,80,58,0.6), transparent 70%); animation:pilPulse 1s ease-in-out infinite;}
+@keyframes pilPulse{0%,100%{transform:scale(0.85); opacity:0.6;} 50%{transform:scale(1.15); opacity:1;}}
+
+.pil-target-grid{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:16px; max-width:340px;}
+.pil-target-btn{padding:12px 16px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--text); font-family:'Inter',sans-serif; font-size:14px; cursor:pointer;}
+
+.pil-timer-big{font-family:'Fraunces',serif; font-size:60px; color:var(--accent);}
+.pil-timer-sub{font-size:12px; color:var(--text-faint); letter-spacing:1.5px; text-transform:uppercase; margin-top:6px;}
+
+.pil-secret-result{font-family:'Fraunces',serif; font-size:24px; margin-top:14px;}
+.pil-secret-result.is-pillier{color:var(--clay);}
+.pil-secret-result.is-clean{color:var(--sage);}
+
+.pil-camp-tag{display:inline-block; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; padding:4px 10px; border-radius:20px; margin-top:6px;}
+.pil-camp-tag.camp-pilliers{background:rgba(163,80,58,0.2); color:var(--clay);}
+.pil-camp-tag.camp-village{background:rgba(138,154,126,0.2); color:var(--sage);}
+.pil-camp-tag.camp-solo{background:rgba(184,129,74,0.2); color:var(--accent);}
+
+.pil-roster{font-size:13px; color:var(--text-dim); line-height:2; margin-top:14px; text-align:left; max-width:280px;}
+.pil-roster .dead{opacity:0.45; text-decoration:line-through;}
+
+.host-tag{font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--accent); text-align:center; margin-bottom:10px;}
+.footer-row{display:flex; gap:10px; margin-top:14px;}
+.footer-row .btn{flex:1;}

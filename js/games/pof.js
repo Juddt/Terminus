@@ -18,6 +18,7 @@ document.getElementById('pof-name-field').addEventListener('keydown', (e)=>{
     if(val && pof.players.length<10){
       pof.players.push(val);
       e.target.value='';
+      Sound.play('tick');
       pofRenderChips();
     }
   }
@@ -152,8 +153,10 @@ function pofFlip(choice){
     '</div></div>';
 
   if(navigator.vibrate) navigator.vibrate([40,30,40,30,40,30,80]);
+  Sound.play('coin');
 
   setTimeout(()=>{
+    Sound.play(won ? 'success' : 'fail');
     const loser = won ? pofOpponent() : pofPlayer();
 
     body.innerHTML =

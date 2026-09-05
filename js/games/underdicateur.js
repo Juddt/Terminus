@@ -24,6 +24,14 @@ const und = {
 
 const UND_BAG_KEY = 'soiree_und_wordbag_v1';
 
+// feedback.js a laissé place au module Sound (js/core/audio.js) : on suit la convention
+// des autres jeux, avec un retour haptique en plus — à une table bruyante, la vibration
+// passe là où le son se perd.
+function undFeedback(sound, pattern){
+  Sound.play(sound);
+  if(pattern && navigator.vibrate) navigator.vibrate(pattern);
+}
+
 /* ---------- Setup ---------- */
 
 function underdicateurSetup(){
@@ -42,6 +50,7 @@ document.getElementById('und-name-field').addEventListener('keydown', function(e
       und.players.push({ name:val, role:'citoyen', word:'', alive:true, dict:false });
       e.target.value = '';
       undRenderChips();
+      Sound.play('tick');
     }
   }
 });
@@ -356,7 +365,7 @@ function undResolveDictAction(){
       '<div class="und-drink">boit 3 gorgées</div>';
     document.getElementById('und-footer').innerHTML =
       '<button class="btn btn-primary" onclick="undRenderVote()">Passer au vote</button>';
-    vibrate([40,40,40]);
+    undFeedback('powerConfirm', [40,40,40]);
     return;
   }
 
@@ -380,7 +389,7 @@ function undResolveDictAction(){
     '<div class="und-sub" style="margin-top:8px;">Le Dictateur en boit 1. Pas de vote ce tour.</div>';
   document.getElementById('und-footer').innerHTML =
     '<button class="btn btn-primary" onclick="undAfterElimination('+act.target+')">Révéler son rôle</button>';
-  vibrate([80,50,120]);
+  undFeedback('gong', [80,50,120]);
 }
 
 /* ---------- Vote ---------- */
@@ -411,7 +420,7 @@ function undVote(idx){
       '<div class="und-sub" style="margin-top:8px;">Le Dictateur veillait. Personne ne quitte la table — et tout le groupe boit 1 gorgée de dépit.</div>';
     document.getElementById('und-footer').innerHTML =
       '<button class="btn btn-primary" onclick="undNextRound()">Manche suivante</button>';
-    vibrate([30,30,30,30,60]);
+    undFeedback('success', [30,30,30,30,60]);
     return;
   }
 
@@ -452,7 +461,7 @@ function undAfterElimination(idx){
     '<div class="und-drink">'+(wrong
       ? 'Mauvaise pioche. Tous les Citoyens boivent 1 gorgée.'
       : 'Bien vu. '+p.name+' boit 2 gorgées.')+'</div>';
-  vibrate(wrong ? [120] : [40,40,40]);
+  undFeedback(wrong ? 'fail' : 'success', wrong ? [120] : [40,40,40]);
 
   const win = undCheckWin();
   document.getElementById('und-footer').innerHTML = win
@@ -479,7 +488,7 @@ function undGuess(skipped){
     '<div class="und-h1" style="color:var(--clay);">Raté</div>'+
     (raw.trim() ? '<div class="und-sub" style="margin-top:8px;">« '+raw.trim()+' », ce n&rsquo;était pas ça.</div>' : '')+
     '<div class="und-drink">Mister White quitte la table et boit 3 gorgées.</div>';
-  vibrate([120]);
+  undFeedback('fail', [120]);
 
   const win = undCheckWin();
   document.getElementById('und-footer').innerHTML = win
@@ -547,5 +556,5 @@ function undEnd(winner){
   document.getElementById('und-footer').innerHTML =
     '<button class="btn btn-ghost" style="flex:1;" onclick="underdicateurSetup()">Nouveaux joueurs</button>'+
     '<button class="btn btn-primary" style="flex:2;" onclick="undDealRoles()">Rejouer</button>';
-  vibrate([60,40,60,40,140]);
+  undFeedback('win', [60,40,60,40,140]);
 }

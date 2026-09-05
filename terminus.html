@@ -20,9 +20,12 @@
 <link rel="stylesheet" href="css/games/dice.css">
 <link rel="stylesheet" href="css/games/pof.css">
 <link rel="stylesheet" href="css/games/underdicateur.css">
+<link rel="stylesheet" href="css/games/pilliers.css">
 </head>
 <body>
 <div id="frame">
+
+  <button id="sound-toggle-btn" onclick="Sound.toggle()">🔊</button>
 
   <div class="screen active" id="screen-home">
     <div class="home-content">
@@ -49,8 +52,6 @@
         <div class="home-links">
           <span onclick="openHistoryScreen()">Historique</span>
           <span onclick="openCustomScreen()">Mes ajouts</span>
-          <span class="feedback-toggle-sound" onclick="toggleFeedbackPref('sound')">Son</span>
-          <span class="feedback-toggle-vibration" onclick="toggleFeedbackPref('vibration')">Vibration</span>
           <span class="sober-mode-toggle" onclick="toggleSoberMode()">Sans alcool</span>
         </div>
       </div>
@@ -435,6 +436,37 @@
     <div class="palm-footer" id="und-footer"></div>
   </div>
 
+  <!-- Les Pilliers Setup -->
+  <div class="screen" id="screen-pilliers-setup">
+    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
+    <h2 style="font-size:22px;">Combien êtes-vous ?</h2>
+    <div class="step-sub" style="margin-bottom:16px;">De 3 à 20 joueurs — un seul téléphone au centre</div>
+    <div id="pil-count-choices" class="pil-count-row"></div>
+    <div class="step-sub" id="pil-names-title" style="margin:20px 0 12px;">Qui joue ?</div>
+    <div class="field-row" style="margin-bottom:12px;">
+      <input type="text" id="pil-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
+    </div>
+    <div id="pil-chips" class="chips-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="pil-start-btn" disabled onclick="pilStartGame()">Distribuer les rôles</button>
+  </div>
+
+  <!-- Les Pilliers Game -->
+  <div class="screen" id="screen-pilliers">
+    <div class="palm-header">
+      <div>
+        <div class="back-link" onclick="pilQuit()" style="font-size:13px;">✕ Quitter</div>
+        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <div class="palm-badges" id="pil-header"></div>
+        <div class="badge" onclick="showRulesOverlay('pilliers')" style="cursor:pointer;">?</div>
+      </div>
+    </div>
+    <div class="palm-body" id="pil-body"></div>
+    <div class="palm-footer" id="pil-footer"></div>
+  </div>
+
   <!-- Partage de configuration (lien + QR code) -->
   <div class="screen scroll-screen" id="screen-share">
     <div class="topnav"><div class="back-link" onclick="goTo('setup')">← Retour</div></div>
@@ -517,10 +549,10 @@
 <script src="js/data/games-catalog.js"></script>
 <script src="js/data/underdicateur-words.js"></script>
 <script src="js/core/state.js"></script>
+<script src="js/core/audio.js"></script>
 <script src="js/core/navigation.js"></script>
 <script src="js/core/setup-wizard.js"></script>
 <script src="js/core/custom-content.js"></script>
-<script src="js/core/feedback.js"></script>
 <script src="js/core/sober-mode.js"></script>
 <script src="js/core/session-engine.js"></script>
 <script src="js/core/persistence.js"></script>
@@ -538,12 +570,12 @@
 <script src="js/games/pof.js"></script>
 <script src="js/games/des.js"></script>
 <script src="js/games/underdicateur.js"></script>
+<script src="js/games/pilliers.js"></script>
 <script>
   // Initialisation au chargement : applique un lien de config partagé s'il y en a un
   // (prioritaire), sinon propose de reprendre une soirée interrompue. Restaure aussi
   // les préférences visuelles/sonores persistées.
   applyTvModeClass();
-  renderFeedbackToggles();
   renderSoberModeToggle();
   const hadSharedConfig = applySharedConfigFromUrl();
   if(!hadSharedConfig) checkForResumableSession();

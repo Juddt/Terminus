@@ -79,7 +79,8 @@ function openGameDetail(id){
   const playWrap = document.getElementById('gd-play-wrap');
   if(g.interactive){
     playWrap.classList.remove('hidden');
-    playWrap.innerHTML = '<button class="btn btn-primary" onclick="'+g.launchFn+'()" style="width:100%;">Jouer sur l\'app</button>';
+    playWrap.innerHTML = '<button class="btn btn-primary" onclick="'+g.launchFn+'()" style="width:100%;">Jouer en local (passation)</button>'+
+      (g.onlineUrl ? '<button class="btn btn-ghost" onclick="window.open(\''+g.onlineUrl+'\',\'_blank\')" style="width:100%;margin-top:10px;">Jouer en ligne (un téléphone par joueur)</button>' : '');
   } else {
     playWrap.classList.add('hidden');
     playWrap.innerHTML = '';
