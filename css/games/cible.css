@@ -9,7 +9,7 @@
 .cible-ring.z2{width:220px; height:220px; border-color:#C9AF4B;}
 .cible-ring.z3{width:110px; height:110px; border-color:var(--accent);}
 .cible-ring.z4{width:48px; height:48px; border-color:var(--clay); background:rgba(163,80,58,0.08);}
-.cc{position:absolute; border-radius:5px; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; transform:translate(-50%,-50%); transition:transform 0.12s; font-family:'Fraunces',serif; flex-direction:column; line-height:1.1;}
+.cc{position:absolute; border-radius:5px; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; transform:translate(-50%,-50%); transition:transform 0.12s; font-family:var(--font); font-weight:800; letter-spacing:-0.02em; flex-direction:column; line-height:1.1;}
 .cc:active{transform:translate(-50%,-50%) scale(0.9);}
 .cc.z1{width:34px; height:48px; font-size:14px; background:rgba(138,154,126,0.2); border:1px solid rgba(138,154,126,0.5);}
 .cc.z2{width:38px; height:54px; font-size:15px; background:rgba(201,175,75,0.15); border:1px solid rgba(201,175,75,0.5);}
@@ -18,11 +18,11 @@
 .cc.revealed{cursor:default; opacity:0.7;}
 .cc.revealed.red-card{background:#f6f1e7; color:#a82020; border-color:rgba(0,0,0,0.15); opacity:0.8; box-shadow:0 2px 6px rgba(0,0,0,0.3);}
 .cc.revealed.black-card{background:#f6f1e7; color:#1a1a1a; border-color:rgba(0,0,0,0.15); opacity:0.8; box-shadow:0 2px 6px rgba(0,0,0,0.3);}
-.cc .cc-sip{font-size:6px; color:var(--text-faint); font-family:'Inter',sans-serif; font-weight:400;}
+.cc .cc-sip{font-size:6px; color:var(--text-faint); font-family:var(--font); font-weight:400;}
 .cc .cc-val{font-size:inherit; line-height:1;}
 .cc .cc-suit{font-size:0.6em;}
-.sip-pot{font-family:'Fraunces',serif; font-size:42px; color:var(--accent); font-weight:600; text-align:center; line-height:1;}
+.sip-pot{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:42px; color:var(--accent); font-weight:600; text-align:center; line-height:1;}
 .sip-pot-label{font-size:11px; color:var(--text-faint); text-align:center; margin-bottom:2px;}
-.cible-question{font-family:'Fraunces',serif; font-size:18px; color:var(--text); text-align:center; margin-top:6px;}
-.cible-result{font-family:'Fraunces',serif; font-size:18px; text-align:center; margin-top:4px;}
+.cible-question{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:18px; color:var(--text); text-align:center; margin-top:6px;}
+.cible-result{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:18px; text-align:center; margin-top:4px;}
 .cible-special{font-size:12px; color:var(--accent); text-align:center; margin-top:4px;}

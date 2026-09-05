@@ -135,37 +135,74 @@ terminus.html (532 lignes, structure HTML)
 
 ## Identité visuelle
 
-### Direction artistique
-- **Premium minimaliste** : Apple × Notion × Spotify × Linear × Airbnb
-- **PAS** de gaming, néon, dégradé flashy, RGB, cartoon
-- Dark warm (pas froid) : bois sombre, cuir, bar à cocktails
+### Le point de départ : ce téléphone n'est pas tenu en main
 
-### Palette actuelle (CSS variables)
+Il est posé à plat au centre d'une table, lu par 4 à 12 personnes à 1 ou 2 mètres, dans
+le noir, à l'envers pour la moitié d'entre elles, par des gens qui boivent. C'est de la
+**signalétique**, pas une interface de poche — et c'est ce constat qui décide tout le
+reste. L'ancienne charte était une belle app tenue en main : le mot « DÉFI », la donnée
+la plus importante de l'écran, y était composé en 11 px, et le minuteur qui gouverne
+chaque défi tenait dans un anneau de 40 px relégué en bas de page.
+
+### Trois partis pris
+
+**1. Le champ de couleur est le message.** Chaque type de moment prend tout l'écran avec
+sa couleur : avant d'avoir lu un mot, la table sait ce qu'elle doit faire. C'est le seul
+ornement de l'app — tout le reste a été retiré pour lui laisser la place. Ce ne sont pas
+des humeurs, c'est une consigne :
+
+| Champ | Couleur | Ce que la table doit faire |
+|---|---|---|
+| Défi | `#B23A26` vermillon | une personne agit, maintenant |
+| Mini-jeu | `#9A6512` ocre | tout le monde joue |
+| Vote | `#1B5745` vert bouteille | le groupe tranche |
+| Nouvelle règle | `#28357C` outremer | ça vaut pour toute la soirée |
+| Spécial / climax | `#8C1D13` puis papier inversé | tout le monde boit |
+| Moment | `#16161D` encre | respiration, rien d'urgent |
+
+**2. Une seule famille de caractères.** Archivo, déclinée en trois registres —
+instruction (800, ~31-40 px), libellé (700, capitales, interlettrage 0,26 em), méta (600,
+11-12 px). Les systèmes de signalétique fonctionnent comme ça. Fraunces + Inter ont été
+retirées : un serif à fort contraste perd ses détails à deux mètres, et Inter est le
+choix par défaut de toutes les interfaces.
+
+**3. L'échelle vise 1,50 m.** L'ancien « mode grand écran » optionnel est devenu la
+taille par défaut ; le mode grand écran vise désormais une télé ou un vidéoprojecteur.
+
+### Palette
+
 ```css
---bg: #17120f
---surface: #2a231e
---accent: #b8814a / #c99a67
---text: #f4ece2
---sage: #8A9A7E (succès)
---clay: #A3503A (erreur)
+--ink:#0E0E12       /* sol neutre : navigation, listes, réglages */
+--ink-2:#16161D     /* surface posée sur le sol */
+--ink-3:#20202A     /* surface enfoncée : champs de saisie */
+--paper:#F4F2ED     /* texte, et remplissage des boutons */
+--accent:#E0A63C    /* laiton : chiffres et mises en avant */
+--sage:#83A96D      /* réussite */
+--clay:#C4533C      /* échec */
 ```
 
+Les anciens noms (`--bg`, `--surface`, `--text`…) sont conservés comme alias : ils sont
+employés ~290 fois dans les 9 jeux, les repointer propage la charte d'un coup plutôt que
+de réécrire chaque fichier.
+
+### Ce qui a été retiré
+
+- Les coins très arrondis (16-20 px) — désormais 3-4 px, ou rien
+- Les bordures sur les cartes : des filets et des rangs réglés à la place
+- Les neuf gros boutons pleins du catalogue : la ligne entière lance le jeu
+- Les pastilles d'avatar sur l'écran de jeu — un emoji ne survit pas à deux mètres, le
+  prénom en capitales oui. Les avatars restent là où on les regarde de près : composition
+  de l'équipe et résultats de fin.
+
+### Écriture
+
+Les intitulés disent ce que l'app fait, pas comment le mode s'appelle en interne :
+« Mode rapide » est devenu « Elle mène la soirée », « Mode jeux » « Vous choisissez ».
+
 ### Cartes à jouer
-- **Réalistes** : fond crème `#f6f1e7`, rouge `#a82020`, noir `#1a1a1a`
-- Ombre portée `box-shadow: 0 8px 20px rgba(0,0,0,0.4)`
-- Pas de cartes stylisées/néon
 
-### Typographie
-- Display : Fraunces (serif)
-- Body : Inter (sans-serif)
-- Contenu de jeu lisible à 1-2 mètres (25-32px)
-
-### Boutons et surfaces
-- Boutons : border-radius 16px
-- Game cards : border-radius 18px
-- Mode cards : border-radius 20px
-- Badges : pills 20px, fond translucide sans bordure
-- Stat cards : surface `#2a231e`, radius 18px
+Inchangées, et volontairement : crème `#F4F2ED`, rouge `#B01F1F`, noir `#14141A`, ombre
+portée. Une carte doit ressembler à une carte.
 
 ## Navigation
 
@@ -353,10 +390,10 @@ et une vraie réponse 503 en repli. `CACHE_NAME` en v8.
 - Phase 1.1 : UnderDicateur implémenté (moteur, 200 paires de mots, catalogue, précache)
 - Phase 1.4 : contenu Mode Rapide porté à 447 items + fenêtres d'intensité (Chaos = tier 2 pur)
 - Phase 2.1 : revue de code — 5 défauts corrigés (XSS lien de partage, fuites de timer, localStorage, SW)
+- Phase 2.2 : refonte complète de la charte — signalétique de table, champs de couleur par moment, Archivo
 - Toutes les features PWA + persistance + historique + avatars + partage
 
 ### 🔨 À faire
-- **Phase 2.2** : appliquer la DA minimaliste aux écrans récents (historique, récap, partage, mes ajouts)
 - **Phase 3** : test réel en soirée + conformité légale (18+, avertissements alcool)
 
 ### Prochaines phases (post-MVP)

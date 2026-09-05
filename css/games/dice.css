@@ -2,8 +2,8 @@
 .die .pip{width:100%; height:100%; border-radius:50%; background:transparent;}
 .die .pip.on{background:#1a1a1a;}
 .die-wrap{display:flex; flex-direction:column; align-items:center; gap:8px;}
-.die-name{font-family:'Fraunces',serif; font-size:18px; color:var(--text);}
-.die-vs{font-family:'Fraunces',serif; font-size:24px; color:rgba(244,236,226,0.3); margin:0 16px;}
+.die-name{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:18px; color:var(--text);}
+.die-vs{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:24px; color:rgba(244,242,237,0.3); margin:0 16px;}
 @keyframes dieRoll{
   0%{transform:rotate(0deg) scale(1)}
   10%{transform:rotate(20deg) scale(0.85)}

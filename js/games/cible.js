@@ -206,7 +206,7 @@ function cibleGuess(answer){
       '<div class="card-val">'+card.value+'</div>'+
       '<div class="card-suit" style="font-size:14px;">'+card.suit+'</div>'+
     '</div>'+
-    '<div style="font-family:Fraunces,serif;font-size:28px;color:'+(correct?'var(--sage)':'var(--clay)')+';">'+resultTitle+'</div>'+
+    '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:28px;color:'+(correct?'var(--sage)':'var(--clay)')+';">'+resultTitle+'</div>'+
     '<div style="font-size:14px;color:var(--text-dim);">'+resultSub+'</div>'+
     (special ? '<div class="cible-special">'+special+'</div>' : '');
 

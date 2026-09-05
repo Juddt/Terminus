@@ -2,21 +2,21 @@
    Tout passe par #und-body, donc les blocs sont pensés pour s'empiler dans la
    colonne centrée de .palm-body sans largeur fixe. */
 
-.und-h1{font-family:'Fraunces',serif; font-size:24px; color:var(--text); line-height:1.2;}
+.und-h1{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:24px; color:var(--text); line-height:1.2;}
 .und-sub{font-size:13px; color:var(--text-dim); line-height:1.45; max-width:300px;}
 .und-pass{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim);}
 
 /* Composition + réglages */
 .und-compo{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:14px 0 22px;}
-.und-compo span{background:rgba(244,236,226,0.06); border-radius:20px; padding:8px 14px; font-size:12px; color:var(--text-dim);}
-.und-compo b{font-family:'Fraunces',serif; font-size:15px; color:var(--accent); margin-right:4px;}
+.und-compo span{background:rgba(244,242,237,0.06); border-radius:20px; padding:8px 14px; font-size:12px; color:var(--text-dim);}
+.und-compo b{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:15px; color:var(--accent); margin-right:4px;}
 .und-opts{width:100%; max-width:340px; display:flex; flex-direction:column; gap:10px;}
 .und-opt{display:flex; align-items:center; gap:14px; text-align:left; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; cursor:pointer;}
 .und-opt.on{border-color:var(--accent);}
 .und-opt-txt{flex:1;}
 .und-opt-txt h4{font-size:15px; color:var(--text); margin:0 0 4px;}
 .und-opt-txt p{font-size:11px; color:var(--text-dim); margin:0; line-height:1.4;}
-.und-switch{width:38px; height:22px; border-radius:20px; background:rgba(244,236,226,0.12); position:relative; flex-shrink:0; transition:background 0.18s;}
+.und-switch{width:38px; height:22px; border-radius:20px; background:rgba(244,242,237,0.12); position:relative; flex-shrink:0; transition:background 0.18s;}
 .und-switch::after{content:''; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:var(--text-dim); transition:transform 0.18s, background 0.18s;}
 .und-switch.on{background:rgba(184,129,74,0.35);}
 .und-switch.on::after{transform:translateX(16px); background:var(--accent);}
@@ -24,14 +24,14 @@
 /* Carte de rôle */
 .und-role{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim);}
 .und-role.white{color:var(--accent);}
-.und-word{font-family:'Fraunces',serif; font-size:38px; font-weight:600; color:var(--accent); line-height:1.1; margin:6px 0 12px; max-width:320px;}
+.und-word{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:38px; font-weight:600; color:var(--accent); line-height:1.1; margin:6px 0 12px; max-width:320px;}
 .und-word.none{color:var(--text-faint); font-size:26px; font-style:italic;}
-.und-dict-tag{margin-top:16px; background:rgba(184,129,74,0.14); border:1px solid rgba(184,129,74,0.4); border-radius:14px; padding:12px 16px; font-size:12px; color:#c99a67; line-height:1.45; max-width:300px;}
+.und-dict-tag{margin-top:16px; background:rgba(184,129,74,0.14); border:1px solid rgba(184,129,74,0.4); border-radius:14px; padding:12px 16px; font-size:12px; color:#E0A63C; line-height:1.45; max-width:300px;}
 
 /* Tour de table */
 .und-order{width:100%; max-width:300px; display:flex; flex-direction:column; gap:6px;}
 .und-turn{display:flex; align-items:center; gap:12px; background:var(--surface); border-radius:12px; padding:11px 16px; font-size:15px; color:var(--text); text-align:left;}
-.und-turn-n{font-family:'Fraunces',serif; font-size:12px; color:var(--accent); width:16px; flex-shrink:0;}
+.und-turn-n{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:12px; color:var(--accent); width:16px; flex-shrink:0;}
 
 /* Pouvoirs du Dictateur */
 .und-powers{width:100%; max-width:340px; display:flex; flex-direction:column; gap:10px; margin-top:16px;}
@@ -45,7 +45,7 @@
 .und-target{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 18px; font-size:16px; color:var(--text); cursor:pointer; text-align:left;}
 .und-target:active{border-color:var(--accent);}
 
-.und-drink{font-family:'Fraunces',serif; font-size:18px; color:var(--text); line-height:1.35; margin-top:14px; max-width:300px;}
+.und-drink{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:18px; color:var(--text); line-height:1.35; margin-top:14px; max-width:300px;}
 
 /* Révélation de rôle */
 .und-reveal{font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:8px; padding:7px 16px; border-radius:20px; display:inline-block;}
@@ -54,15 +54,15 @@
 .und-reveal.white{background:rgba(184,129,74,0.16); color:var(--accent);}
 
 /* Fin de partie */
-.und-win{font-family:'Fraunces',serif; font-size:28px; font-weight:600; line-height:1.15;}
+.und-win{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:28px; font-weight:600; line-height:1.15;}
 .und-words{display:flex; gap:10px; margin:18px 0 14px; flex-wrap:wrap; justify-content:center;}
-.und-words div{background:var(--surface); border-radius:14px; padding:12px 18px; font-family:'Fraunces',serif; font-size:17px; color:var(--text);}
-.und-words small{display:block; font-family:'Inter',sans-serif; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px;}
+.und-words div{background:var(--surface); border-radius:14px; padding:12px 18px; font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:17px; color:var(--text);}
+.und-words small{display:block; font-family:var(--font); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px;}
 .und-roster{width:100%; max-width:320px; display:flex; flex-direction:column; gap:5px;}
-.und-row{display:flex; justify-content:space-between; align-items:center; gap:10px; background:rgba(244,236,226,0.04); border-radius:10px; padding:9px 14px; font-size:14px;}
+.und-row{display:flex; justify-content:space-between; align-items:center; gap:10px; background:rgba(244,242,237,0.04); border-radius:10px; padding:9px 14px; font-size:14px;}
 .und-row.out{opacity:0.45;}
 .und-row-name{color:var(--text); text-align:left;}
-.und-crown{font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#c99a67;}
+.und-crown{font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#E0A63C;}
 .und-row-role{font-size:11px; letter-spacing:1px; text-transform:uppercase;}
 .und-row-role.citoyen{color:var(--sage);}
 .und-row-role.undercover{color:var(--clay);}

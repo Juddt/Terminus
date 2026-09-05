@@ -16,5 +16,5 @@
 .balance-cursor.hit{background:var(--sage);}
 .balance-cursor.miss{background:var(--clay);}
 .balance-card-float{transition:transform 0.05s linear;}
-.palm-collapse{font-family:'Fraunces',serif; font-size:32px; color:var(--clay); animation:shake 0.4s ease-in-out;}
+.palm-collapse{font-family:var(--font); font-weight:800; letter-spacing:-0.02em; font-size:32px; color:var(--clay); animation:shake 0.4s ease-in-out;}
 @keyframes shake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}}

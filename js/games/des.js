@@ -98,13 +98,13 @@ function desRoll(){
       body.innerHTML =
         '<div style="display:flex;align-items:center;justify-content:center;">'+
           '<div class="die-wrap"><div class="die-name">'+des.players[0]+'</div>'+desDieHTML(d1,false)+
-            '<div style="font-family:Fraunces,serif;font-size:28px;margin-top:6px;">'+d1+'</div></div>'+
+            '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:28px;margin-top:6px;">'+d1+'</div></div>'+
           '<div class="die-vs">=</div>'+
           '<div class="die-wrap"><div class="die-name">'+des.players[1]+'</div>'+desDieHTML(d2,false)+
-            '<div style="font-family:Fraunces,serif;font-size:28px;margin-top:6px;">'+d2+'</div></div>'+
+            '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:28px;margin-top:6px;">'+d2+'</div></div>'+
         '</div>'+
-        '<div style="font-family:Fraunces,serif;font-size:24px;color:var(--accent);margin-top:16px;">Égalité !</div>'+
-        '<div style="font-size:14px;color:rgba(244,236,226,0.5);margin-top:6px;">On relance...</div>';
+        '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:24px;color:var(--accent);margin-top:16px;">Égalité !</div>'+
+        '<div style="font-size:14px;color:rgba(244,242,237,0.5);margin-top:6px;">On relance...</div>';
       if(navigator.vibrate) navigator.vibrate([40,30,40,30,40]);
       Sound.play('tick');
       setTimeout(()=> desRoll(), 1200);
@@ -117,13 +117,13 @@ function desRoll(){
     body.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:center;">'+
         '<div class="die-wrap"><div class="die-name" style="color:'+(loser===0?'var(--clay)':'var(--sage)')+';">'+des.players[0]+'</div>'+desDieHTML(d1,false)+
-          '<div style="font-family:Fraunces,serif;font-size:28px;margin-top:6px;">'+d1+'</div></div>'+
+          '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:28px;margin-top:6px;">'+d1+'</div></div>'+
         '<div class="die-vs">×</div>'+
         '<div class="die-wrap"><div class="die-name" style="color:'+(loser===1?'var(--clay)':'var(--sage)')+';">'+des.players[1]+'</div>'+desDieHTML(d2,false)+
-          '<div style="font-family:Fraunces,serif;font-size:28px;margin-top:6px;">'+d2+'</div></div>'+
+          '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:28px;margin-top:6px;">'+d2+'</div></div>'+
       '</div>'+
-      '<div style="font-family:Fraunces,serif;font-size:28px;color:var(--clay);margin-top:20px;">'+des.players[loser]+' perd</div>'+
-      '<div style="font-family:Fraunces,serif;font-size:22px;color:var(--text);margin-top:8px;">'+product+' gorgée'+(product>1?'s':'')+'</div>';
+      '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:28px;color:var(--clay);margin-top:20px;">'+des.players[loser]+' perd</div>'+
+      '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:22px;color:var(--text);margin-top:8px;">'+product+' gorgée'+(product>1?'s':'')+'</div>';
 
     if(navigator.vibrate) navigator.vibrate([80,40,80]);
     Sound.play('win');
