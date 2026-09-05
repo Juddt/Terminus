@@ -167,25 +167,7 @@ function advanceQueue(){
   }
 }
 
-// Chaque type de moment peint tout l'écran de sa couleur. C'est la seule
-// signalétique qui fonctionne à deux mètres : la table sait ce qu'elle doit faire
-// avant d'avoir lu un mot. Voir --f-* dans base.css.
-const ITEM_FIELDS = {
-  'Défi':'field-defi',
-  'Mini-jeu':'field-jeu',
-  'Vote':'field-vote',
-  'Nouvelle règle':'field-regle',
-  'Moment':'field-calme',
-};
-
-function applyItemField(eyebrow){
-  const screen = document.getElementById('screen-main');
-  screen.classList.remove('field-defi','field-jeu','field-vote','field-regle','field-calme');
-  screen.classList.add(ITEM_FIELDS[eyebrow] || 'field-calme');
-}
-
 function renderItem(eyebrow, text, players, seconds){
-  applyItemField(eyebrow);
   document.getElementById('item-eyebrow').textContent = eyebrow;
   document.getElementById('item-text').textContent = soberize(text);
   const tagsWrap = document.getElementById('item-players');

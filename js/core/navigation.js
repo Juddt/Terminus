@@ -21,15 +21,14 @@ function renderGamesList(){
   filtered.forEach(g=>{
     const card = document.createElement('div');
     card.className = 'game-card';
-    // La ligne entière lance le jeu. L'ancienne version posait un gros bouton plein
-    // par jeu : neuf boutons empilés saturaient l'écran et on ne voyait que quatre
-    // jeux à la fois. « Règles » reste accessible, en second plan.
-    if(g.interactive) card.setAttribute('onclick', g.launchFn+'()');
     card.innerHTML = '<div class="game-name">'+g.name+'</div>'+
       '<div class="game-meta"><span>'+g.joueurs+'</span><span>'+g.duree+'</span>'+
         (g.category ? '<span>'+g.category+'</span>' : '')+
         (g.difficulty ? '<span class="game-difficulty game-difficulty-'+(DIFFICULTY_SLUGS[g.difficulty]||'')+'">'+g.difficulty+'</span>' : '')+
-        '<span class="game-rules-link" onclick="event.stopPropagation();openGameDetail(\''+g.id+'\')">Règles</span>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;margin-top:10px;">'+
+        (g.interactive ? '<button class="btn btn-primary" style="flex:2;padding:12px;" onclick="event.stopPropagation();'+g.launchFn+'()">Jouer</button>' : '')+
+        '<button class="btn btn-ghost" style="flex:1;padding:12px;" onclick="event.stopPropagation();openGameDetail(\''+g.id+'\')">Règles</button>'+
       '</div>';
     wrap.appendChild(card);
   });

@@ -4,7 +4,7 @@
 // bloqués sur une vieille version jusqu'à un rechargement supplémentaire après chaque
 // mise à jour — gênant tant que l'app change encore souvent. Bumper CACHE_NAME force
 // quand même le remplacement complet du cache au prochain déploiement.
-const CACHE_NAME = 'soiree-cache-v9';
+const CACHE_NAME = 'soiree-cache-v8';
 
 const PRECACHE_URLS = [
   './terminus.html',

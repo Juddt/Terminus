@@ -85,7 +85,6 @@ function resumeSession(){
   renderChallengeCounter();
 
   if(state.lastItem){
-    applyItemField(state.lastItem.eyebrow);
     document.getElementById('item-eyebrow').textContent = state.lastItem.eyebrow;
     document.getElementById('item-text').textContent = soberize(state.lastItem.text);
     const tagsWrap = document.getElementById('item-players');

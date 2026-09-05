@@ -64,7 +64,7 @@ function purpleUpdateHeader(){
 function purpleCardHTML(card){
   const red = palmIsRed(card.suit);
   return '<div style="width:52px;height:74px;background:#f6f1e7;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">'+
-    '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-weight:600;font-size:18px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.value+'</div>'+
+    '<div style="font-family:Fraunces,serif;font-weight:600;font-size:18px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.value+'</div>'+
     '<div style="font-size:14px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.suit+'</div>'+
   '</div>';
 }
@@ -94,14 +94,14 @@ function purpleShowTurn(){
   body.innerHTML =
     potHTML+
     '<div class="palm-player-big" style="font-size:26px;">'+purplePlayer()+'</div>'+
-    '<div style="font-size:14px;color:rgba(244,242,237,0.5);margin-top:4px;">Fais ta prédiction</div>'+
+    '<div style="font-size:14px;color:rgba(244,236,226,0.5);margin-top:4px;">Fais ta prédiction</div>'+
     lastCardsHTML;
 
   footer.innerHTML =
     '<div style="display:flex;flex-direction:column;gap:8px;width:100%;">'+
       '<div style="display:flex;gap:8px;">'+
         '<button class="btn btn-primary" onclick="purpleGuess(\'rouge\')" style="flex:1;background:#a82020;color:#fff;padding:16px;">Rouge</button>'+
-        '<button class="btn btn-primary" onclick="purpleGuess(\'noir\')" style="flex:1;background:#1a1a1a;color:#fff;padding:16px;border:1px solid rgba(244,242,237,0.2);">Noir</button>'+
+        '<button class="btn btn-primary" onclick="purpleGuess(\'noir\')" style="flex:1;background:#1a1a1a;color:#fff;padding:16px;border:1px solid rgba(244,236,226,0.2);">Noir</button>'+
         '<button class="btn btn-primary" onclick="purpleGuess(\'purple\')" style="flex:1;background:#7B2D8E;color:#fff;padding:16px;">Purple</button>'+
       '</div>'+
       '<div style="display:flex;gap:8px;">'+
@@ -162,8 +162,8 @@ function purpleGuess(choice){
 
   body.innerHTML =
     cardsHTML+
-    '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:30px;color:'+(correct?'var(--sage)':'var(--clay)')+';margin-top:16px;">'+resultTitle+'</div>'+
-    '<div style="font-size:15px;color:rgba(244,242,237,0.6);margin-top:6px;">'+resultSub+'</div>';
+    '<div style="font-family:Fraunces,serif;font-size:30px;color:'+(correct?'var(--sage)':'var(--clay)')+';margin-top:16px;">'+resultTitle+'</div>'+
+    '<div style="font-size:15px;color:rgba(244,236,226,0.6);margin-top:6px;">'+resultSub+'</div>';
 
   purple.currentIdx++;
   purpleUpdateHeader();
@@ -176,8 +176,8 @@ function purpleEndGame(){
   const footer = document.getElementById('purple-footer');
 
   body.innerHTML =
-    '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:26px;color:var(--text);">Partie terminée</div>'+
-    '<div style="font-size:14px;color:rgba(244,242,237,0.5);margin-top:8px;">Plus assez de cartes dans le paquet</div>';
+    '<div style="font-family:Fraunces,serif;font-size:26px;color:var(--text);">Partie terminée</div>'+
+    '<div style="font-size:14px;color:rgba(244,236,226,0.5);margin-top:8px;">Plus assez de cartes dans le paquet</div>';
 
   footer.innerHTML =
     '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>'+

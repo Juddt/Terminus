@@ -490,7 +490,7 @@ function pilEndGame(winner){
   });
   roster += '</div>';
   document.getElementById('pil-body').innerHTML =
-    '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:26px;color:var(--accent);">'+label+'</div>'+
+    '<div style="font-family:Fraunces,serif;font-size:26px;color:var(--accent);">'+label+'</div>'+
     roster+
     '<div class="creators-counter">🥂 '+creatorsGlasses+' verre'+(creatorsGlasses>1?'s':'')+' pour les créateurs</div>';
   document.getElementById('pil-footer').innerHTML =

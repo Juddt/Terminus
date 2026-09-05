@@ -6,16 +6,16 @@
 
 const RECAP_W = 1080, RECAP_H = 1350;
 
-// Charge Archivo avant de dessiner, sinon le premier rendu tombe sur la
+// Charge la police Fraunces avant de dessiner, sinon le premier rendu tombe sur la
 // police système par défaut (le canvas ne réutilise pas automatiquement les fonts
 // CSS tant qu'elles ne sont pas signalées "prêtes" par la Font Loading API).
 async function ensureRecapFontsLoaded(){
   if(!document.fonts || !document.fonts.load) return;
   try{
     await Promise.all([
-      document.fonts.load('800 64px Archivo'),
-      document.fonts.load('800 32px Archivo'),
-      document.fonts.load('600 28px Archivo'),
+      document.fonts.load('600 64px Fraunces'),
+      document.fonts.load('500 32px Fraunces'),
+      document.fonts.load('500 28px Inter'),
     ]);
   }catch(e){
     // Tant pis, le canvas retombera sur la police système par défaut du navigateur.
@@ -24,8 +24,8 @@ async function ensureRecapFontsLoaded(){
 
 function drawRecapBackground(ctx){
   const grad = ctx.createRadialGradient(RECAP_W*0.7, RECAP_H*0.15, 50, RECAP_W*0.5, RECAP_H*0.4, RECAP_W*0.9);
-  grad.addColorStop(0, '#B23A26');
-  grad.addColorStop(1, '#0E0E12');
+  grad.addColorStop(0, '#3a2412');
+  grad.addColorStop(1, '#17120f');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, RECAP_W, RECAP_H);
 }
@@ -35,12 +35,12 @@ function drawRecapRow(ctx, y, icon, label, value, accentColor){
   ctx.font = '44px serif';
   ctx.fillText(icon, 80, y);
 
-  ctx.font = '600 22px Archivo, sans-serif';
-  ctx.fillStyle = 'rgba(244,242,237,0.55)';
+  ctx.font = '500 22px Inter, sans-serif';
+  ctx.fillStyle = 'rgba(244,236,226,0.5)';
   ctx.fillText(label.toUpperCase(), 150, y - 16);
 
-  ctx.font = '800 34px Archivo, sans-serif';
-  ctx.fillStyle = accentColor || '#F4F2ED';
+  ctx.font = '600 34px Fraunces, serif';
+  ctx.fillStyle = accentColor || '#f4ece2';
   ctx.fillText(value, 150, y + 22);
 }
 
@@ -57,11 +57,11 @@ async function buildRecapCanvas(podium, stats, durationMin){
   drawRecapBackground(ctx);
 
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#F4F2ED';
-  ctx.font = '800 76px Archivo, sans-serif';
+  ctx.fillStyle = '#f4ece2';
+  ctx.font = '600 76px Fraunces, serif';
   ctx.fillText('SOIRÉE', RECAP_W/2, 160);
-  ctx.font = '600 26px Archivo, sans-serif';
-  ctx.fillStyle = '#E0A63C';
+  ctx.font = '500 26px Inter, sans-serif';
+  ctx.fillStyle = '#c99a67';
   ctx.letterSpacing = '4px';
   ctx.fillText('LE RÉCAP DE LA SOIRÉE', RECAP_W/2, 210);
   ctx.letterSpacing = '0px';
@@ -71,21 +71,21 @@ async function buildRecapCanvas(podium, stats, durationMin){
     ctx.textAlign = 'center';
     ctx.font = '80px serif';
     ctx.fillText('🏆', RECAP_W/2, y);
-    ctx.font = '600 24px Archivo, sans-serif';
-    ctx.fillStyle = 'rgba(244,242,237,0.55)';
+    ctx.font = '500 24px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(244,236,226,0.5)';
     ctx.fillText('MVP DE LA SOIRÉE', RECAP_W/2, y + 50);
-    ctx.font = '800 56px Archivo, sans-serif';
-    ctx.fillStyle = '#F4F2ED';
+    ctx.font = '600 56px Fraunces, serif';
+    ctx.fillStyle = '#f4ece2';
     ctx.fillText((podium.mvp.avatar||'') + ' ' + podium.mvp.name, RECAP_W/2, y + 110);
 
     y += 190;
     ctx.font = '60px serif';
     ctx.fillText('😌', RECAP_W/2, y);
-    ctx.font = '600 22px Archivo, sans-serif';
-    ctx.fillStyle = 'rgba(244,242,237,0.55)';
+    ctx.font = '500 22px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(244,236,226,0.5)';
     ctx.fillText('LE PLUS TRANQUILLE', RECAP_W/2, y + 42);
-    ctx.font = '800 42px Archivo, sans-serif';
-    ctx.fillStyle = '#F4F2ED';
+    ctx.font = '600 42px Fraunces, serif';
+    ctx.fillStyle = '#f4ece2';
     ctx.fillText((podium.chill.avatar||'') + ' ' + podium.chill.name, RECAP_W/2, y + 92);
     y += 160;
   } else {
@@ -93,7 +93,7 @@ async function buildRecapCanvas(podium, stats, durationMin){
   }
 
   // Séparateur discret
-  ctx.strokeStyle = 'rgba(244,242,237,0.14)';
+  ctx.strokeStyle = 'rgba(244,236,226,0.14)';
   ctx.beginPath();
   ctx.moveTo(120, y);
   ctx.lineTo(RECAP_W-120, y);
@@ -110,7 +110,7 @@ async function buildRecapCanvas(podium, stats, durationMin){
 
   ctx.textAlign = 'center';
   ctx.font = '500 20px Inter, sans-serif';
-  ctx.fillStyle = 'rgba(244,242,237,0.4)';
+  ctx.fillStyle = 'rgba(244,236,226,0.4)';
   ctx.fillText('Généré avec l\'app Soirée', RECAP_W/2, RECAP_H - 50);
 
   return canvas;

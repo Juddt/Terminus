@@ -264,7 +264,7 @@ function palmCardPlaced(){
   const footer = document.getElementById('palm-footer');
 
   body.innerHTML =
-    '<div style="color:var(--sage); font-size:18px; font-family:var(--font);font-weight:800;letter-spacing:-0.02em;">✓ Posée</div>'+
+    '<div style="color:var(--sage); font-size:18px; font-family:Fraunces,serif;">✓ Posée</div>'+
     palmTreeHTML();
 
   palm.currentIdx++;
@@ -282,7 +282,7 @@ function palmCollapse(){
 
   body.innerHTML =
     '<div class="palm-collapse">💥</div>'+
-    '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em; font-size:22px; color:var(--clay);">Effondrement !</div>'+
+    '<div style="font-family:Fraunces,serif; font-size:22px; color:var(--clay);">Effondrement !</div>'+
     '<div class="palm-rule-line">'+palmPlayer()+' boit '+penalty+'</div>'+
     '<div class="palm-kings-left">'+palm.collapseCount+'/5 chutes</div>';
 
@@ -312,7 +312,7 @@ function palmEndGame(){
   }
 
   body.innerHTML =
-    '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em; font-size:24px; color:var(--text);">'+(won?'Bravo !':'Perdu !')+'</div>'+
+    '<div style="font-family:Fraunces,serif; font-size:24px; color:var(--text);">'+(won?'Bravo !':'Perdu !')+'</div>'+
     '<div class="palm-rule-line" style="font-size:13px; line-height:2;">'+
       palm.drawnCards.length+' cartes · '+palm.kingsDrawn+' Rois<br>'+
       palm.collapseCount+' effondrement'+(palm.collapseCount!==1?'s':'')+'<br>'+

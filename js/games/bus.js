@@ -22,7 +22,7 @@ function busCardHTML(card, hidden){
   if(hidden) return '<div style="width:56px;height:80px;background:var(--surface);border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text-faint);">?</div>';
   const red = palmIsRed(card.suit);
   return '<div style="width:56px;height:80px;background:#f6f1e7;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;">'+
-    '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-weight:600;font-size:18px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.value+'</div>'+
+    '<div style="font-family:Fraunces,serif;font-weight:600;font-size:18px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.value+'</div>'+
     '<div style="font-size:14px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.suit+'</div>'+
   '</div>';
 }
@@ -202,7 +202,7 @@ function busShowResults(){
   document.getElementById('bus-header-info').textContent = 'Résultats';
 
   body.innerHTML =
-    '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em; font-size:22px; color:var(--text);">Résultats</div>'+
+    '<div style="font-family:Fraunces,serif; font-size:22px; color:var(--text);">Résultats</div>'+
     scoreHTML+
     '<div class="palm-rule-line" style="color:var(--clay); margin-top:8px;">'+worst+' monte dans le bus !</div>';
 

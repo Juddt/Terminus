@@ -61,22 +61,22 @@ function pmuShowBet(){
 
   body.innerHTML =
     '<div class="palm-player-big" style="font-size:26px;">'+p.name+'</div>'+
-    '<div style="font-size:14px;color:rgba(244,242,237,0.5);margin-top:6px;">Choisis ton cheval</div>'+
+    '<div style="font-size:14px;color:rgba(244,236,226,0.5);margin-top:6px;">Choisis ton cheval</div>'+
     '<div style="display:flex;gap:10px;margin-top:20px;">'+
       PMU_SUITS.map(s=>{
         const red = s==='♥'||s==='♦';
         const sel = p.horse===s;
         return '<div onclick="pmuSelectHorse(\''+s+'\')" style="cursor:pointer;width:60px;height:84px;background:'+(sel?'#f6f1e7':'var(--surface)')+';border-radius:8px;border:2px solid '+(sel?'var(--accent)':'var(--line)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:'+(sel?'0 4px 12px rgba(0,0,0,0.4)':'none')+';">'+
-          '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-weight:600;font-size:16px;color:'+(sel?(red?'#a82020':'#1a1a1a'):'var(--text-dim)')+';">As</div>'+
+          '<div style="font-family:Fraunces,serif;font-weight:600;font-size:16px;color:'+(sel?(red?'#a82020':'#1a1a1a'):'var(--text-dim)')+';">As</div>'+
           '<div style="font-size:22px;color:'+(sel?(red?'#a82020':'#1a1a1a'):'var(--text-faint)')+';">'+s+'</div>'+
         '</div>';
       }).join('')+
     '</div>'+
-    '<div style="margin-top:20px;font-size:14px;color:rgba(244,242,237,0.5);">Mise : combien de gorgées ?</div>'+
+    '<div style="margin-top:20px;font-size:14px;color:rgba(244,236,226,0.5);">Mise : combien de gorgées ?</div>'+
     '<div style="display:flex;gap:8px;margin-top:10px;">'+
       [1,2,3,4,5].map(n=>{
         const sel = p.bet===n;
-        return '<div onclick="pmuSelectBet('+n+')" style="cursor:pointer;width:44px;height:44px;border-radius:10px;background:'+(sel?'var(--accent)':'var(--surface)')+';border:1px solid '+(sel?'var(--accent)':'var(--line)')+';display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;color:'+(sel?'#12121A':'var(--text)')+';">'+n+'</div>';
+        return '<div onclick="pmuSelectBet('+n+')" style="cursor:pointer;width:44px;height:44px;border-radius:10px;background:'+(sel?'var(--accent)':'var(--surface)')+';border:1px solid '+(sel?'var(--accent)':'var(--line)')+';display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;color:'+(sel?'#251c13':'var(--text)')+';">'+n+'</div>';
       }).join('')+
     '</div>';
 
@@ -132,9 +132,9 @@ function pmuRenderRace(){
   if(pmu.currentCard){
     const red = palmIsRed(pmu.currentCard.suit);
     lastHTML = '<div class="pmu-lastcard">'+
-      '<div style="font-size:13px;color:rgba(244,242,237,0.5);">Dernière carte :</div>'+
+      '<div style="font-size:13px;color:rgba(244,236,226,0.5);">Dernière carte :</div>'+
       '<div style="width:36px;height:50px;background:#f6f1e7;border-radius:5px;box-shadow:0 3px 8px rgba(0,0,0,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;">'+
-        '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-weight:600;font-size:14px;color:'+(red?'#a82020':'#1a1a1a')+';">'+pmu.currentCard.value+'</div>'+
+        '<div style="font-family:Fraunces,serif;font-weight:600;font-size:14px;color:'+(red?'#a82020':'#1a1a1a')+';">'+pmu.currentCard.value+'</div>'+
         '<div style="font-size:12px;color:'+(red?'#a82020':'#1a1a1a')+';">'+pmu.currentCard.suit+'</div>'+
       '</div>'+
     '</div>';
@@ -162,14 +162,14 @@ function pmuRenderRace(){
   });
 
   // Obstacles row
-  trackHTML += '<div class="pmu-row"><div class="pmu-label" style="font-size:10px;color:rgba(244,242,237,0.3);">⚡</div>';
+  trackHTML += '<div class="pmu-row"><div class="pmu-label" style="font-size:10px;color:rgba(244,236,226,0.3);">⚡</div>';
   for(let col=0; col<=FINISH; col++){
     if(col>=1 && col<=7){
       const obs = pmu.obstacles[col-1];
       const flipped = obs.flipped;
       if(flipped){
         const red = palmIsRed(obs.suit);
-        trackHTML += '<div class="pmu-cell obstacle flipped"><span style="font-size:9px;color:'+(red?'#a82020':'rgba(244,242,237,0.6)')+';">'+obs.value+obs.suit+'</span></div>';
+        trackHTML += '<div class="pmu-cell obstacle flipped"><span style="font-size:9px;color:'+(red?'#a82020':'rgba(244,236,226,0.6)')+';">'+obs.value+obs.suit+'</span></div>';
       } else {
         trackHTML += '<div class="pmu-cell obstacle"><span style="font-size:8px;">?</span></div>';
       }
@@ -193,7 +193,7 @@ function pmuRenderRace(){
     const winners = pmu.players.filter(p=>p.horse===winSuit);
     const losers = pmu.players.filter(p=>p.horse!==winSuit);
 
-    let resultHTML = '<div style="font-family:var(--font);font-weight:800;letter-spacing:-0.02em;font-size:24px;color:var(--text);text-align:center;margin-top:10px;">'+winSuit+' gagne !</div>';
+    let resultHTML = '<div style="font-family:Fraunces,serif;font-size:24px;color:var(--text);text-align:center;margin-top:10px;">'+winSuit+' gagne !</div>';
     if(winners.length>0) resultHTML += '<div style="font-size:13px;color:var(--sage);text-align:center;margin-top:6px;">'+winners.map(p=>p.name+' distribue '+(p.bet*2)).join(', ')+' gorgées</div>';
     if(losers.length>0) resultHTML += '<div style="font-size:13px;color:var(--clay);text-align:center;margin-top:4px;">'+losers.map(p=>p.name+' boit '+p.bet).join(', ')+' gorgée'+(losers.some(p=>p.bet>1)?'s':'')+'</div>';
     body.innerHTML += resultHTML;

@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Soirée</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0E0E12">
+<meta name="theme-color" content="#17120f">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;450;600;650;700;750;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/games-shared.css">
@@ -32,31 +32,32 @@
       <div id="resume-banner" class="resume-banner hidden">
         <div id="resume-banner-text">Soirée en cours</div>
         <div style="display:flex; gap:8px;">
-          <button class="btn btn-primary" style="padding:12px 18px;" onclick="resumeSession()">Reprendre</button>
-          <button class="btn btn-ghost" style="padding:12px 18px;" onclick="dismissResumableSession()">Ignorer</button>
+          <button class="btn btn-primary" style="padding:10px 16px;" onclick="resumeSession()">Reprendre</button>
+          <button class="btn btn-ghost" style="padding:10px 16px;" onclick="dismissResumableSession()">Ignorer</button>
         </div>
       </div>
-      <div class="home-head">
-        <div class="hero-title">SOIR&Eacute;E</div>
-        <div class="hero-tag">Ce soir, personne ne g&egrave;re</div>
+      <div style="display:flex; flex-direction:column; align-items:center;">
+        <div class="hero-title">SOIRÉE</div>
+        <div class="hero-tag">Ce soir, personne ne gère</div>
       </div>
-      <button class="mode-card primary" onclick="goTo('setup')">
-        <div class="mode-title">Elle m&egrave;ne la soir&eacute;e</div>
-        <div class="mode-desc">D&eacute;fis, votes et r&egrave;gles s&rsquo;encha&icirc;nent tout seuls</div>
-      </button>
-      <button class="mode-card" onclick="openGamesList()">
-        <div class="mode-title">Vous choisissez</div>
-        <div class="mode-desc">Neuf jeux &agrave; lancer un par un</div>
-      </button>
-      <div class="home-links">
-        <span onclick="openHistoryScreen()">Historique</span>
-        <span onclick="openCustomScreen()">Mes ajouts</span>
-        <span class="sober-mode-toggle" onclick="toggleSoberMode()">Sans alcool</span>
+      <div style="width:100%;">
+        <button class="mode-card primary" onclick="goTo('setup')">
+          <div class="mode-title">Mode rapide</div>
+          <div class="mode-desc">L'app pilote toute la soirée</div>
+        </button>
+        <button class="mode-card" onclick="openGamesList()">
+          <div class="mode-title">Mode jeux</div>
+          <div class="mode-desc">Les classiques, un par un</div>
+        </button>
+        <div class="home-links">
+          <span onclick="openHistoryScreen()">Historique</span>
+          <span onclick="openCustomScreen()">Mes ajouts</span>
+          <span class="sober-mode-toggle" onclick="toggleSoberMode()">Sans alcool</span>
+        </div>
       </div>
+      <div></div>
     </div>
   </div>
-
-
 
   <div class="screen" id="screen-setup">
     <div class="progress" id="setup-progress"><div></div><div></div><div></div><div></div></div>
@@ -122,7 +123,7 @@
       <div id="challenge-counter" class="challenge-counter"></div>
     </div>
     <div class="main-body">
-      <div class="item-eyebrow" id="item-eyebrow">Défi</div>
+      <div class="item-eyebrow" id="item-eyebrow" style="color:var(--accent);">Défi</div>
       <div class="item-text" id="item-text">—</div>
       <div class="player-tags" id="item-players"></div>
     </div>
@@ -169,7 +170,7 @@
   <div class="screen scroll-screen" id="screen-games-list">
     <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
     <h2 style="font-size:20px; margin-bottom:4px;">Les classiques</h2>
-    <div class="step-sub" style="margin-bottom:16px;">Touche un jeu pour le lancer</div>
+    <div class="step-sub" style="margin-bottom:16px;">Choisis un jeu, lis les règles, lance la partie</div>
     <div id="games-filter-wrap" class="games-filter-wrap"></div>
     <div id="games-list-wrap"></div>
   </div>
@@ -535,7 +536,7 @@
   <div id="rules-overlay" class="rules-overlay hidden" onclick="closeRulesOverlay()">
     <div class="rules-modal" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-size:19px;font-weight:750;letter-spacing:-0.02em;">Règles</div>
+        <div style="font-family:Fraunces,serif;font-size:18px;">Règles</div>
         <div style="cursor:pointer;color:var(--text-dim);font-size:18px;" onclick="closeRulesOverlay()">✕</div>
       </div>
       <div id="rules-overlay-content"></div>
