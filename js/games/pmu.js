@@ -35,7 +35,7 @@ function pmuRenderChips(){
   pmu.players.forEach((p,i)=>{
     const chip=document.createElement('div');
     chip.className='chip';
-    chip.innerHTML=p.name+'<span class="x" onclick="pmuRemovePlayer('+i+')">×</span>';
+    chip.innerHTML=escapeHtml(p.name)+'<span class="x" onclick="pmuRemovePlayer('+i+')">×</span>';
     wrap.appendChild(chip);
   });
   document.getElementById('pmu-start-btn').disabled = pmu.players.length < 2;

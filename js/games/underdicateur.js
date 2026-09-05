@@ -61,7 +61,7 @@ function undRenderChips(){
   und.players.forEach(function(p,i){
     const chip = document.createElement('div');
     chip.className = 'chip';
-    chip.innerHTML = p.name + '<span class="x" onclick="undRemovePlayer('+i+')">&times;</span>';
+    chip.innerHTML = escapeHtml(p.name) + '<span class="x" onclick="undRemovePlayer('+i+')">&times;</span>';
     wrap.appendChild(chip);
   });
   document.getElementById('und-start-btn').disabled = und.players.length < 4;

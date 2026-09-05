@@ -55,7 +55,7 @@ function busRenderChips(){
   bus.players.forEach((name,i)=>{
     const chip=document.createElement('div');
     chip.className='chip';
-    chip.innerHTML=name+'<span class="x" onclick="busRemovePlayer('+i+')">×</span>';
+    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="busRemovePlayer('+i+')">×</span>';
     wrap.appendChild(chip);
   });
   document.getElementById('bus-start-btn').disabled = bus.players.length < 2;

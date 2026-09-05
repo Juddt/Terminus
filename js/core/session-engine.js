@@ -63,6 +63,10 @@ function launchSession(){
 function startMainLoop(){
   goTo('main');
   document.getElementById('global-fill').style.width = '100%';
+  // Toujours couper l'intervalle précédent : sinon un double appel (double-tap sur
+  // « Reprendre ») en laisse deux en vie et l'horloge tourne deux fois trop vite, sans
+  // que clearInterval(state.globalInterval) puisse rattraper l'orphelin.
+  clearInterval(state.globalInterval);
   state.globalInterval = setInterval(tickGlobal, 1000);
   advanceQueue();
 }
@@ -171,7 +175,7 @@ function renderItem(eyebrow, text, players, seconds){
   players.forEach(p=>{
     const tag = document.createElement('div');
     tag.className = 'player-tag';
-    tag.innerHTML = '<span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+p.name;
+    tag.innerHTML = '<span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+escapeHtml(p.name);
     tagsWrap.appendChild(tag);
   });
   // Sauvegardé pour la reprise de session (persistence.js) : permet de réafficher
@@ -268,7 +272,7 @@ function renderRulesBanner(){
   state.activeRules.forEach(r=>{
     const pill = document.createElement('div');
     pill.className = 'rule-pill';
-    pill.innerHTML = '<span class="ic">·</span>' + soberize(r);
+    pill.innerHTML = '<span class="ic">·</span>' + escapeHtml(soberize(r));
     wrap.appendChild(pill);
   });
 }
@@ -327,14 +331,14 @@ function renderTargetPodium(){
   const mvpCard = document.createElement('div');
   mvpCard.className = 'podium-card podium-mvp';
   mvpCard.innerHTML = '<div class="podium-icon">🏆</div><div><div class="stat-label">MVP DE LA SOIRÉE</div>'+
-    '<div class="podium-name"><span class="avatar-badge avatar-badge-sm" style="background:'+podium.mvp.color+'">'+(podium.mvp.avatar||'')+'</span>'+podium.mvp.name+'</div></div>'+
+    '<div class="podium-name"><span class="avatar-badge avatar-badge-sm" style="background:'+podium.mvp.color+'">'+(podium.mvp.avatar||'')+'</span>'+escapeHtml(podium.mvp.name)+'</div></div>'+
     '<div class="podium-count">'+podium.mvp.count+'</div>';
   wrap.appendChild(mvpCard);
 
   const chillCard = document.createElement('div');
   chillCard.className = 'podium-card podium-chill';
   chillCard.innerHTML = '<div class="podium-icon">😌</div><div><div class="stat-label">LE PLUS TRANQUILLE</div>'+
-    '<div class="podium-name"><span class="avatar-badge avatar-badge-sm" style="background:'+podium.chill.color+'">'+(podium.chill.avatar||'')+'</span>'+podium.chill.name+'</div></div>'+
+    '<div class="podium-name"><span class="avatar-badge avatar-badge-sm" style="background:'+podium.chill.color+'">'+(podium.chill.avatar||'')+'</span>'+escapeHtml(podium.chill.name)+'</div></div>'+
     '<div class="podium-count">'+podium.chill.count+'</div>';
   wrap.appendChild(chillCard);
 }
@@ -356,7 +360,7 @@ function renderPlayerResults(){
     const drinks = state.stats.playerDrinks[p.name] || 0;
     const row = document.createElement('div');
     row.className = 'player-result-row';
-    row.innerHTML = '<div class="player-result-name"><span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+p.name+'</div>'+
+    row.innerHTML = '<div class="player-result-name"><span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+escapeHtml(p.name)+'</div>'+
       '<div class="player-result-stats"><span>'+c.done+' défi'+(c.done!==1?'s':'')+'</span><span>'+drinks+' verre'+(drinks!==1?'s':'')+'</span></div>';
     wrap.appendChild(row);
   });

@@ -36,7 +36,7 @@ function purpleRenderChips(){
   purple.players.forEach((name,i)=>{
     const chip=document.createElement('div');
     chip.className='chip';
-    chip.innerHTML=name+'<span class="x" onclick="purpleRemovePlayer('+i+')">×</span>';
+    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="purpleRemovePlayer('+i+')">×</span>';
     wrap.appendChild(chip);
   });
   document.getElementById('purple-start-btn').disabled = purple.players.length < 2;

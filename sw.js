@@ -4,7 +4,7 @@
 // bloqués sur une vieille version jusqu'à un rechargement supplémentaire après chaque
 // mise à jour — gênant tant que l'app change encore souvent. Bumper CACHE_NAME force
 // quand même le remplacement complet du cache au prochain déploiement.
-const CACHE_NAME = 'soiree-cache-v7';
+const CACHE_NAME = 'soiree-cache-v8';
 
 const PRECACHE_URLS = [
   './terminus.html',
@@ -75,9 +75,21 @@ self.addEventListener('fetch', (event)=>{
 
   event.respondWith(
     fetch(event.request).then(response=>{
-      const clone = response.clone();
-      caches.open(CACHE_NAME).then(cache=> cache.put(event.request, clone));
+      // Ne mettre en cache que les réponses valides. Sans ce test, un 404 ou un 502
+      // servi pendant un déploiement était mémorisé et redevenait la version « hors
+      // ligne » de la ressource, indéfiniment.
+      if(response && response.ok){
+        const clone = response.clone();
+        // waitUntil : l'écriture doit survivre à la fin du handler, sinon le navigateur
+        // peut arrêter le service worker avant qu'elle n'aboutisse.
+        event.waitUntil(caches.open(CACHE_NAME).then(cache=> cache.put(event.request, clone)));
+      }
       return response;
-    }).catch(()=> caches.match(event.request))
+    }).catch(()=> caches.match(event.request).then(hit=>
+      // respondWith(undefined) lève : on renvoie une vraie réponse quand la ressource
+      // n'a jamais été mise en cache et qu'on est hors ligne.
+      hit || new Response('Hors ligne', {status:503, statusText:'Hors ligne',
+        headers:{'Content-Type':'text/plain; charset=utf-8'}})
+    ))
   );
 });

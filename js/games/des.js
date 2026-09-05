@@ -27,7 +27,7 @@ function desRenderChips(){
   des.players.forEach((name,i)=>{
     const chip=document.createElement('div');
     chip.className='chip';
-    chip.innerHTML=name+'<span class="x" onclick="desRemovePlayer('+i+')">×</span>';
+    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="desRemovePlayer('+i+')">×</span>';
     wrap.appendChild(chip);
   });
   document.getElementById('des-start-btn').disabled = des.players.length !== 2;

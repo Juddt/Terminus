@@ -40,7 +40,7 @@ function palmRenderSetupChips(){
   palm.players.forEach((name,i)=>{
     const chip=document.createElement('div');
     chip.className='chip';
-    chip.innerHTML=name+'<span class="x" onclick="palmRemovePlayer('+i+')">×</span>';
+    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="palmRemovePlayer('+i+')">×</span>';
     wrap.appendChild(chip);
   });
   document.getElementById('palm-start-btn').disabled = palm.players.length < 2;
@@ -330,3 +330,10 @@ function palmierQuit(){
   if(palm.balInterval) clearInterval(palm.balInterval);
   goTo('games-list');
 }
+
+// Le bouton « Accueil » de l'en-tête appelle goTo() directement, sans passer par
+// palmierQuit() : sans ce nettoyage, la boucle de balance (16 ms) continuait à tourner
+// pour le reste de la soirée.
+registerScreenCleanup('palmier', function(){
+  if(palm.balInterval) clearInterval(palm.balInterval);
+});

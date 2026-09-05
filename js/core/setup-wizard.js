@@ -37,7 +37,7 @@ function renderChips(){
     chip.className = 'chip';
     // L'avatar est cliquable pour changer d'emoji (voir cycleChipAvatar) ; stopPropagation
     // évite de déclencher un clic parasite sur le chip lui-même.
-    chip.innerHTML = '<span class="avatar-badge" style="background:'+p.color+'" onclick="event.stopPropagation();cycleChipAvatar('+idx+')">'+(p.avatar||'')+'</span>' + p.name + '<span class="x" onclick="removePlayer('+idx+')">×</span>';
+    chip.innerHTML = '<span class="avatar-badge" style="background:'+p.color+'" onclick="event.stopPropagation();cycleChipAvatar('+idx+')">'+(p.avatar||'')+'</span>' + escapeHtml(p.name) + '<span class="x" onclick="removePlayer('+idx+')">×</span>';
     wrap.appendChild(chip);
   });
   const remaining = state.playerCount - state.players.length;

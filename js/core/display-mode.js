@@ -6,7 +6,7 @@
 const TV_MODE_KEY = 'soiree_tv_mode_v1';
 
 function isTvModeOn(){
-  return localStorage.getItem(TV_MODE_KEY) === '1';
+  try{ return localStorage.getItem(TV_MODE_KEY) === '1'; }catch(e){ return false; }
 }
 
 function applyTvModeClass(){
@@ -16,7 +16,9 @@ function applyTvModeClass(){
 
 async function toggleTvMode(){
   const next = !isTvModeOn();
-  localStorage.setItem(TV_MODE_KEY, next ? '1' : '0');
+  // Sans garde, l'exception coupait applyTvModeClass() juste en dessous et le bouton
+  // paraissait mort en navigation privée.
+  try{ localStorage.setItem(TV_MODE_KEY, next ? '1' : '0'); }catch(e){}
   applyTvModeClass();
 
   try{

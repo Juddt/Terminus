@@ -92,7 +92,7 @@ function resumeSession(){
     (state.lastItem.players||[]).forEach(p=>{
       const tag = document.createElement('div');
       tag.className = 'player-tag';
-      tag.innerHTML = '<span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+p.name;
+      tag.innerHTML = '<span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+escapeHtml(p.name);
       tagsWrap.appendChild(tag);
     });
     renderMainFooter(state.lastItem.eyebrow === 'Défi');
@@ -100,6 +100,7 @@ function resumeSession(){
 
   // Reprend le minuteur de la manche là où il s'est arrêté, plutôt que d'en relancer un neuf.
   resumeRingFrom(state.ringTotal, state.ringLeft);
+  clearInterval(state.globalInterval);
   state.globalInterval = setInterval(tickGlobal, 1000);
   saveSessionSnapshot();
 }

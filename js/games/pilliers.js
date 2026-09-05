@@ -99,7 +99,7 @@ function pilRenderChips(){
   pil.players.forEach((name,i)=>{
     const chip=document.createElement('div');
     chip.className='chip';
-    chip.innerHTML=name+'<span class="x" onclick="pilRemovePlayer('+i+')">×</span>';
+    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="pilRemovePlayer('+i+')">×</span>';
     wrap.appendChild(chip);
   });
   document.getElementById('pil-start-btn').disabled = pil.players.length !== pil.count;
@@ -150,7 +150,7 @@ function pilRevealStep(){
   body.innerHTML =
     '<div class="pil-pass-card">Passe le téléphone à</div>'+
     '<div class="pil-pass-name">'+p.name+'</div>';
-  footer.innerHTML = '<button class="btn btn-primary" onclick="pilRevealShow()">Je suis '+p.name+', voir mon rôle</button>';
+  footer.innerHTML = '<button class="btn btn-primary" onclick="pilRevealShow()">Je suis '+escapeHtml(p.name)+', voir mon rôle</button>';
 }
 
 function pilRevealShow(){
@@ -504,3 +504,9 @@ function pilQuit(){
   Sound.ambiance(false);
   goTo('games-list');
 }
+
+// Idem : le bouton « Accueil » contourne pilQuit(), qui est le seul à couper le minuteur
+// de débat.
+registerScreenCleanup('pilliers', function(){
+  if(pil.dayInterval) clearInterval(pil.dayInterval);
+});

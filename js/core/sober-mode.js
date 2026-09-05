@@ -43,11 +43,11 @@ const SOBER_REPLACEMENTS = [
 ];
 
 function isSoberModeOn(){
-  return localStorage.getItem(SOBER_MODE_KEY) === '1';
+  try{ return localStorage.getItem(SOBER_MODE_KEY) === '1'; }catch(e){ return false; }
 }
 
 function toggleSoberMode(){
-  localStorage.setItem(SOBER_MODE_KEY, isSoberModeOn() ? '0' : '1');
+  try{ localStorage.setItem(SOBER_MODE_KEY, isSoberModeOn() ? '0' : '1'); }catch(e){}
   document.querySelectorAll('.sober-mode-toggle').forEach(el=> el.classList.toggle('active', isSoberModeOn()));
 }
 

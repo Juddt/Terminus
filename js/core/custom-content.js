@@ -69,7 +69,7 @@ function renderCustomContentList(){
     const row = document.createElement('div');
     row.className = 'chip';
     row.style.width = '100%';
-    row.innerHTML = '<span style="flex:1;">'+r.text+'</span><span class="x" onclick="removeCustomItem(\'rules\','+idx+')">×</span>';
+    row.innerHTML = '<span style="flex:1;">'+escapeHtml(r.text)+'</span><span class="x" onclick="removeCustomItem(\'rules\','+idx+')">×</span>';
     rulesWrap.appendChild(row);
   });
 
@@ -82,7 +82,7 @@ function renderCustomContentList(){
     const row = document.createElement('div');
     row.className = 'chip';
     row.style.width = '100%';
-    row.innerHTML = '<span style="flex:1;">'+c.text+'</span><span class="x" onclick="removeCustomItem(\'challenges\','+idx+')">×</span>';
+    row.innerHTML = '<span style="flex:1;">'+escapeHtml(c.text)+'</span><span class="x" onclick="removeCustomItem(\'challenges\','+idx+')">×</span>';
     challWrap.appendChild(row);
   });
 }

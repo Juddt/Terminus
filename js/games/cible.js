@@ -29,7 +29,7 @@ function cibleRenderChips(){
   cible.players.forEach((name,i)=>{
     const chip=document.createElement('div');
     chip.className='chip';
-    chip.innerHTML=name+'<span class="x" onclick="cibleRemovePlayer('+i+')">×</span>';
+    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="cibleRemovePlayer('+i+')">×</span>';
     wrap.appendChild(chip);
   });
   document.getElementById('cible-start-btn').disabled = cible.players.length < 2;

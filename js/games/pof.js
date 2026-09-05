@@ -30,7 +30,7 @@ function pofRenderChips(){
   pof.players.forEach((name,i)=>{
     const chip=document.createElement('div');
     chip.className='chip';
-    chip.innerHTML=name+'<span class="x" onclick="pofRemovePlayer('+i+')">×</span>';
+    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="pofRemovePlayer('+i+')">×</span>';
     wrap.appendChild(chip);
   });
   document.getElementById('pof-start-btn').disabled = pof.players.length < 2;

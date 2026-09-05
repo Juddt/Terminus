@@ -1,7 +1,10 @@
 /* Lightweight synthesized sound effects (Web Audio API, no audio files needed) */
 const Sound = (function(){
   let ctx = null;
-  let muted = localStorage.getItem('terminus_sound_muted') === 'true';
+  // localStorage jette (pas seulement renvoie null) en navigation privée iOS : sans
+  // garde, le module entier échouait au chargement et plus aucun son ne fonctionnait.
+  let muted = false;
+  try{ muted = localStorage.getItem('terminus_sound_muted') === 'true'; }catch(e){}
 
   function getCtx(){
     if(!ctx){
@@ -130,7 +133,7 @@ const Sound = (function(){
 
   function setMuted(v){
     muted = v;
-    localStorage.setItem('terminus_sound_muted', muted ? 'true' : 'false');
+    try{ localStorage.setItem('terminus_sound_muted', muted ? 'true' : 'false'); }catch(e){}
     if(muted) stopAmbiance();
     updateToggleUI();
   }

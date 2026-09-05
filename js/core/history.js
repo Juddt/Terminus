@@ -90,7 +90,7 @@ function renderHallOfFame(history){
   const medals = ['🥇','🥈','🥉'];
   const rows = ranking.map((r, i)=>
     '<div class="stat-card" style="padding:14px 22px;">'+
-      '<div class="stat-label">'+(medals[i]||'#'+(i+1))+' '+r.name+'</div>'+
+      '<div class="stat-label">'+(medals[i]||'#'+(i+1))+' '+escapeHtml(r.name)+'</div>'+
       '<div class="stat-value">'+r.count+'&times; MVP</div>'+
     '</div>'
   ).join('');

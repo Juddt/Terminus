@@ -82,7 +82,17 @@ function applySharedConfigFromUrl(){
   const cfg = decodeShareConfig(payload);
   if(!cfg || !Array.isArray(cfg.n) || !cfg.n.length) return false;
 
-  state.players = cfg.n.map((name, idx)=>({
+  // Le payload vient d'une URL : n'importe qui peut en fabriquer une et l'envoyer. On ne
+  // fait donc jamais confiance à son contenu — coercition en chaîne, longueur et nombre
+  // de joueurs bornés, entrées vides écartées. L'échappement à l'affichage (escapeHtml)
+  // est la seconde ligne de défense, pas la seule.
+  const noms = cfg.n
+    .map(n=> String(n == null ? '' : n).trim().slice(0, 24))
+    .filter(Boolean)
+    .slice(0, 12);
+  if(!noms.length) return false;
+
+  state.players = noms.map((name, idx)=>({
     name,
     color: PLAYER_COLORS[idx % PLAYER_COLORS.length],
     avatar: PLAYER_AVATARS[idx % PLAYER_AVATARS.length]

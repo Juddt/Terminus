@@ -282,6 +282,69 @@ au-delà de la soirée.
   donne « fait un gage une point de gage ». Les 447 items ont été passés au filtre.
 - Recettes par durée : 10/20/30/45/60 min (voir `RECIPES`).
 
+## Revue de code (phase 2.1)
+
+Cinq défauts trouvés et corrigés. Trois ont été reproduits dans le navigateur avant
+correctif, puis re-testés après.
+
+### 1. Exécution de script via un lien de partage — critique
+
+`applySharedConfigFromUrl()` reprenait les prénoms de `?c=<base64>` sans aucune
+validation, et `renderChips()` les concaténait dans du `innerHTML`. Un lien fabriqué
+exécutait donc du JS dans l'origine de l'app — et le lien de partage est justement fait
+pour être envoyé à des gens. L'URL étant nettoyée juste après, la victime ne voyait rien.
+
+Deux chemins de persistance existaient : le prénom du MVP part dans l'historique (Hall of
+Fame) et les règles perso sont relues depuis `localStorage`, tous deux rendus en
+`innerHTML`.
+
+**Correctif** — validation à la source (coercition en chaîne, 24 caractères et 12 joueurs
+maximum, entrées vides écartées) *et* `escapeHtml()` sur les 16 points d'insertion de
+texte utilisateur. Défense en profondeur : ni l'un ni l'autre seul.
+
+### 2. Le bouton « Accueil » d'un jeu ne coupait rien — élevé
+
+Chaque écran de jeu a deux sorties côte à côte : « Quitter » appelait bien `palmierQuit()`
+/ `pilQuit()`, « Accueil » appelait `goTo('home')` brut. La boucle de balance du Palmier
+(16 ms, soit 60 fps) continuait donc à tourner et à écrire dans le DOM jusqu'à la
+fermeture de l'onglet — sur un téléphone en soirée, c'est de la batterie pour rien.
+
+**Correctif** — `goTo()` exécute le nettoyage déclaré par l'écran qu'on quitte
+(`registerScreenCleanup`). Une seule place à tenir à jour au lieu de neuf écrans. L'écran
+de session (`main`) n'en déclare volontairement pas : `openPause()` passe par `goTo()` et
+l'horloge doit survivre à l'aller-retour.
+
+### 3. Double-tap sur « Reprendre » : horloge à 2× — élevé
+
+`resumeSession()` et `startMainLoop()` posaient un `setInterval` sans couper le précédent.
+Deux appels rapprochés faisaient tourner la soirée deux fois trop vite, et l'orphelin
+survivait à `clearInterval(state.globalInterval)` puisque seul le dernier handle était
+mémorisé — un `tickGlobal` fantôme finissait par déclencher `endSession()` depuis
+l'accueil.
+
+**Correctif** — `clearInterval` systématique avant de reposer l'intervalle.
+
+### 4. `localStorage` non protégé — moyen
+
+Trois écritures et trois lectures sans `try/catch` (`audio.js`, `display-mode.js`,
+`sober-mode.js`). En navigation privée iOS, `localStorage` *lève* au lieu de renvoyer
+`null` : l'exception coupait la suite de la fonction et les bascules son / mode TV / sans
+alcool paraissaient mortes. Pour le son, c'était le pire cas : on appuie sur muet, rien ne
+se passe et l'ambiance continue.
+
+**Correctif** — gardes sur les six accès. Les sept chemins de stockage ont été rejoués
+avec un `localStorage` qui lève systématiquement.
+
+### 5. Le service worker mémorisait les erreurs — moyen
+
+Le handler `fetch` mettait en cache *toute* réponse, sans tester `response.ok`. Un 404 ou
+un 502 servi pendant un déploiement devenait la version « hors ligne » de la ressource,
+définitivement. Et `caches.match()` renvoie `undefined` sur un miss, ce qui fait lever
+`respondWith()` au lieu d'afficher quelque chose.
+
+**Correctif** — `response.ok` avant mise en cache, `event.waitUntil` autour de l'écriture,
+et une vraie réponse 503 en repli. `CACHE_NAME` en v8.
+
 ## État du projet
 
 ### ✅ Fait (main branch)
@@ -289,10 +352,11 @@ au-delà de la soirée.
 - Phase 0.2 : validation 7/7 jeux + Mode Rapide complet (aucune régression)
 - Phase 1.1 : UnderDicateur implémenté (moteur, 200 paires de mots, catalogue, précache)
 - Phase 1.4 : contenu Mode Rapide porté à 447 items + fenêtres d'intensité (Chaos = tier 2 pur)
+- Phase 2.1 : revue de code — 5 défauts corrigés (XSS lien de partage, fuites de timer, localStorage, SW)
 - Toutes les features PWA + persistance + historique + avatars + partage
 
 ### 🔨 À faire
-- **Phase 2** : revue de code (fuites d'intervalle, race conditions) + design final
+- **Phase 2.2** : appliquer la DA minimaliste aux écrans récents (historique, récap, partage, mes ajouts)
 - **Phase 3** : test réel en soirée + conformité légale (18+, avertissements alcool)
 
 ### Prochaines phases (post-MVP)
