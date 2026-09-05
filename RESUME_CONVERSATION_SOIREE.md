@@ -16,12 +16,12 @@ terminus.html (532 lignes, structure HTML)
 │   ├── games-shared.css (styles jeux)
 │   └── games/ (CSS par jeu)
 │       ├── palmier.css, bus.css, cible.css, pmu.css, pof.css, dice.css
-│       ├── underdicateur.css
+│       ├── underdicateur.css, pilliers.css
 ├── js/
 │   ├── core/
 │   │   ├── state.js, navigation.js, setup-wizard.js, session-engine.js
 │   │   ├── persistence.js (snapshot & reprise), history.js (Hall of Fame)
-│   │   ├── custom-content.js (mode perso), feedback.js (son/vibration)
+│   │   ├── custom-content.js (mode perso), audio.js (module Sound synthétisé)
 │   │   ├── sober-mode.js (mode sans alcool), display-mode.js (mode TV)
 │   │   ├── share.js (lien + QR), recap-card.js (carte-souvenir)
 │   ├── data/
@@ -30,7 +30,7 @@ terminus.html (532 lignes, structure HTML)
 │   │   ├── underdicateur-words.js (200 paires de mots)
 │   ├── games/ (moteur par jeu)
 │   │   ├── shared-cards.js, palmier.js, bus.js, cible.js, purple.js, pmu.js, pof.js, des.js
-│   │   ├── underdicateur.js
+│   │   ├── underdicateur.js, pilliers.js
 │   ├── lib/
 │   │   └── qrcode.js (vendorisé, MIT)
 ├── manifest.json (PWA)
@@ -52,7 +52,7 @@ terminus.html (532 lignes, structure HTML)
    - Boutons Pause et Suivant toujours visibles
    - Recettes de contenu par durée (ex: 45min = 12 mini-jeux, 18 votes, 12 défis, etc.)
 
-2. **Mode Jeux** — Bibliothèque de 8 jeux interactifs + catalogue filtrable
+2. **Mode Jeux** — Bibliothèque de 9 jeux interactifs + catalogue filtrable
    - Chaque jeu : bouton "Jouer" (lance direct) + bouton "Règles" (fiche condensée)
    - Bouton "?" en jeu pour voir les règles sans quitter la partie
    - Bouton "Accueil" discret sur tous les écrans
@@ -229,14 +229,26 @@ terminus.html (532 lignes, structure HTML)
 
 ## Contenu Mode Rapide
 
-- ~48 règles (tiered 0/1/2)
-- ~40 défis (1 ou 2 joueurs ciblés)
-- ~19 mini-jeux
-- ~28 votes
-- ~18 moments légers
-- ~12 événements spéciaux
-- ~6 climax events
-- Récipes par durée : 10/20/30/45/60 min
+352 items, tous tiered 0/1/2 (Soft / Fun / Chaos) :
+
+| Type | Total | Soft (t0) | Fun (≤t1) |
+|---|---|---|---|
+| Règles | 80 | 30 | 58 |
+| Défis | 80 | 28 | 56 |
+| Votes | 80 | 36 | 60 |
+| Mini-jeux | 50 | 20 | 38 |
+| Moments légers | 36 | 14 | 28 |
+| Événements spéciaux | 26 | 10 | 20 |
+| Climax | 12 | — | — |
+
+- Recettes par durée : 10/20/30/45/60 min (voir `RECIPES` dans `content.js`)
+- **Dimensionnement** : une session de 60 min tire 80 items. Le stock est calibré pour
+  qu'elle se déroule sans une seule répétition, y compris à l'intensité Soft où seul le
+  tier 0 est disponible — c'était le point faible avant la phase 1.4 (24 votes tirés
+  dans un stock de 10, donc 2 à 3 passages par vote).
+- Les défis ciblent 1 ou 2 joueurs via `{p1}` / `{p2}`, remplis par `fillTemplate()`.
+  Les mini-jeux n'ont pas de champ `n` : le moteur déduit le nombre de joueurs à tirer
+  des marqueurs présents dans le texte.
 
 ## État du projet
 
@@ -244,11 +256,10 @@ terminus.html (532 lignes, structure HTML)
 - Phase 0.1 : merge branche jami + refonte minimaliste accueil
 - Phase 0.2 : validation 7/7 jeux + Mode Rapide complet (aucune régression)
 - Phase 1.1 : UnderDicateur implémenté (moteur, 200 paires de mots, catalogue, précache)
+- Phase 1.4 : contenu Mode Rapide porté à 352 items — plus aucune répétition sur 60 min
 - Toutes les features PWA + persistance + historique + avatars + partage
 
 ### 🔨 À faire
-- **Phase 1.4** : étoffer le contenu du Mode Rapide aux volumes de la spec
-
 - **Phase 2** : revue de code (fuites d'intervalle, race conditions) + design final
 - **Phase 3** : test réel en soirée + conformité légale (18+, avertissements alcool)
 

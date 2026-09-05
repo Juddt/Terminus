@@ -129,7 +129,11 @@ function advanceQueue(){
     renderItem('Défi', text, players, Math.round(25*speedFactor()));
   } else if(type === 'minigame'){
     const m = drawFromBag('minigame', MINIGAMES);
-    const players = m.text.includes('{p1}') ? pickPlayers(1) : [];
+    // Les mini-jeux n'ont pas de champ `n` : on déduit le nombre de joueurs à tirer des
+    // marqueurs présents dans le texte. Sans le cas {p2}, un mini-jeux à deux afficherait
+    // le marqueur brut à l'écran.
+    const needed = m.text.includes('{p2}') ? 2 : (m.text.includes('{p1}') ? 1 : 0);
+    const players = needed ? pickPlayers(needed) : [];
     const text = fillTemplate(m.text, players);
     renderItem('Mini-jeu', text, players, Math.round(m.dur*speedFactor()));
   } else if(type === 'vote'){
