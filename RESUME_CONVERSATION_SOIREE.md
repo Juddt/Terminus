@@ -345,6 +345,50 @@ définitivement. Et `caches.match()` renvoie `undefined` sur un miss, ce qui fai
 **Correctif** — `response.ok` avant mise en cache, `event.waitUntil` autour de l'écriture,
 et une vraie réponse 503 en repli. `CACHE_NAME` en v8.
 
+## Conformité légale (phase 3.1)
+
+`js/core/legal.js` · écrans `screen-age` et `screen-legal`
+
+### Barrière d'âge
+Premier écran au tout premier lancement, mémorisée dans `soiree_age_ok_v1`. Le refus
+mène à une impasse sans bouton de retour. Elle passe **avant** la config partagée et la
+reprise de soirée ; `confirmAge()` les rejoue ensuite, sinon un lien de partage ouvert au
+premier lancement perdait sa configuration.
+
+**C'est une déclaration, pas une vérification.** Rien n'empêche de recharger en répondant
+autrement. C'est le standard du secteur, pas un contrôle.
+
+### Message sanitaire
+« L'abus d'alcool est dangereux pour la santé. À consommer avec modération. »
+Formulation de l'article L3323-4 du code de la santé publique, imposée au mot près :
+elle vit dans une constante unique (`MESSAGE_SANITAIRE`) pour qu'aucune copie ne dérive.
+Affichée à trois endroits — barrière d'âge, pied des informations légales, et fin de
+soirée, le moment où le groupe a le plus bu.
+
+### Données personnelles
+Position favorable : **rien ne quitte l'appareil**. Pas de compte, pas de serveur, pas de
+mesure d'audience, pas de publicité. Les 8 clés de stockage servent uniquement au
+fonctionnement du jeu, ce qui relève de l'exemption de consentement de l'article 82 de la
+loi Informatique et Libertés — d'où l'absence de bandeau cookies, qui serait ici sans
+objet.
+
+Une exception documentée : le lien de partage encode les prénoms dans l'URL. S'il est
+envoyé, ils transitent par la messagerie utilisée.
+
+Bouton **Effacer toutes mes données** : confirmation en deux temps, supprime les 8 clés
+Soirée et rien d'autre (jamais un `localStorage.clear()`, qui emporterait ce qui ne nous
+appartient pas).
+
+### À compléter avant mise en ligne
+Cinq marqueurs `[À COMPLÉTER]` dans `LEGAL_SECTIONS` : identité de l'éditeur, directeur
+de la publication, adresse e-mail de contact (×2) et date de mise à jour. L'article 6-III
+de la LCEN les rend obligatoires pour un service en ligne accessible au public.
+
+### Réserve
+Ces textes sont une base sérieuse, pas un avis juridique. La loi Évin encadre étroitement
+tout ce qui touche à la promotion de l'alcool en France ; une relecture par un juriste est
+justifiée avant un lancement commercial ou toute campagne de communication.
+
 ## État du projet
 
 ### ✅ Fait (main branch)
@@ -353,11 +397,12 @@ et une vraie réponse 503 en repli. `CACHE_NAME` en v8.
 - Phase 1.1 : UnderDicateur implémenté (moteur, 200 paires de mots, catalogue, précache)
 - Phase 1.4 : contenu Mode Rapide porté à 447 items + fenêtres d'intensité (Chaos = tier 2 pur)
 - Phase 2.1 : revue de code — 5 défauts corrigés (XSS lien de partage, fuites de timer, localStorage, SW)
+- Phase 3.1 : barrière 18+, message sanitaire, mentions légales, confidentialité, CGU
 - Toutes les features PWA + persistance + historique + avatars + partage
 
 ### 🔨 À faire
 - **Phase 2.2** : appliquer la DA minimaliste aux écrans récents (historique, récap, partage, mes ajouts)
-- **Phase 3** : test réel en soirée + conformité légale (18+, avertissements alcool)
+- **Phase 3.3** : décision React Native / Expo vs PWA
 
 ### Prochaines phases (post-MVP)
 1. **React Native / Expo** migration (animations Reanimated/Skia, native feel)

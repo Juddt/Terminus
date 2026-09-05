@@ -58,6 +58,7 @@
           <span onclick="openHistoryScreen()">Historique</span>
           <span onclick="openCustomScreen()">Mes ajouts</span>
           <span class="sober-mode-toggle" onclick="toggleSoberMode()">Sans alcool</span>
+          <span onclick="openLegalScreen()">Infos l&eacute;gales</span>
         </div>
       </div>
       <div></div>
@@ -170,6 +171,7 @@
     <div class="spacer"></div>
     <button class="btn btn-ghost" style="margin-bottom:10px;" onclick="openRecapScreen()">Partager le récap</button>
     <button class="btn btn-primary" onclick="resetAll()">Relancer une soirée</button>
+    <div class="legal-footer" id="end-sanitaire"></div>
   </div>
 
   <div class="screen scroll-screen" id="screen-games-list">
@@ -472,6 +474,33 @@
     <div class="palm-footer" id="pil-footer"></div>
   </div>
 
+  <!-- Barrière d'âge : premier écran au tout premier lancement -->
+  <div class="screen" id="screen-age">
+    <div class="age-wrap">
+      <div id="age-body">
+        <div class="age-mark">18+</div>
+        <div class="age-title">R&eacute;serv&eacute; aux majeurs</div>
+        <div class="age-text">Soir&eacute;e propose des jeux &agrave; boire entre adultes. Pour continuer, tu dois avoir 18&nbsp;ans ou plus.</div>
+      </div>
+      <div id="age-actions" class="age-actions">
+        <button class="btn btn-primary" onclick="confirmAge()">J&rsquo;ai 18 ans ou plus</button>
+        <button class="btn btn-ghost" onclick="refuseAge()">J&rsquo;ai moins de 18 ans</button>
+      </div>
+      <div class="age-sanitaire" id="age-sanitaire"></div>
+    </div>
+  </div>
+
+  <!-- Mentions l&eacute;gales, donn&eacute;es et conditions -->
+  <div class="screen scroll-screen" id="screen-legal">
+    <div class="topnav"><div class="back-link" onclick="goTo('home')">&larr; Accueil</div></div>
+    <h2 style="font-size:22px;">Informations l&eacute;gales</h2>
+    <div class="step-sub" style="margin-bottom:24px;">&Eacute;diteur, donn&eacute;es personnelles et conditions d&rsquo;utilisation</div>
+    <div id="legal-body"></div>
+    <button class="btn btn-ghost" id="legal-erase-btn" onclick="eraseAllData()" style="margin-top:8px;">Effacer toutes mes donn&eacute;es</button>
+    <div class="step-sub" id="legal-erase-note" style="margin-top:10px;">Historique, r&egrave;gles perso, pr&eacute;f&eacute;rences et soir&eacute;e en cours.</div>
+    <div class="legal-footer" id="legal-sanitaire"></div>
+  </div>
+
   <!-- Partage de configuration (lien + QR code) -->
   <div class="screen scroll-screen" id="screen-share">
     <div class="topnav"><div class="back-link" onclick="goTo('setup')">← Retour</div></div>
@@ -563,6 +592,7 @@
 <script src="js/core/persistence.js"></script>
 <script src="js/core/history.js"></script>
 <script src="js/core/display-mode.js"></script>
+<script src="js/core/legal.js"></script>
 <script src="js/lib/qrcode.js"></script>
 <script src="js/core/share.js"></script>
 <script src="js/core/recap-card.js"></script>
@@ -582,8 +612,13 @@
   // les préférences visuelles/sonores persistées.
   applyTvModeClass();
   renderSoberModeToggle();
-  const hadSharedConfig = applySharedConfigFromUrl();
-  if(!hadSharedConfig) checkForResumableSession();
+  renderSanitaryNotices();
+  // La barrière d’âge passe avant tout : ni config partagée ni reprise de soirée
+  // ne doivent pouvoir afficher l’app à quelqu’un qui n’a pas déclaré sa majorité.
+  if(!checkAgeGate()){
+    const hadSharedConfig = applySharedConfigFromUrl();
+    if(!hadSharedConfig) checkForResumableSession();
+  }
 
   // Enregistre le service worker pour le mode hors-ligne (voir sw.js). Échoue
   // silencieusement sur file:// ou http non-localhost (contexte non sécurisé) : l'app

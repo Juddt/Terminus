@@ -190,3 +190,20 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 .palm-header{padding-right:52px;}
 .game-card .game-meta{align-items:center;}
 .game-rules-link{margin-left:auto; color:var(--text-dim); text-decoration:underline; text-underline-offset:3px; cursor:pointer;}
+
+/* --- Barrière d'âge et informations légales --------------------------------- */
+#screen-age{align-items:center; justify-content:center;}
+.age-wrap{display:flex; flex-direction:column; align-items:center; text-align:center; gap:0; max-width:340px;}
+.age-mark{font-family:'Fraunces', serif; font-size:44px; color:var(--accent); letter-spacing:1px; margin-bottom:18px;}
+.age-title{font-family:'Fraunces', serif; font-size:26px; color:var(--text); line-height:1.25; margin-bottom:14px;}
+.age-text{font-size:14px; color:var(--text-dim); line-height:1.55; margin-bottom:12px;}
+.age-actions{display:flex; flex-direction:column; gap:10px; width:100%; margin-top:22px;}
+.age-sanitaire{font-size:11px; color:var(--text-faint); line-height:1.5; margin-top:30px; letter-spacing:0.2px;}
+
+.legal-section{margin-bottom:26px;}
+.legal-h{font-family:'Fraunces', serif; font-size:17px; color:var(--accent); margin:0 0 10px;}
+.legal-p{font-size:13.5px; color:var(--text-dim); line-height:1.6; margin:0 0 12px;}
+.legal-p b{color:var(--text); font-weight:600;}
+.legal-date{font-size:12px; color:var(--text-faint);}
+.legal-footer{font-size:11px; color:var(--text-faint); line-height:1.5; text-align:center; margin:26px 0 8px;}
+.legal-erase-armed{border-color:var(--clay) !important; color:var(--clay) !important;}
