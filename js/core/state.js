@@ -8,7 +8,12 @@ let state = {
   ringTotal:10, ringLeft:10,
   paused:false, bags:{},
   climaxElapsedTarget:0, climaxFired:false,
-  stats:{ challenges:0, specials:0, rulesAdded:0, targets:{} }
+  stats:{ challenges:0, specials:0, rulesAdded:0, targets:{}, playerChallenges:{}, playerDrinks:{} },
+  // sessionActive : vrai uniquement pendant une soirée Mode Rapide en cours (voir
+  // session-engine.js). Utilisé par persistence.js pour savoir quand sauvegarder/effacer
+  // la snapshot de reprise. lastItem garde le dernier item affiché pour pouvoir le
+  // réafficher tel quel après une reprise.
+  sessionActive:false, lastItem:null
 };
 
 function goTo(name){

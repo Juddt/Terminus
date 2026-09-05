@@ -1,5 +1,10 @@
 const PLAYER_COLORS = ["#C97B4A","#8A9A7E","#A3503A","#B89968","#6E8C7A","#9C6B4F"];
 
+// Avatars emoji assignés cycliquement aux joueurs (comme PLAYER_COLORS), cliquables pour
+// changer (voir cycleChipAvatar dans setup-wizard.js). Choisis pour rester neutres/fun
+// plutôt que pour représenter un genre ou une identité précise.
+const PLAYER_AVATARS = ["🦊","🐺","🐸","🦁","🐨","🐼","🦄","🐧","🐯","🦜","🐙","🦖","🐝","🦋","🐢","🐰"];
+
 const RULES = [
   {text:"Interdit de dire « oui » — dites « clairement »", tier:0},
   {text:"Doit boire de la main gauche", tier:0},

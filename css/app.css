@@ -3,28 +3,20 @@
 #sound-toggle-btn:active{transform:scale(0.92);}
 
 /* Home */
-#screen-home{align-items:center; justify-content:space-between; padding-top:60px; padding-bottom:48px;}
-#screen-home{padding:0; position:relative; overflow:hidden;}
-.home-bg{position:absolute; inset:-10%; z-index:0; overflow:hidden;}
-.ember{position:absolute; border-radius:50%; filter:blur(44px); opacity:0.5; mix-blend-mode:screen; animation: emberFloat 10s ease-in-out infinite;}
-.e1{width:240px; height:240px; background:#E2944B; top:-30px; left:-70px;}
-.e2{width:280px; height:280px; background:#C9512E; bottom:40px; right:-90px; animation-delay:2.4s;}
-.e3{width:170px; height:170px; background:#8A3D22; top:42%; left:46%; animation-delay:4.8s;}
-@keyframes emberFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-20px) scale(1.1);}}
-.grain{position:absolute; inset:0; background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0); background-size:3px 3px; opacity:0.45; mix-blend-mode:overlay;}
-.home-content{position:relative; z-index:2; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:60px 24px 48px; box-sizing:border-box;}
-.hero-title{font-family:'Fraunces', serif; font-weight:600; font-size:58px; letter-spacing:-1.5px; color:var(--text); text-shadow:0 0 50px rgba(226,148,75,0.5); line-height:1;}
-.hero-tag{font-size:11px; letter-spacing:3.5px; text-transform:uppercase; color:var(--accent-bright); margin-top:14px; text-align:center;}
+#screen-home{padding:0;}
+.home-content{height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:64px 24px 40px; box-sizing:border-box; text-align:center;}
+.hero-title{font-family:'Fraunces', serif; font-weight:600; font-size:26px; letter-spacing:4px; color:var(--text); line-height:1;}
+.hero-tag{font-size:14px; letter-spacing:0; text-transform:none; color:var(--text-dim); margin-top:10px; text-align:center; font-family:'Inter',sans-serif;}
 
 .mark{display:flex; flex-direction:column; align-items:center; gap:14px;}
 .mark-dot{width:46px; height:46px; border-radius:50%; border:1px solid var(--accent); display:flex; align-items:center; justify-content:center;}
 .mark-name{font-size:13px; letter-spacing:4px; color:var(--text-dim);}
 
-.mode-card{width:100%; border:1px solid var(--line); border-radius:20px; padding:20px; text-align:left; background:transparent; margin-bottom:12px; cursor:pointer;}
-.mode-card .mode-title{font-family:'Fraunces', serif; font-size:18px; color:var(--text); margin-bottom:4px;}
-.mode-card .mode-desc{font-size:12.5px; color:var(--text-faint); line-height:1.4;}
-.mode-card.primary{border-color:var(--accent);}
-.mode-card.primary .mode-title{color:var(--accent);}
+.mode-card{width:100%; border:1px solid var(--line); border-radius:20px; padding:26px 22px; text-align:left; background:var(--surface-2); margin-bottom:16px; cursor:pointer;}
+.mode-card .mode-title{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); font-weight:600; margin-bottom:10px; font-family:'Inter',sans-serif;}
+.mode-card .mode-desc{font-family:'Fraunces', serif; font-size:19px; color:var(--text); line-height:1.35; font-weight:500;}
+.mode-card.primary{border-color:rgba(184,129,74,0.45); background:var(--surface);}
+.mode-card.primary .mode-title{color:var(--accent-bright);}
 
 .topnav{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
 .back-link{font-size:13px; color:var(--text-dim); cursor:pointer; display:flex; align-items:center; gap:5px;}
@@ -64,9 +56,12 @@
 
 .name-input{width:100%; padding:14px 16px; border-radius:6px; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:15px; font-family:'Inter'; margin-bottom:14px;}
 .name-input:focus{outline:none; border-color:var(--accent);}
+/* Avatar emoji par joueur (remplace l'ancien simple point de couleur) : le fond garde la
+   couleur du joueur, l'emoji vient de PLAYER_AVATARS (js/data/content.js). */
+.avatar-badge{display:inline-flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0; line-height:1; cursor:default;}
 .chips{display:flex; flex-wrap:wrap; gap:8px;}
 .chip{display:flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--line); border-radius:30px; padding:8px 12px 8px 14px; font-size:13px;}
-.chip .dot{width:8px; height:8px; border-radius:50%;}
+.chip .avatar-badge{width:22px; height:22px; font-size:12px; cursor:pointer;}
 .chip span.x{color:var(--text-faint); cursor:pointer; font-size:14px; padding:0 2px;}
 .choice-list{display:flex; flex-direction:column; gap:9px;}
 .choice{padding:16px 16px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; cursor:pointer;}
@@ -100,7 +95,7 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 .item-text{font-family:'Fraunces', serif; font-size:25px; font-weight:500; line-height:1.4; color:var(--text);}
 .player-tags{display:flex; gap:8px; flex-wrap:wrap; justify-content:center;}
 .player-tag{display:flex; align-items:center; gap:7px; border:1px solid var(--line); border-radius:30px; padding:8px 14px; font-size:13px;}
-.player-tag .dot{width:8px; height:8px; border-radius:50%;}
+.player-tag .avatar-badge-sm{width:20px; height:20px; font-size:11px;}
 .main-footer{display:flex; flex-direction:column; align-items:center; gap:14px;}
 .footer-buttons{display:flex; gap:12px; width:100%;}
 .footer-btn{flex:1; padding:14px 10px !important; width:auto !important;}
@@ -122,7 +117,7 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 
 /* Pause */
 #screen-pause{align-items:center; justify-content:center; gap:18px; text-align:center; color:var(--text-faint);}
-#screen-pause .btn-ghost{width:auto; padding:14px 30px;}
+.end-early-link{font-size:12px; color:var(--text-faint); text-decoration:underline; cursor:pointer; margin-top:6px;}
 
 /* End */
 #screen-end{padding-top:48px;}
@@ -131,3 +126,60 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 .stat-card{background:#2a231e; border:none; border-radius:18px; padding:22px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;}
 .stat-label{font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-faint);}
 .stat-value{font-family:'Fraunces', serif; font-size:18px; color:var(--accent); margin-top:3px;}
+.stat-sub{font-size:11px; color:var(--text-faint); margin-top:2px;}
+
+/* Compteur live de défis (topbar, pendant la partie) */
+.challenge-counter{font-size:11px; color:var(--text-dim); margin-top:4px;}
+
+/* Résultats par joueur (défis + verres) sur l'écran de fin */
+.player-results-title{font-size:14px; color:var(--text-faint); text-transform:uppercase; letter-spacing:1px; margin:18px 0 10px; font-weight:500;}
+.player-result-row{display:flex; align-items:center; justify-content:space-between; padding:12px 4px; border-bottom:1px solid rgba(244,236,226,0.08);}
+.player-result-name{display:flex; align-items:center; gap:10px; font-size:14px; color:var(--text);}
+.player-result-stats{display:flex; gap:14px; font-size:12px; color:var(--text-dim);}
+
+/* Podium MVP / Loser (fin de soirée) */
+.podium-card{background:#2a231e; border-radius:18px; padding:18px 20px; margin-bottom:10px; display:flex; align-items:center; gap:14px;}
+.podium-card.podium-mvp{border:1px solid var(--accent);}
+.podium-icon{font-size:26px;}
+.podium-card > div:nth-child(2){flex:1;}
+.podium-name{font-family:'Fraunces', serif; font-size:16px; color:var(--text); margin-top:3px; display:flex; align-items:center; gap:8px;}
+.podium-name .avatar-badge-sm{width:20px; height:20px; font-size:11px;}
+.podium-count{font-family:'Fraunces', serif; font-size:20px; color:var(--accent);}
+
+/* Home : bandeau de reprise + liens utilitaires */
+.resume-banner{width:100%; background:var(--surface); border:1px solid var(--accent); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; font-size:13px; text-align:left;}
+.home-links{display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:18px;}
+.home-links span{font-size:12px; color:var(--text-faint); cursor:pointer; letter-spacing:0.3px;}
+.home-links span.active{color:var(--accent);}
+
+/* Filtre catégories du catalogue de jeux */
+.games-filter-wrap{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
+.games-filter-chip{font-size:12px; padding:8px 14px; border-radius:30px; border:1px solid var(--line); color:var(--text-dim); cursor:pointer;}
+.games-filter-chip.selected{border-color:var(--accent); color:var(--accent);}
+.game-difficulty{font-weight:500;}
+.game-difficulty-facile{color:var(--sage);}
+.game-difficulty-modere{color:var(--accent-bright);}
+.game-difficulty-intense{color:var(--clay);}
+
+/* Carte-souvenir (canvas) */
+.recap-preview{display:flex; justify-content:center;}
+.recap-preview canvas{width:100%; max-width:320px; border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,0.4);}
+
+/* Partage de session (lien + QR code) */
+.share-qr-wrap{display:flex; justify-content:center; background:#fff; border-radius:16px; padding:16px;}
+.share-qr-wrap svg{width:100%; height:auto; max-width:220px;}
+
+/* Sélecteur d'intensité pour le contenu perso (Mes ajouts) */
+.tier-select{background:var(--surface); border:1px solid var(--line); color:var(--text); border-radius:6px; padding:0 10px; font-size:13px; font-family:'Inter'; height:48px;}
+
+/* Toggle mode grand écran (topbar session) */
+.tv-mode-toggle{width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--line); color:var(--text-dim); font-size:14px; cursor:pointer;}
+.tv-mode-toggle.active{border-color:var(--accent); color:var(--accent);}
+
+/* Mode grand écran : agrandit le contenu principal pour une lecture à distance */
+#frame.tv-mode .item-text{font-size:38px;}
+#frame.tv-mode .item-eyebrow{font-size:14px;}
+#frame.tv-mode .player-tag{font-size:16px; padding:10px 18px;}
+#frame.tv-mode .ring-wrap{width:72px; height:72px;}
+#frame.tv-mode .ring-wrap svg{width:72px; height:72px;}
+#frame.tv-mode .ring-label{font-size:16px;}
