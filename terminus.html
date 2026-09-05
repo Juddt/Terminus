@@ -19,6 +19,7 @@
 <link rel="stylesheet" href="css/games/pmu.css">
 <link rel="stylesheet" href="css/games/dice.css">
 <link rel="stylesheet" href="css/games/pof.css">
+<link rel="stylesheet" href="css/games/underdicateur.css">
 </head>
 <body>
 <div id="frame">
@@ -405,6 +406,35 @@
     <div class="palm-footer" id="des-footer"></div>
   </div>
 
+  <!-- UnderDicateur Setup -->
+  <div class="screen" id="screen-und-setup">
+    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">&larr; Les classiques</div></div>
+    <h2 style="font-size:22px;">Qui joue ?</h2>
+    <div class="step-sub" style="margin-bottom:16px;">Entrez les pr&eacute;noms (4 &agrave; 12 joueurs)</div>
+    <div class="field-row" style="margin-bottom:12px;">
+      <input type="text" id="und-name-field" class="name-input" placeholder="Pr&eacute;nom + Entr&eacute;e &crarr;" autocomplete="off" style="flex:1;">
+    </div>
+    <div id="und-chips" class="chips-wrap"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="und-start-btn" disabled onclick="undShowConfig()">Continuer</button>
+  </div>
+
+  <!-- UnderDicateur -->
+  <div class="screen" id="screen-und">
+    <div class="palm-header">
+      <div>
+        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">&#10005; Quitter</div>
+        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <div class="palm-badges" id="und-header"></div>
+        <div class="badge" onclick="showRulesOverlay('underdicateur')" style="cursor:pointer;">?</div>
+      </div>
+    </div>
+    <div class="palm-body" id="und-body"></div>
+    <div class="palm-footer" id="und-footer"></div>
+  </div>
+
   <!-- Partage de configuration (lien + QR code) -->
   <div class="screen scroll-screen" id="screen-share">
     <div class="topnav"><div class="back-link" onclick="goTo('setup')">← Retour</div></div>
@@ -485,6 +515,7 @@
 
 <script src="js/data/content.js"></script>
 <script src="js/data/games-catalog.js"></script>
+<script src="js/data/underdicateur-words.js"></script>
 <script src="js/core/state.js"></script>
 <script src="js/core/navigation.js"></script>
 <script src="js/core/setup-wizard.js"></script>
@@ -506,6 +537,7 @@
 <script src="js/games/pmu.js"></script>
 <script src="js/games/pof.js"></script>
 <script src="js/games/des.js"></script>
+<script src="js/games/underdicateur.js"></script>
 <script>
   // Initialisation au chargement : applique un lien de config partagé s'il y en a un
   // (prioritaire), sinon propose de reprendre une soirée interrompue. Restaure aussi

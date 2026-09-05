@@ -16,6 +16,7 @@ terminus.html (532 lignes, structure HTML)
 │   ├── games-shared.css (styles jeux)
 │   └── games/ (CSS par jeu)
 │       ├── palmier.css, bus.css, cible.css, pmu.css, pof.css, dice.css
+│       ├── underdicateur.css
 ├── js/
 │   ├── core/
 │   │   ├── state.js, navigation.js, setup-wizard.js, session-engine.js
@@ -26,8 +27,10 @@ terminus.html (532 lignes, structure HTML)
 │   ├── data/
 │   │   ├── content.js (règles, défis, votes, moments, etc.)
 │   │   ├── games-catalog.js (métadonnées jeux)
+│   │   ├── underdicateur-words.js (200 paires de mots)
 │   ├── games/ (moteur par jeu)
 │   │   ├── shared-cards.js, palmier.js, bus.js, cible.js, purple.js, pmu.js, pof.js, des.js
+│   │   ├── underdicateur.js
 │   ├── lib/
 │   │   └── qrcode.js (vendorisé, MIT)
 ├── manifest.json (PWA)
@@ -49,7 +52,7 @@ terminus.html (532 lignes, structure HTML)
    - Boutons Pause et Suivant toujours visibles
    - Recettes de contenu par durée (ex: 45min = 12 mini-jeux, 18 votes, 12 défis, etc.)
 
-2. **Mode Jeux** — Bibliothèque de 7 jeux interactifs + catalogue filtrable
+2. **Mode Jeux** — Bibliothèque de 8 jeux interactifs + catalogue filtrable
    - Chaque jeu : bouton "Jouer" (lance direct) + bouton "Règles" (fiche condensée)
    - Bouton "?" en jeu pour voir les règles sans quitter la partie
    - Bouton "Accueil" discret sur tous les écrans
@@ -100,16 +103,30 @@ terminus.html (532 lignes, structure HTML)
 - Pièce dorée 3D avec animation rotateY
 - Le perdant boit, le gagnant regarde
 
-### Jeu manquant : UnderDicateur
-**Status** : À réimplémenter (absent de l'arborescence actuelle)
-- Jeu social type Undercover + Dictateur
-- **Rôles** : Citoyens (mot), Undercover (mot proche), Mister White (pas de mot), Dictateur (pouvoir caché)
-- **Distribution** : téléphone passe de main en main, chacun voit son rôle en secret
-- **Tour de table** : chacun dit un seul mot (dans la vraie vie), l'Undercover et Mister White bluffent
-- **Dictateur** : après le tour, joue un pouvoir secret (Exécution / Protection / Distribution / Passer)
-- **Vote** : le groupe pointe du doigt dans la vraie vie, on sélectionne l'éliminé sur l'app
-- **30 paires de mots** à écrire (Pizza/Pasta, Bière/Vin, Tinder/Bumble, etc.)
-- **Victoire** : Citoyens si tous UC+MW éliminés | Undercover si majoritaires | Mister White s'il devine le mot
+#### 8. UnderDicateur
+`js/games/underdicateur.js` · `js/data/underdicateur-words.js` · `css/games/underdicateur.css`
+- 4 à 12 joueurs. Jeu social à rôles cachés (Undercover + un Dictateur aux pouvoirs secrets)
+- **Rôles** : Citoyens (le mot), Undercover (un mot très proche), Mister White (aucun mot)
+- **Dictateur** : tiré au hasard parmi *tous* les joueurs — il peut donc être un Citoyen
+  comme un imposteur. Pas de condition de victoire propre : il sert son camp d'origine
+- **Composition auto** selon l'effectif, toujours avec majorité citoyenne au départ :
+  4j → 3/1/0 · 6j → 4/1/1 · 8j → 5/2/1 · 12j → 8/3/1 (cit/UC/MW)
+- **Distribution** : le téléphone passe de main en main, chacun voit son rôle en secret
+- **Tour de table** : l'app affiche l'ordre, chacun dit un seul mot à l'oral.
+  Le premier à parler n'est jamais Mister White (il n'aurait aucun indice)
+- **Phase du Dictateur** : le téléphone refait un tour complet — tous les joueurs voient
+  exactement le même écran neutre, seul le Dictateur voit ses pouvoirs. L'effet n'est
+  annoncé qu'une fois le passage terminé, pour ne jamais trahir son identité
+- **Pouvoirs** (usage unique chacun) : Exécution (élimine, saute le vote) · Protection
+  (annule le vote sur une cible) · Distribution (3 gorgées) · Passer · Renoncer
+- **Vote** : le groupe pointe du doigt, on touche le nom de l'éliminé, son rôle est révélé
+- **Mister White éliminé** : dernière chance de deviner le mot des Citoyens
+  (comparaison tolérante : accents, casse et ponctuation ignorés)
+- **200 paires de mots** dans un sac persistant (`soiree_und_wordbag_v1`) : les 200 paires
+  défilent avant la moindre répétition, et le côté "mot des Citoyens" est tiré à pile ou
+  face à chaque partie, ce qui double la variété perçue
+- **Victoire** : Citoyens si tous UC+MW éliminés | Undercover si majoritaires | Mister
+  White s'il devine le mot
 
 ### Compteur créateurs
 - Incrémenter à chaque fin de partie réussie (fin de jeu, fin de session Mode Rapide)
@@ -226,14 +243,12 @@ terminus.html (532 lignes, structure HTML)
 ### ✅ Fait (main branch)
 - Phase 0.1 : merge branche jami + refonte minimaliste accueil
 - Phase 0.2 : validation 7/7 jeux + Mode Rapide complet (aucune régression)
+- Phase 1.1 : UnderDicateur implémenté (moteur, 200 paires de mots, catalogue, précache)
 - Toutes les features PWA + persistance + historique + avatars + partage
 
 ### 🔨 À faire
-- **Phase 1.1** : réimplémenter UnderDicateur (absent du catalogue)
-  - Moteur: rôles cachés, passage d'appareil, pouvoirs, vote mixed real+digital
-  - Contenu: 30 paires de mots FR
-  - Intégration au catalogue + test complet
-  
+- **Phase 1.4** : étoffer le contenu du Mode Rapide aux volumes de la spec
+
 - **Phase 2** : revue de code (fuites d'intervalle, race conditions) + design final
 - **Phase 3** : test réel en soirée + conformité légale (18+, avertissements alcool)
 

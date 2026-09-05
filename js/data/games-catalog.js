@@ -101,4 +101,19 @@ const GAMES = [
       {card:'Perdu', text:'Tu bois. Gagné = l\'autre boit'},
     ]
   },
+  {
+    id:"underdicateur", name:"UnderDicateur", joueurs:"4-12", duree:"20-40 min",
+    difficulty:"Intense", category:"Bluff",
+    interactive: true, launchFn: 'underdicateurSetup',
+    desc:"Presque tout le monde a le même mot. Presque. Un mot chacun par tour, un vote — et un Dictateur qui manipule la partie dans l'ombre.",
+    rules:[
+      {card:'Citoyen', text:'Reçoit le mot de la majorité'},
+      {card:'Undercover', text:'Reçoit un mot très proche — et doit le cacher'},
+      {card:'M. White', text:'Aucun mot. Il improvise et déduit'},
+      {card:'Dictateur', text:'Tiré au hasard parmi tous : 3 pouvoirs à usage unique'},
+      {card:'Tour', text:'Chacun dit UN seul mot pour décrire le sien'},
+      {card:'Vote', text:'On pointe du doigt, on élimine, on révèle le rôle'},
+      {card:'Victoire', text:'Citoyens si tous les imposteurs tombent — Undercover en majorité — M. White s\'il devine le mot'},
+    ]
+  },
 ];

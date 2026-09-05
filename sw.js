@@ -4,7 +4,7 @@
 // bloqués sur une vieille version jusqu'à un rechargement supplémentaire après chaque
 // mise à jour — gênant tant que l'app change encore souvent. Bumper CACHE_NAME force
 // quand même le remplacement complet du cache au prochain déploiement.
-const CACHE_NAME = 'soiree-cache-v5';
+const CACHE_NAME = 'soiree-cache-v6';
 
 const PRECACHE_URLS = [
   './terminus.html',
@@ -18,8 +18,10 @@ const PRECACHE_URLS = [
   './css/games/pmu.css',
   './css/games/dice.css',
   './css/games/pof.css',
+  './css/games/underdicateur.css',
   './js/data/content.js',
   './js/data/games-catalog.js',
+  './js/data/underdicateur-words.js',
   './js/core/state.js',
   './js/core/navigation.js',
   './js/core/setup-wizard.js',
@@ -41,6 +43,7 @@ const PRECACHE_URLS = [
   './js/games/pmu.js',
   './js/games/pof.js',
   './js/games/des.js',
+  './js/games/underdicateur.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
