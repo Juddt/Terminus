@@ -102,11 +102,11 @@ const GAMES = [
     ]
   },
   {
-    id:"pilliers", name:"Les Pilliers", joueurs:"6-12", duree:"30-60 min", materiel:"1 téléphone au centre",
+    id:"pilliers", name:"Les Pilliers", joueurs:"3-20", duree:"30-60 min", materiel:"1 téléphone au centre",
     interactive: true, launchFn: 'pilSetup', onlineUrl: 'pilliers-online/index.html',
     desc:"Un Loup-Garou version bar. Le camp des Pilliers élimine en secret chaque nuit, le village débat et vote le jour. Rôles cachés, alcootest, chimiste, mouchard... et une bonne dose de cul secs.",
     rules:[
-      {card:'Joueurs', text:'6, 8, 10 ou 12 joueurs — un seul téléphone posé au centre'},
+      {card:'Joueurs', text:'De 3 à 20 joueurs — un seul téléphone posé au centre'},
       {card:'Attribution', text:'Chacun découvre son rôle en secret, à tour de rôle'},
       {card:'Nuit', text:'Yeux fermés. Les rôles actifs s\'approchent un par un pour agir sur l\'écran'},
       {card:'Pilliers', text:'Chaque nuit, désignent ensemble une victime — cul sec direct'},

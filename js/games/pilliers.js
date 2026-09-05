@@ -15,11 +15,29 @@ const ROLE_INFO = {
   alcoolique: {camp:'solo', name:'Alcoolique Anonyme', desc:"La première fois que le village te désigne par vote, tu survis et révèles ton rôle. La seconde fois, tu es éliminé pour de bon."},
 };
 
+// Composition par nombre de joueurs (3 à 20). Le ratio de Pilliers (~1 pour 4 joueurs),
+// les pouvoirs village et les rôles solo montent progressivement avec la taille de la
+// table ; le reste de la table est complété par des Villageois. Les compositions à
+// 6/8/10/12 sont celles d'origine, testées en jeu — inchangées.
 const ROLE_SETS = {
+  3:  ['pillier','villageois','villageois'],
+  4:  ['pillier','villageois','villageois','villageois'],
+  5:  ['pillier','ethylotest','villageois','villageois','villageois'],
   6:  ['pillier','coma','ethylotest','chimiste','mauvais','wingman'],
+  7:  ['pillier','coma','ethylotest','chimiste','foie','mauvais','villageois'],
   8:  ['coma','infect','ethylotest','chimiste','foie','barman','mauvais','villageois'],
+  9:  ['pillier','coma','ethylotest','chimiste','foie','barman','mauvais','wingman','villageois'],
   10: ['coma','infect','tequila','ethylotest','chimiste','foie','wingman','videur','mauvais','villageois'],
+  11: ['pillier','coma','infect','ethylotest','chimiste','foie','barman','videur','mauvais','wingman','villageois'],
   12: ['coma','infect','tequila','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','villageois'],
+  13: ['pillier','coma','infect','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','villageois','villageois'],
+  14: ['pillier','coma','infect','tequila','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','villageois'],
+  15: ['pillier','coma','infect','tequila','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','villageois','villageois'],
+  16: ['pillier','coma','infect','tequila','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','villageois','villageois','villageois'],
+  17: ['pillier','coma','infect','tequila','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','mauvais','villageois','villageois','villageois'],
+  18: ['pillier','coma','infect','tequila','pillier','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','mauvais','villageois','villageois','villageois'],
+  19: ['pillier','coma','infect','tequila','pillier','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','mauvais','alcoolique','villageois','villageois','villageois'],
+  20: ['pillier','coma','infect','tequila','pillier','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','mauvais','alcoolique','villageois','villageois','villageois','villageois'],
 };
 
 const CAMP_LABEL = {pilliers:'Camp des Pilliers', village:'Village', solo:'Solo'};
@@ -32,6 +50,9 @@ const pil = {
 };
 
 /* --- Setup --- */
+const PIL_MIN_PLAYERS = 3;
+const PIL_MAX_PLAYERS = 20;
+
 function pilSetup(){
   pil.players=[]; pil.count=8;
   document.getElementById('pil-chips').innerHTML='';
@@ -42,16 +63,22 @@ function pilSetup(){
   setTimeout(()=> document.getElementById('pil-name-field').focus(), 100);
 }
 
+function pilSetCount(n){
+  pil.count = Math.max(PIL_MIN_PLAYERS, Math.min(PIL_MAX_PLAYERS, n));
+  pil.players = pil.players.slice(0, pil.count);
+  pilRenderCountChoices();
+  pilRenderChips();
+}
+
 function pilRenderCountChoices(){
   const wrap = document.getElementById('pil-count-choices');
-  wrap.innerHTML='';
-  [6,8,10,12].forEach(n=>{
-    const btn = document.createElement('div');
-    btn.className = 'pil-count-btn' + (pil.count===n ? ' selected':'');
-    btn.textContent = n;
-    btn.onclick = ()=>{ pil.count = n; pil.players = pil.players.slice(0, n); pilRenderCountChoices(); pilRenderChips(); };
-    wrap.appendChild(btn);
-  });
+  wrap.innerHTML =
+    '<div class="pil-stepper">'+
+      '<button type="button" class="pil-step-btn" onclick="pilSetCount(pil.count-1)" '+(pil.count<=PIL_MIN_PLAYERS?'disabled':'')+'>−</button>'+
+      '<div class="pil-count-value">'+pil.count+'</div>'+
+      '<button type="button" class="pil-step-btn" onclick="pilSetCount(pil.count+1)" '+(pil.count>=PIL_MAX_PLAYERS?'disabled':'')+'>+</button>'+
+    '</div>'+
+    '<div class="pil-count-hint">de '+PIL_MIN_PLAYERS+' à '+PIL_MAX_PLAYERS+' joueurs</div>';
 }
 
 document.getElementById('pil-name-field').addEventListener('keydown', (e)=>{

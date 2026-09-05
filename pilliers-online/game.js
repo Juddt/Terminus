@@ -20,12 +20,31 @@ const ROLE_INFO = {
   mauvais: {camp:'solo', name:'Mauvais Buveur', desc:"Si le village t'élimine par vote, tout le monde boit 2 gorgées de pénalité en ton honneur."},
   alcoolique: {camp:'solo', name:'Alcoolique Anonyme', desc:"La première fois que le village te désigne par vote, tu survis et révèles ton rôle. La seconde fois, tu es éliminé pour de bon."},
 };
+// Composition par nombre de joueurs (3 à 20) — voir js/games/pilliers.js pour le
+// détail du raisonnement (même table, dupliquée ici car ce fichier tourne seul,
+// sans dépendance au reste de l'app).
 const ROLE_SETS = {
+  3:  ['pillier','villageois','villageois'],
+  4:  ['pillier','villageois','villageois','villageois'],
+  5:  ['pillier','ethylotest','villageois','villageois','villageois'],
   6:  ['pillier','coma','ethylotest','chimiste','mauvais','wingman'],
+  7:  ['pillier','coma','ethylotest','chimiste','foie','mauvais','villageois'],
   8:  ['coma','infect','ethylotest','chimiste','foie','barman','mauvais','villageois'],
+  9:  ['pillier','coma','ethylotest','chimiste','foie','barman','mauvais','wingman','villageois'],
   10: ['coma','infect','tequila','ethylotest','chimiste','foie','wingman','videur','mauvais','villageois'],
+  11: ['pillier','coma','infect','ethylotest','chimiste','foie','barman','videur','mauvais','wingman','villageois'],
   12: ['coma','infect','tequila','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','villageois'],
+  13: ['pillier','coma','infect','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','villageois','villageois'],
+  14: ['pillier','coma','infect','tequila','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','villageois'],
+  15: ['pillier','coma','infect','tequila','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','villageois','villageois'],
+  16: ['pillier','coma','infect','tequila','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','villageois','villageois','villageois'],
+  17: ['pillier','coma','infect','tequila','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','mauvais','villageois','villageois','villageois'],
+  18: ['pillier','coma','infect','tequila','pillier','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','mauvais','villageois','villageois','villageois'],
+  19: ['pillier','coma','infect','tequila','pillier','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','mauvais','alcoolique','villageois','villageois','villageois'],
+  20: ['pillier','coma','infect','tequila','pillier','ethylotest','chimiste','foie','barman','videur','parasite','alcoolique','mauvais','wingman','mauvais','alcoolique','villageois','villageois','villageois','villageois'],
 };
+const PIL_MIN_PLAYERS = 3;
+const PIL_MAX_PLAYERS = 20;
 const CAMP_LABEL = {pilliers:'Camp des Pilliers', village:'Village', solo:'Solo'};
 const PIL_PROMPTS = {
   videur: "Choisis qui tu empêches d'agir cette nuit",
@@ -133,6 +152,7 @@ async function playerJoinRoom(code, name){
   if(!snap.exists()) return showErr('Code introuvable');
   const data = snap.val();
   if(data.status !== 'lobby') return showErr('La partie a déjà commencé');
+  if((data.order||[]).length >= PIL_MAX_PLAYERS) return showErr('Partie complète ('+PIL_MAX_PLAYERS+' joueurs max)');
   myId = uid(); myCode = code; amHost = false; roleSeen = false;
   await db.ref('games/'+code+'/players/'+myId).set({name, connected:true});
   const orderRef = db.ref('games/'+code+'/order');
@@ -185,7 +205,7 @@ function roleOf(pid){ return state.roles[pid]; }
 async function startGame(){
   const order = state.order||[];
   const count = order.length;
-  if(![6,8,10,12].includes(count)) return;
+  if(count < PIL_MIN_PLAYERS || count > PIL_MAX_PLAYERS) return;
   const roleKeys = shuffleArr(ROLE_SETS[count]);
   const roles = {};
   order.forEach((pid,i)=>{ roles[pid] = {key:roleKeys[i], camp:ROLE_INFO[roleKeys[i]].camp, alive:true}; });
@@ -340,15 +360,16 @@ function roleBadge(){
 
 function renderHostLobby(){
   const order = state.order||[];
+  const ready = order.length >= PIL_MIN_PLAYERS && order.length <= PIL_MAX_PLAYERS;
   frame().innerHTML =
     '<div class="host-tag">Écran de la table</div>'+
     '<div class="room-code-display"><div class="lbl">Code de partie</div><div class="code">'+state.code+'</div></div>'+
     '<div class="player-list">'+
       order.map(pid=>'<div class="player-row"><span><span class="dot"></span>'+playerName(pid)+'</span></div>').join('')+
     '</div>'+
-    '<div class="count-hint'+([6,8,10,12].includes(order.length)?' ok':'')+'">'+order.length+' joueur'+(order.length>1?'s':'')+' — il faut 6, 8, 10 ou 12</div>'+
+    '<div class="count-hint'+(ready?' ok':'')+'">'+order.length+' joueur'+(order.length>1?'s':'')+' — de '+PIL_MIN_PLAYERS+' à '+PIL_MAX_PLAYERS+'</div>'+
     '<div class="spacer"></div>'+
-    '<button class="btn btn-primary" id="start-btn" '+([6,8,10,12].includes(order.length)?'':'disabled')+'>Lancer la partie</button>';
+    '<button class="btn btn-primary" id="start-btn" '+(ready?'':'disabled')+'>Lancer la partie</button>';
   const btn = document.getElementById('start-btn');
   if(btn) btn.onclick = startGame;
 }
