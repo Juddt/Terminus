@@ -90,8 +90,26 @@ function fillTemplate(text, players){
   players.forEach((p,i)=>{ t = t.split('{p'+(i+1)+'}').join(p.name); });
   return t;
 }
-function tierLimit(){ return (state.intensityValue/100) * 2; }
-function filterByTier(arr){ const lim = tierLimit(); return arr.filter(i => i.tier <= lim); }
+// Le curseur d'intensité choisit une FENÊTRE de tiers, pas un simple plafond. Avec un
+// plafond seul (tier <= limite), le mode Chaos continuait à piocher dans tout le tier 0 :
+// l'app servait « trinquez avant chaque gorgée » entre deux confessions, et l'intensité
+// ne montait jamais vraiment. Chaque cran exclut donc aussi ce qui est devenu trop tiède.
+function tierWindow(){
+  const v = state.intensityValue;
+  if(v >= 85) return {min:2, max:2};   // Chaos  — uniquement le tier 2
+  if(v >= 60) return {min:1, max:2};   // Chaud  — Fun et Chaos mélangés
+  if(v >= 30) return {min:0, max:1};   // Fun    — Soft et Fun
+  return {min:0, max:0};               // Soft   — uniquement le tier 0
+}
+
+function filterByTier(arr){
+  const w = tierWindow();
+  const narrowed = arr.filter(i => i.tier >= w.min && i.tier <= w.max);
+  // Repli si un stock personnalisé est trop maigre pour tenir la soirée dans la fenêtre :
+  // mieux vaut des items hors registre que le même qui revient toutes les cinq minutes.
+  return narrowed.length ? narrowed : arr.filter(i => i.tier <= w.max);
+}
+
 function speedFactor(){ return 1 - (state.intensityValue/100) * 0.4; }
 
 function advanceQueue(){

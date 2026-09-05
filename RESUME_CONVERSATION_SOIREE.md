@@ -229,26 +229,58 @@ terminus.html (532 lignes, structure HTML)
 
 ## Contenu Mode Rapide
 
-352 items, tous tiered 0/1/2 (Soft / Fun / Chaos) :
+447 items, tous tiered 0/1/2 (Soft / Fun / Chaos) :
 
-| Type | Total | Soft (t0) | Fun (≤t1) |
-|---|---|---|---|
-| Règles | 80 | 30 | 58 |
-| Défis | 80 | 28 | 56 |
-| Votes | 80 | 36 | 60 |
-| Mini-jeux | 50 | 20 | 38 |
-| Moments légers | 36 | 14 | 28 |
-| Événements spéciaux | 26 | 10 | 20 |
-| Climax | 12 | — | — |
+| Type | Total | Soft (t0) | Fun (t1) | Chaos (t2) |
+|---|---|---|---|---|
+| Règles | 89 | 30 | 39 | 20 |
+| Défis | 94 | 28 | 32 | 34 |
+| Votes | 100 | 36 | 24 | 40 |
+| Mini-jeux | 65 | 20 | 19 | 26 |
+| Moments légers | 49 | 14 | 19 | 16 |
+| Événements spéciaux | 38 | 10 | 14 | 14 |
+| Climax | 12 | — | — | — |
 
-- Recettes par durée : 10/20/30/45/60 min (voir `RECIPES` dans `content.js`)
-- **Dimensionnement** : une session de 60 min tire 80 items. Le stock est calibré pour
-  qu'elle se déroule sans une seule répétition, y compris à l'intensité Soft où seul le
-  tier 0 est disponible — c'était le point faible avant la phase 1.4 (24 votes tirés
-  dans un stock de 10, donc 2 à 3 passages par vote).
+### Le curseur d'intensité choisit une fenêtre, pas un plafond
+
+`filterByTier()` gardait `tier <= limite`. En Chaos, le sac contenait donc **aussi tout
+le tier 0** : l'app servait encore « trinquez avant chaque gorgée » entre deux
+confessions, et l'intensité ne montait jamais vraiment. Chaque cran exclut maintenant ce
+qui est devenu trop tiède (`tierWindow()` dans `session-engine.js`) :
+
+| Curseur | Tiers servis | Registre |
+|---|---|---|
+| 0-29 % | 0 | Soft seul |
+| 30-59 % | 0-1 | Soft + Fun |
+| 60-84 % | 1-2 | Fun + Chaos |
+| 85-100 % | **2 seul** | Chaos pur |
+
+Repli automatique sur le plafond seul si un stock personnalisé est trop maigre pour tenir
+la soirée dans la fenêtre — mieux vaut du hors-registre qu'une répétition toutes les cinq
+minutes.
+
+### Dimensionnement
+
+Une session de 60 min tire 80 items. Chaque fenêtre est calibrée pour l'absorber **sans
+une seule répétition** — vérifié en rejouant les quatre intensités par le vrai moteur.
+Avant la phase 1.4, une session Soft tirait 24 votes dans un stock de 10.
+
+### Registre du tier 2
+
+Aveux, révélations de téléphone, verdicts de groupe, classements à voix haute, questions
+sans droit de refus. Volontairement hors périmètre : escalade de consommation au-delà du
+cul sec déjà présent, contenu sexuel explicite, et gages irréversibles ou humiliants
+au-delà de la soirée.
+
+### Notes techniques
+
 - Les défis ciblent 1 ou 2 joueurs via `{p1}` / `{p2}`, remplis par `fillTemplate()`.
   Les mini-jeux n'ont pas de champ `n` : le moteur déduit le nombre de joueurs à tirer
   des marqueurs présents dans le texte.
+- Le mode sans alcool (`soberize()`) traite les locutions verbe + « cul sec » / « gorgée »
+  avant leurs sous-mots, sinon les deux moitiés sont remplacées séparément et le rendu
+  donne « fait un gage une point de gage ». Les 447 items ont été passés au filtre.
+- Recettes par durée : 10/20/30/45/60 min (voir `RECIPES`).
 
 ## État du projet
 
@@ -256,7 +288,7 @@ terminus.html (532 lignes, structure HTML)
 - Phase 0.1 : merge branche jami + refonte minimaliste accueil
 - Phase 0.2 : validation 7/7 jeux + Mode Rapide complet (aucune régression)
 - Phase 1.1 : UnderDicateur implémenté (moteur, 200 paires de mots, catalogue, précache)
-- Phase 1.4 : contenu Mode Rapide porté à 352 items — plus aucune répétition sur 60 min
+- Phase 1.4 : contenu Mode Rapide porté à 447 items + fenêtres d'intensité (Chaos = tier 2 pur)
 - Toutes les features PWA + persistance + historique + avatars + partage
 
 ### 🔨 À faire

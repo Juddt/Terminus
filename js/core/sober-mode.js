@@ -10,6 +10,24 @@ const SOBER_MODE_KEY = 'soiree_sober_mode_v1';
 // Ordre important : les expressions les plus longues/spécifiques d'abord, pour qu'elles
 // soient remplacées avant leurs sous-mots (ex. "cul sec" avant un éventuel mot isolé).
 const SOBER_REPLACEMENTS = [
+  // Les locutions verbe + « cul sec » d'abord : sinon les deux moitiés sont remplacées
+  // séparément et le rendu donne « fait un gage mini-défi éclair ».
+  [/boivent cul secs?/gi, 'font un mini-défi éclair'],
+  [/boit cul secs?/gi, 'fait un mini-défi éclair'],
+  [/buvez cul secs?/gi, 'faites un mini-défi éclair'],
+  [/bois cul secs?/gi, 'fais un mini-défi éclair'],
+  [/boire cul secs?/gi, 'faire un mini-défi éclair'],
+  [/cul secs/gi, 'mini-défis éclair'],
+  // Idem pour « boire » collé à une quantité de gorgées : traités séparément, le verbe et
+  // le complément donnaient « fait un gage une point de gage ».
+  [/boivent une gorgée/gi, 'prennent un gage'],
+  [/boit une gorgée/gi, 'prend un gage'],
+  [/buvez une gorgée/gi, 'prenez un gage'],
+  [/bois une gorgée/gi, 'prends un gage'],
+  [/boivent (\d+|deux|trois|quatre|cinq) gorgées/gi, 'prennent $1 gages'],
+  [/boit (\d+|deux|trois|quatre|cinq) gorgées/gi, 'prend $1 gages'],
+  [/buvez (\d+|deux|trois|quatre|cinq) gorgées/gi, 'prenez $1 gages'],
+  [/bois (\d+|deux|trois|quatre|cinq) gorgées/gi, 'prends $1 gages'],
   [/cul sec/gi, 'mini-défi éclair'],
   [/gorgées/gi, 'points de gage'],
   [/gorgée/gi, 'point de gage'],
