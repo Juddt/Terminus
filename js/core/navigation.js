@@ -21,14 +21,14 @@ function renderGamesList(){
   filtered.forEach(g=>{
     const card = document.createElement('div');
     card.className = 'game-card';
+    // La carte entière lance le jeu. Avant, chaque carte portait un gros bouton « Jouer »
+    // plein : neuf boutons empilés ne laissaient voir que quatre jeux à la fois.
+    if(g.interactive) card.setAttribute('onclick', g.launchFn+'()');
     card.innerHTML = '<div class="game-name">'+g.name+'</div>'+
       '<div class="game-meta"><span>'+g.joueurs+'</span><span>'+g.duree+'</span>'+
         (g.category ? '<span>'+g.category+'</span>' : '')+
         (g.difficulty ? '<span class="game-difficulty game-difficulty-'+(DIFFICULTY_SLUGS[g.difficulty]||'')+'">'+g.difficulty+'</span>' : '')+
-      '</div>'+
-      '<div style="display:flex;gap:8px;margin-top:10px;">'+
-        (g.interactive ? '<button class="btn btn-primary" style="flex:2;padding:12px;" onclick="event.stopPropagation();'+g.launchFn+'()">Jouer</button>' : '')+
-        '<button class="btn btn-ghost" style="flex:1;padding:12px;" onclick="event.stopPropagation();openGameDetail(\''+g.id+'\')">Règles</button>'+
+        '<span class="game-rules-link" onclick="event.stopPropagation();openGameDetail(\''+g.id+'\')">Règles</span>'+
       '</div>';
     wrap.appendChild(card);
   });
