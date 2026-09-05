@@ -55,6 +55,7 @@ document.getElementById('name-field').addEventListener('keydown', (e)=>{
     if(val && state.players.length < state.playerCount){
       state.players.push({name:val, color: PLAYER_COLORS[state.players.length % PLAYER_COLORS.length]});
       e.target.value = '';
+      Sound.play('tick');
       renderChips();
     }
   }

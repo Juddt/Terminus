@@ -17,6 +17,7 @@ document.getElementById('cible-name-field').addEventListener('keydown', (e)=>{
     if(val && cible.players.length<10){
       cible.players.push(val);
       e.target.value='';
+      Sound.play('tick');
       cibleRenderChips();
     }
   }
@@ -147,6 +148,7 @@ function cibleSelectCard(idx){
 }
 
 function cibleGuess(answer){
+  Sound.play('cardFlip');
   const idx = cible.selectedIdx;
   const card = cible.cards[idx];
   const z = card.zone;
@@ -186,11 +188,13 @@ function cibleGuess(answer){
     cible.sipPot += card.sips;
     resultTitle = 'Gagné';
     resultSub = '+'+card.sips+' gorgée'+(card.sips>1?'s':'')+' au compteur';
+    Sound.play('success');
   } else {
     const totalDrink = cible.sipPot + card.sips;
     resultTitle = 'Perdu';
     resultSub = ciblePlayer()+' boit '+totalDrink+' gorgée'+(totalDrink>1?'s':'');
     cible.sipPot = 0;
+    Sound.play('fail');
   }
 
   const body = document.getElementById('cible-body');

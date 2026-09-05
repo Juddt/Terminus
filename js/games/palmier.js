@@ -28,6 +28,7 @@ document.getElementById('palm-name-field').addEventListener('keydown', (e)=>{
     if(val && palm.players.length<10){
       palm.players.push(val);
       e.target.value='';
+      Sound.play('tick');
       palmRenderSetupChips();
     }
   }
@@ -144,6 +145,7 @@ function palmNextTurn(){
   if(palm.deck.length===0){ palmEndGame(); return; }
   palm.currentCard = palm.deck.pop();
   palm.drawnCards.push(palm.currentCard);
+  Sound.play('cardFlip');
   palmUpdateHeader();
   palmShowReveal();
 }
@@ -239,12 +241,14 @@ function palmShowBalance(){
       floatCard.style.transition = 'transform 0.4s ease-out, opacity 0.4s';
       floatCard.style.opacity = '0.3';
       if(navigator.vibrate) navigator.vibrate(50);
+      Sound.play('success');
       setTimeout(()=> palmCardPlaced(), 500);
     } else {
       cursor.classList.add('miss');
       floatCard.style.transform = 'rotate('+(pos > 50 ? 45 : -45)+'deg) translateY(30px)';
       floatCard.style.transition = 'transform 0.3s ease-out';
       if(navigator.vibrate) navigator.vibrate([80,40,80,40,160]);
+      Sound.play('fail');
       setTimeout(()=> palmCollapse(), 500);
     }
   }
@@ -269,6 +273,7 @@ function palmCardPlaced(){
 
 function palmCollapse(){
   if(navigator.vibrate) navigator.vibrate([100,50,100,50,200]);
+  Sound.play('collapse');
   const body = document.getElementById('palm-body');
   const footer = document.getElementById('palm-footer');
   palm.collapseCount++;
@@ -298,6 +303,7 @@ function palmEndGame(){
   const body = document.getElementById('palm-body');
   const footer = document.getElementById('palm-footer');
   const won = palm.deck.length === 0 && palm.collapseCount < 5;
+  Sound.play(won ? 'win' : 'fail');
 
   let creatorsHTML = '';
   if(won){

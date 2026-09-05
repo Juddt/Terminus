@@ -24,6 +24,7 @@ document.getElementById('purple-name-field').addEventListener('keydown', (e)=>{
     if(val && purple.players.length<10){
       purple.players.push(val);
       e.target.value='';
+      Sound.play('tick');
       purpleRenderChips();
     }
   }
@@ -121,6 +122,7 @@ function purpleGuess(choice){
   }
 
   // Draw cards
+  Sound.play('cardFlip');
   const drawn = [];
   for(let i=0;i<numCards;i++) drawn.push(purple.deck.pop());
 
@@ -148,12 +150,14 @@ function purpleGuess(choice){
     purple.drawnCards = purple.drawnCards.concat(drawn);
     resultTitle = 'Gagné';
     resultSub = '+'+numCards+' gorgée'+(numCards>1?'s':'')+' au compteur';
+    Sound.play('success');
   } else {
     const total = purple.sipPot + numCards;
     resultTitle = 'Perdu';
     resultSub = purplePlayer()+' boit '+total+' gorgée'+(total>1?'s':'');
     purple.sipPot = 0;
     purple.drawnCards = [];
+    Sound.play('fail');
   }
 
   body.innerHTML =

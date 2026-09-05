@@ -23,6 +23,7 @@ document.getElementById('pmu-name-field').addEventListener('keydown', (e)=>{
     if(val && pmu.players.length<8){
       pmu.players.push({name:val, horse:null, bet:1});
       e.target.value='';
+      Sound.play('tick');
       pmuRenderChips();
     }
   }
@@ -207,6 +208,7 @@ function pmuRenderRace(){
 
 function pmuFlipCard(){
   if(pmu.deck.length===0 || pmu.winner) return;
+  Sound.play('cardFlip');
 
   const card = pmu.deck.pop();
   pmu.currentCard = card;
@@ -231,9 +233,11 @@ function pmuFlipCard(){
 
   // Check winner
   const FINISH = 8;
+  const hadWinner = !!pmu.winner;
   PMU_SUITS.forEach(s=>{
     if(pmu.horses[s] >= FINISH && !pmu.winner) pmu.winner = s;
   });
+  if(!hadWinner && pmu.winner) Sound.play('win');
 
   pmuUpdateHeader();
   pmuRenderRace();

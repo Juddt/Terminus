@@ -49,8 +49,8 @@ function launchSession(){
   document.getElementById('cd-number').textContent = n;
   const cdInterval = setInterval(()=>{
     n--;
-    if(n > 0){ document.getElementById('cd-number').textContent = n; }
-    else { clearInterval(cdInterval); startMainLoop(); }
+    if(n > 0){ document.getElementById('cd-number').textContent = n; Sound.play('tick'); }
+    else { clearInterval(cdInterval); Sound.play('ding'); startMainLoop(); }
   }, 800);
 }
 
@@ -164,6 +164,9 @@ function startRing(seconds){
       clearInterval(state.ringInterval);
       fg.style.stroke = 'var(--sage)';
       document.getElementById('ring-label').textContent = '✓';
+      Sound.play('ding');
+    } else if(state.ringLeft <= 3){
+      Sound.play('tick');
     }
   }, 1000);
 }
@@ -195,6 +198,7 @@ function showSpecialEvent(){
   document.getElementById('special-text').textContent = text;
   goTo('special');
   if(navigator.vibrate) navigator.vibrate([80,40,80]);
+  Sound.play('ding');
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 3200);
 }
 
@@ -207,6 +211,7 @@ function fireClimax(){
   document.getElementById('special-text').textContent = text;
   goTo('special');
   if(navigator.vibrate) navigator.vibrate([100,60,100,60,220]);
+  Sound.play('sting');
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 4500);
 }
 
@@ -217,6 +222,7 @@ function endSession(){
   clearInterval(state.globalInterval);
   clearInterval(state.ringInterval);
   goTo('end');
+  Sound.play('win');
   const h = Math.floor(state.durationMin/60);
   const m = state.durationMin % 60;
   document.getElementById('end-duration').textContent = h + 'h' + (m? (m<10?'0'+m:m) : '') + ' de soirée jouée';

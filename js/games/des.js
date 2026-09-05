@@ -15,6 +15,7 @@ document.getElementById('des-name-field').addEventListener('keydown', (e)=>{
     if(val && des.players.length<2){
       des.players.push(val);
       e.target.value='';
+      Sound.play('tick');
       desRenderChips();
     }
   }
@@ -70,6 +71,7 @@ function desRoll(){
   const body = document.getElementById('des-body');
   const footer = document.getElementById('des-footer');
   footer.innerHTML = '';
+  Sound.play('dice');
 
   // Animate random faces for 700ms
   let rollCount = 0;
@@ -104,6 +106,7 @@ function desRoll(){
         '<div style="font-family:Fraunces,serif;font-size:24px;color:var(--accent);margin-top:16px;">Égalité !</div>'+
         '<div style="font-size:14px;color:rgba(244,236,226,0.5);margin-top:6px;">On relance...</div>';
       if(navigator.vibrate) navigator.vibrate([40,30,40,30,40]);
+      Sound.play('tick');
       setTimeout(()=> desRoll(), 1200);
       return;
     }
@@ -123,6 +126,7 @@ function desRoll(){
       '<div style="font-family:Fraunces,serif;font-size:22px;color:var(--text);margin-top:8px;">'+product+' gorgée'+(product>1?'s':'')+'</div>';
 
     if(navigator.vibrate) navigator.vibrate([80,40,80]);
+    Sound.play('win');
     footer.innerHTML =
       '<button class="btn btn-primary" onclick="desRoll()" style="flex:2;">Relancer</button>'+
       '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>';

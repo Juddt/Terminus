@@ -91,4 +91,23 @@ const GAMES = [
       {card:'Perdu', text:'Tu bois. Gagné = l\'autre boit'},
     ]
   },
+  {
+    id:"pilliers", name:"Les Pilliers", joueurs:"6-12", duree:"30-60 min", materiel:"1 téléphone au centre",
+    interactive: true, launchFn: 'pilSetup', onlineUrl: 'pilliers-online/index.html',
+    desc:"Un Loup-Garou version bar. Le camp des Pilliers élimine en secret chaque nuit, le village débat et vote le jour. Rôles cachés, alcootest, chimiste, mouchard... et une bonne dose de cul secs.",
+    rules:[
+      {card:'Joueurs', text:'6, 8, 10 ou 12 joueurs — un seul téléphone posé au centre'},
+      {card:'Attribution', text:'Chacun découvre son rôle en secret, à tour de rôle'},
+      {card:'Nuit', text:'Yeux fermés. Les rôles actifs s\'approchent un par un pour agir sur l\'écran'},
+      {card:'Pilliers', text:'Chaque nuit, désignent ensemble une victime — cul sec direct'},
+      {card:'Éthylotest', text:'Vérifie en secret si un joueur est un Pillier'},
+      {card:'Chimiste', text:'Protège un joueur de l\'élimination de la nuit'},
+      {card:'Réveil', text:'L\'appli annonce les victimes de la nuit'},
+      {card:'Débat', text:'90 secondes pour discuter avant le vote'},
+      {card:'Vote', text:'Décompte 3-2-1, tout le monde pointe un suspect'},
+      {card:'Sentence', text:'Le plus désigné boit cul sec et révèle son rôle'},
+      {card:'Erreur judiciaire', text:'Si l\'éliminé n\'était pas un Pillier, tout le monde boit 2 gorgées'},
+      {card:'Victoire', text:'Village = tous les Pilliers éliminés. Pilliers = ils sont à parité'},
+    ]
+  },
 ];
