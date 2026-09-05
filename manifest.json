@@ -2,7 +2,7 @@
   "name": "Soirée",
   "short_name": "Soirée",
   "description": "L'app qui pilote toute la soirée : règles, défis, mini-jeux et moments.",
-  "start_url": "./terminus.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

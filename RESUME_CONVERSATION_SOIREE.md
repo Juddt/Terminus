@@ -9,7 +9,7 @@
 **Mono-fichier → Arborescence** : le projet est passé d'un `app-soiree-prototype-v2.html` (~3400 lignes) à une structure modulaire.
 
 ```
-terminus.html (532 lignes, structure HTML)
+index.html (532 lignes, structure HTML)
 ├── css/
 │   ├── base.css (variable et resets)
 │   ├── app.css (screens, layout)
@@ -366,7 +366,7 @@ et une vraie réponse 503 en repli. `CACHE_NAME` en v8.
 
 ## Fichiers de référence actuels
 
-- `terminus.html` — structure principale
+- `index.html` — structure principale
 - `js/core/` — moteurs (session, wizard, persistence, historique, etc.)
 - `js/games/` — jeux individuels
 - `js/data/content.js` — toutes les règles/défis/votes/moments
