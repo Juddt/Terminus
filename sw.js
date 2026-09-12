@@ -4,7 +4,7 @@
 // bloqués sur une vieille version jusqu'à un rechargement supplémentaire après chaque
 // mise à jour — gênant tant que l'app change encore souvent. Bumper CACHE_NAME force
 // quand même le remplacement complet du cache au prochain déploiement.
-const CACHE_NAME = 'soiree-cache-v11';
+const CACHE_NAME = 'soiree-cache-v13';
 
 const PRECACHE_URLS = [
   './',
@@ -29,6 +29,7 @@ const PRECACHE_URLS = [
   './js/core/setup-wizard.js',
   './js/core/custom-content.js',
   './js/core/audio.js',
+  './js/core/confetti.js',
   './js/core/sober-mode.js',
   './js/core/session-engine.js',
   './js/core/persistence.js',

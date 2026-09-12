@@ -43,7 +43,7 @@ function pofChooseMode(){
   const footer = document.getElementById('pof-mode-footer');
 
   body.innerHTML =
-    '<div style="font-family:Fraunces,serif;font-size:24px;margin-bottom:16px;">Choisis ton mode</div>'+
+    '<div style="font-family:Unbounded,sans-serif;font-size:24px;margin-bottom:16px;">Choisis ton mode</div>'+
     '<div class="pof-mode-card'+(pof.mode==='fun'?' selected':'')+'" onclick="pof.mode=\'fun\';pofChooseMode()">'+
       '<h3>Mode Fun</h3><p>Parie 1 à 3 gorgées par lancer. Tranquille.</p>'+
     '</div>'+
@@ -102,9 +102,9 @@ function pofShowTurn(){
     // Show bet selection + pile/face choice
     body.innerHTML =
       '<div class="palm-player-big" style="font-size:24px;">'+pofPlayer()+'</div>'+
-      '<div style="font-size:13px;color:rgba(244,236,226,0.5);margin-top:4px;">contre '+pofOpponent()+'</div>'+
+      '<div style="font-size:13px;color:var(--text-dim);margin-top:4px;">contre '+pofOpponent()+'</div>'+
       pofCoinHTML()+
-      '<div style="font-size:13px;color:rgba(244,236,226,0.5);margin-top:10px;">Mise :</div>'+
+      '<div style="font-size:13px;color:var(--text-dim);margin-top:10px;">Mise :</div>'+
       '<div style="display:flex;gap:10px;margin-top:6px;">'+
         [1,2,3].map(n=>{
           const sel = pof.currentBet===n;
@@ -120,9 +120,9 @@ function pofShowTurn(){
     body.innerHTML =
       '<div class="pof-round-badge">Manche '+(pof.round+1)+' / 5</div>'+
       '<div class="palm-player-big" style="font-size:24px;">'+pofPlayer()+'</div>'+
-      '<div style="font-size:13px;color:rgba(244,236,226,0.5);margin-top:4px;">contre '+pofOpponent()+'</div>'+
+      '<div style="font-size:13px;color:var(--text-dim);margin-top:4px;">contre '+pofOpponent()+'</div>'+
       pofCoinHTML()+
-      '<div style="font-family:Fraunces,serif;font-size:22px;color:var(--accent);margin-top:10px;">'+stakeText+'</div>';
+      '<div style="font-family:Unbounded,sans-serif;font-size:22px;color:var(--accent);margin-top:10px;">'+stakeText+'</div>';
 
     footer.innerHTML =
       '<button class="btn btn-primary" onclick="pofFlip(\'pile\')" style="flex:1;background:linear-gradient(135deg,#b8814a,#967034);color:#1a1208;">Pile</button>'+
@@ -165,8 +165,8 @@ function pofFlip(choice){
         '<div class="coin-face coin-pile">PILE</div>'+
         '<div class="coin-face coin-face-back">FACE</div>'+
       '</div></div>'+
-      '<div style="font-family:Fraunces,serif;font-size:20px;color:rgba(244,236,226,0.5);margin-top:14px;">La pièce tombe sur '+result+'</div>'+
-      '<div style="font-family:Fraunces,serif;font-size:28px;color:'+(won?'var(--sage)':'var(--clay)')+';margin-top:10px;">'+(won?'Gagné':'Perdu')+'</div>'+
+      '<div style="font-family:Unbounded,sans-serif;font-size:20px;color:var(--text-dim);margin-top:14px;">La pièce tombe sur '+result+'</div>'+
+      '<div style="font-family:Unbounded,sans-serif;font-size:28px;color:'+(won?'var(--sage)':'var(--clay)')+';margin-top:10px;">'+(won?'Gagné':'Perdu')+'</div>'+
       '<div style="font-size:16px;color:var(--text);margin-top:6px;">'+loser+' boit '+stakeText+'</div>';
 
     if(pof.mode==='prison'){

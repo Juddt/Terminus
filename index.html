@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Soirée</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#17120f">
+<meta name="theme-color" content="#F3EAD6">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <!-- Sans ces deux balises, « Ajouter à l'écran d'accueil » sur iPhone ouvre l'app
      dans une fenêtre Safari avec sa barre d'adresse, au lieu du plein écran. -->
@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="Soirée">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/games-shared.css">
@@ -121,7 +121,7 @@
   <div class="screen" id="screen-main">
     <div class="topbar">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div class="game-home-btn" onclick="if(confirm('Quitter la soirée ?')){clearInterval(state.globalInterval);clearInterval(state.ringInterval);state.sessionActive=false;clearSessionSnapshot();goTo('home');}">Accueil</div>
+        <div class="game-home-btn" onclick="if(confirm('Quitter la soirée ?')){clearInterval(state.globalInterval);clearInterval(state.ringInterval);state.sessionActive=false;clearSessionSnapshot();document.getElementById('frame').classList.remove('chaos-mode');goTo('home');}">Accueil</div>
         <div class="tv-mode-toggle" onclick="toggleTvMode()" title="Mode grand écran">⛶</div>
       </div>
       <div class="global-track"><div class="global-fill" id="global-fill"></div></div>
@@ -129,7 +129,8 @@
       <div id="challenge-counter" class="challenge-counter"></div>
     </div>
     <div class="main-body">
-      <div class="item-eyebrow" id="item-eyebrow" style="color:var(--accent);">Défi</div>
+      <div class="ticket-num" id="ticket-num"></div>
+      <div class="item-eyebrow" id="item-eyebrow">Défi</div>
       <div class="item-text" id="item-text">—</div>
       <div class="player-tags" id="item-players"></div>
     </div>
@@ -570,7 +571,7 @@
   <div id="rules-overlay" class="rules-overlay hidden" onclick="closeRulesOverlay()">
     <div class="rules-modal" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-family:Fraunces,serif;font-size:18px;">Règles</div>
+        <div style="font-family:Unbounded,sans-serif;font-size:18px;">Règles</div>
         <div style="cursor:pointer;color:var(--text-dim);font-size:18px;" onclick="closeRulesOverlay()">✕</div>
       </div>
       <div id="rules-overlay-content"></div>
@@ -584,6 +585,7 @@
 <script src="js/data/underdicateur-words.js"></script>
 <script src="js/core/state.js"></script>
 <script src="js/core/audio.js"></script>
+<script src="js/core/confetti.js"></script>
 <script src="js/core/navigation.js"></script>
 <script src="js/core/setup-wizard.js"></script>
 <script src="js/core/custom-content.js"></script>

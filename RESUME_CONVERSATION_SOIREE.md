@@ -133,39 +133,82 @@ index.html (532 lignes, structure HTML)
 - Affichage : "🥂 X verre(s) pour les créateurs du jeu"
 - Sauvegardé dans `creatorsGlasses` (global persistent)
 
-## Identité visuelle
+## Identité visuelle — « Le Confetti » (phase 4.1)
 
-### Direction artistique
-- **Premium minimaliste** : Apple × Notion × Spotify × Linear × Airbnb
-- **PAS** de gaming, néon, dégradé flashy, RGB, cartoon
-- Dark warm (pas froid) : bois sombre, cuir, bar à cocktails
+Refonte complète : le fond sombre bois/cuir façon bar à cocktails (`#17120f`) lisait comme
+un template IA générique (voir revue plus bas). Nouvelle direction : un carnet de tickets
+papier — fond crème clair, chaque type de contenu (défi/vote/règle/mini-jeu/moment) a sa
+propre couleur de "ticket", perforations façon billet déchiré.
 
-### Palette actuelle (CSS variables)
+### Palette actuelle (`css/base.css`, propagée via les mêmes variables CSS qu'avant — seules
+les valeurs changent, ~290 usages touchés sans renommage)
 ```css
---bg: #17120f
---surface: #2a231e
---accent: #b8814a / #c99a67
---text: #f4ece2
---sage: #8A9A7E (succès)
---clay: #A3503A (erreur)
+--bg: #F3EAD6            /* papier crème clair */
+--surface: #ECDFC4
+--surface-2: #E4D4B4
+--accent: #E1502F        /* corail — CTA, éléments actifs */
+--accent-bright: #EB6B4A
+--accent-deep: #B23E22
+--sage: #2E7D57          /* succès */
+--clay: #C4342B           /* erreur + alarme Mode Chaos */
+--text: #1E1A14           /* encre foncée */
+--type-defi: #E1502F | --type-vote: #1D6E86 | --type-regle: #DA9A1F
+--type-mini: #6A4A82 | --type-moment: #8A6DA8
+--ink-on-light: #1E1A14 | --ink-on-dark: #FBF4E7
 ```
+Couleur de texte du bouton primaire choisie après calcul de contraste WCAG réel (encre
+foncée sur corail ≈4.44:1, contre crème sur corail ≈3.56:1) — ni l'un ni l'autre ne passe
+un AA propre en petit texte, l'encre foncée est le compromis le moins pire.
 
-### Cartes à jouer
-- **Réalistes** : fond crème `#f6f1e7`, rouge `#a82020`, noir `#1a1a1a`
-- Ombre portée `box-shadow: 0 8px 20px rgba(0,0,0,0.4)`
-- Pas de cartes stylisées/néon
+### Cartes à jouer / pièce / palette gold — restées intentionnellement inchangées
+Couleurs "réalistes" indépendantes du thème, comme avant : cartes crème `#f6f1e7`/rouge
+`#a82020`/noir `#1a1a1a`, dégradé de la pièce dorée `#d4a44a→#967034`. Ce sont des objets
+physiques réels, pas des éléments de thème.
 
 ### Typographie
-- Display : Fraunces (serif)
-- Body : Inter (sans-serif)
-- Contenu de jeu lisible à 1-2 mètres (25-32px)
+- Display : **Unbounded** (700-800, sans display)
+- Body : **Work Sans**
+- Utilitaire/mono : **IBM Plex Mono** (numéros de ticket, labels)
+- (Fraunces/Inter entièrement retirés — voir bug ci-dessous)
+
+### Signature : le ticket
+- `#screen-main[data-type]` pilote la couleur de fond/texte du ticket principal selon le
+  type de contenu en cours (`EYEBROW_TO_TYPE` dans `session-engine.js`)
+- Perforations (`::before`/`::after` ronds couleur fond) en haut/bas du ticket
+- Numéro de ticket réel tiré de l'état de session : `N° 0XX / YYY` (`state.queueIndex` /
+  `state.typesQueue.length`)
+
+### Confetti (`js/core/confetti.js`, nouveau)
+Canvas vanilla, particules = rectangles colorés (un ticket miniature par couleur de type),
+gravité + rotation + fade. Trois déclencheurs réels : `markChallengeResult(true)` (petit),
+`fireClimax()` (grand), `endSession()` (énorme). Respecte `prefers-reduced-motion` (aucune
+particule si l'utilisateur l'a demandé).
+
+### Mode Chaos plus agressif (`intensityValue >= 85`)
+Classe `chaos-mode` sur `#frame` (posée dans `launchSession`/`resumeSession`, retirée dans
+le handler Accueil et `endSession`) :
+- Liseré marquee zébré alarme haut/bas de l'écran (`hazardMarch`, désactivé si
+  `prefers-reduced-motion`)
+- Ticket "Défi" forcé en rouge alarme `--clay`, texte en capitales, pulsation de
+  box-shadow (`chaosPulse`)
+- Anneau de progression (`ring-fg`) forcé en `--clay`
+- Vibration plus insistante sur les défis
 
 ### Boutons et surfaces
-- Boutons : border-radius 16px
-- Game cards : border-radius 18px
-- Mode cards : border-radius 20px
-- Badges : pills 20px, fond translucide sans bordure
-- Stat cards : surface `#2a231e`, radius 18px
+- Boutons : border-radius 16px · Game cards : 18px · Mode cards : 10px (ticket)
+- Mode card primaire : fond `--accent` plein
+- Ticket principal : coins arrondis 16px, perforations 22px
+
+### Bug trouvé en QA après la refonte : styles inline JS oubliés
+Le premier passage de refonte n'a couvert que les fichiers `.css` (sed sur `Fraunces`/
+`Inter`/couleurs crème hardcodées). Les templates `innerHTML` de 8 jeux (`des.js`, `pmu.js`,
+`pof.js`, `purple.js`, `bus.js`, `cible.js`, `palmier.js`, `pilliers.js`) et
+`recap-card.js` (canvas) contenaient encore des styles inline en dur (`font-family:
+Fraunces,serif`, `color:rgba(244,236,226,0.5)` etc.) — invisibles ou quasi sur le nouveau
+fond clair, police retombant silencieusement sur le fallback système. Corrigé (police →
+Unbounded/Work Sans, couleurs crème → `var(--text-dim)`/`var(--text-faint)`/équivalents
+encre foncée), sauf les couleurs volontairement réalistes (pièce dorée, bouton noir/rouge
+du jeu Purple). `CACHE_NAME` du service worker bumpé en conséquence (`v13`).
 
 ## Navigation
 
@@ -399,9 +442,13 @@ justifiée avant un lancement commercial ou toute campagne de communication.
 - Phase 2.1 : revue de code — 5 défauts corrigés (XSS lien de partage, fuites de timer, localStorage, SW)
 - Phase 3.1 : barrière 18+, message sanitaire, mentions légales, confidentialité, CGU
 - Toutes les features PWA + persistance + historique + avatars + partage
+- Phase 4.1 : refonte visuelle complète « Le Confetti » (palette ticket/papier, typographie
+  Unbounded/Work Sans/IBM Plex Mono, confetti canvas sur 3 déclencheurs réels, Mode Chaos
+  visuellement agressif) + QA complète (5 types de ticket, climax, fin de session, 9 jeux,
+  écrans wizard) + correctif des styles inline JS oubliés lors du premier passage
 
 ### 🔨 À faire
-- **Phase 2.2** : appliquer la DA minimaliste aux écrans récents (historique, récap, partage, mes ajouts)
+- **Phase 2.2** : appliquer la DA minimaliste aux écrans récents (historique, récap, partage, mes ajouts) — le récap (`recap-card.js`) garde volontairement sa propre palette sombre "poster", seule la police a été mise à jour
 - **Phase 3.3** : décision React Native / Expo vs PWA
 
 ### Prochaines phases (post-MVP)

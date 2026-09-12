@@ -36,6 +36,11 @@ function buildQueue(recipe){
 }
 
 function launchSession(){
+  // Mode Chaos (intensité >= 85) : traitement visuel délibérément plus agressif —
+  // voir #frame.chaos-mode dans app.css (liseré alarme, ticket défi qui pulse, texte
+  // en capitales). Recalculé à chaque lancement puisque l'intensité peut changer entre deux
+  // sessions (reprise de config partagée notamment).
+  document.getElementById('frame').classList.toggle('chaos-mode', state.intensityValue >= 85);
   state.globalSecondsTotal = state.durationMin * 60;
   state.globalSecondsLeft = state.globalSecondsTotal;
   state.activeRules = [];
@@ -167,9 +172,20 @@ function advanceQueue(){
   }
 }
 
+// Fait correspondre le libellé affiché au type de ticket (couleur définie dans app.css
+// via #screen-main[data-type]) — le principe « Confetti » : la couleur du ticket annonce
+// le type de moment avant même la lecture.
+const EYEBROW_TO_TYPE = { 'Défi':'defi', 'Vote':'vote', 'Nouvelle règle':'regle', 'Mini-jeu':'mini', 'Moment':'moment' };
+
 function renderItem(eyebrow, text, players, seconds){
+  const type = EYEBROW_TO_TYPE[eyebrow] || 'defi';
+  document.getElementById('screen-main').dataset.type = type;
+  document.getElementById('ticket-num').textContent = 'N° ' + String(state.queueIndex).padStart(3,'0') + ' / ' + state.typesQueue.length;
   document.getElementById('item-eyebrow').textContent = eyebrow;
   document.getElementById('item-text').textContent = soberize(text);
+  if(document.getElementById('frame').classList.contains('chaos-mode') && type === 'defi' && navigator.vibrate){
+    navigator.vibrate([40,30,40]);
+  }
   const tagsWrap = document.getElementById('item-players');
   tagsWrap.innerHTML = '';
   players.forEach(p=>{
@@ -209,6 +225,7 @@ function markChallengeResult(done){
     const rec = state.stats.playerChallenges[p.name] || (state.stats.playerChallenges[p.name] = {done:0, failed:0});
     if(done){
       rec.done++;
+      if(window.fireConfetti) fireConfetti('small');
     } else {
       rec.failed++;
       // Raté = tu bois, convention classique des jeux à gages.
@@ -302,6 +319,7 @@ function fireClimax(){
   goTo('special');
   if(navigator.vibrate) navigator.vibrate([100,60,100,60,220]);
   Sound.play('sting');
+  if(window.fireConfetti) fireConfetti('big');
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 4500);
 }
 
@@ -381,8 +399,10 @@ function endSession(){
   clearInterval(state.ringInterval);
   state.sessionActive = false;
   clearSessionSnapshot();
+  document.getElementById('frame').classList.remove('chaos-mode');
   goTo('end');
   Sound.play('win');
+  if(window.fireConfetti) fireConfetti('huge');
 
   // Durée réellement jouée plutôt que la durée planifiée (state.durationMin) : identique
   // en fin normale (le minuteur est à 0), mais plus courte si la soirée s'est terminée en

@@ -6,16 +6,16 @@
 
 const RECAP_W = 1080, RECAP_H = 1350;
 
-// Charge la police Fraunces avant de dessiner, sinon le premier rendu tombe sur la
+// Charge la police Unbounded avant de dessiner, sinon le premier rendu tombe sur la
 // police système par défaut (le canvas ne réutilise pas automatiquement les fonts
 // CSS tant qu'elles ne sont pas signalées "prêtes" par la Font Loading API).
 async function ensureRecapFontsLoaded(){
   if(!document.fonts || !document.fonts.load) return;
   try{
     await Promise.all([
-      document.fonts.load('600 64px Fraunces'),
-      document.fonts.load('500 32px Fraunces'),
-      document.fonts.load('500 28px Inter'),
+      document.fonts.load('600 64px Unbounded'),
+      document.fonts.load('500 32px Unbounded'),
+      document.fonts.load('500 28px "Work Sans"'),
     ]);
   }catch(e){
     // Tant pis, le canvas retombera sur la police système par défaut du navigateur.
@@ -35,11 +35,11 @@ function drawRecapRow(ctx, y, icon, label, value, accentColor){
   ctx.font = '44px serif';
   ctx.fillText(icon, 80, y);
 
-  ctx.font = '500 22px Inter, sans-serif';
+  ctx.font = '500 22px "Work Sans", sans-serif';
   ctx.fillStyle = 'rgba(244,236,226,0.5)';
   ctx.fillText(label.toUpperCase(), 150, y - 16);
 
-  ctx.font = '600 34px Fraunces, serif';
+  ctx.font = '600 34px Unbounded, sans-serif';
   ctx.fillStyle = accentColor || '#f4ece2';
   ctx.fillText(value, 150, y + 22);
 }
@@ -58,10 +58,10 @@ async function buildRecapCanvas(podium, stats, durationMin){
 
   ctx.textAlign = 'center';
   ctx.fillStyle = '#f4ece2';
-  ctx.font = '600 76px Fraunces, serif';
+  ctx.font = '600 76px Unbounded, sans-serif';
   ctx.fillText('SOIRÉE', RECAP_W/2, 160);
-  ctx.font = '500 26px Inter, sans-serif';
-  ctx.fillStyle = '#c99a67';
+  ctx.font = '500 26px "Work Sans", sans-serif';
+  ctx.fillStyle = '#EB6B4A';
   ctx.letterSpacing = '4px';
   ctx.fillText('LE RÉCAP DE LA SOIRÉE', RECAP_W/2, 210);
   ctx.letterSpacing = '0px';
@@ -71,20 +71,20 @@ async function buildRecapCanvas(podium, stats, durationMin){
     ctx.textAlign = 'center';
     ctx.font = '80px serif';
     ctx.fillText('🏆', RECAP_W/2, y);
-    ctx.font = '500 24px Inter, sans-serif';
+    ctx.font = '500 24px "Work Sans", sans-serif';
     ctx.fillStyle = 'rgba(244,236,226,0.5)';
     ctx.fillText('MVP DE LA SOIRÉE', RECAP_W/2, y + 50);
-    ctx.font = '600 56px Fraunces, serif';
+    ctx.font = '600 56px Unbounded, sans-serif';
     ctx.fillStyle = '#f4ece2';
     ctx.fillText((podium.mvp.avatar||'') + ' ' + podium.mvp.name, RECAP_W/2, y + 110);
 
     y += 190;
     ctx.font = '60px serif';
     ctx.fillText('😌', RECAP_W/2, y);
-    ctx.font = '500 22px Inter, sans-serif';
+    ctx.font = '500 22px "Work Sans", sans-serif';
     ctx.fillStyle = 'rgba(244,236,226,0.5)';
     ctx.fillText('LE PLUS TRANQUILLE', RECAP_W/2, y + 42);
-    ctx.font = '600 42px Fraunces, serif';
+    ctx.font = '600 42px Unbounded, sans-serif';
     ctx.fillStyle = '#f4ece2';
     ctx.fillText((podium.chill.avatar||'') + ' ' + podium.chill.name, RECAP_W/2, y + 92);
     y += 160;
@@ -109,7 +109,7 @@ async function buildRecapCanvas(podium, stats, durationMin){
   drawRecapRow(ctx, y, '✨', 'Événements spéciaux', String(stats.specials));
 
   ctx.textAlign = 'center';
-  ctx.font = '500 20px Inter, sans-serif';
+  ctx.font = '500 20px "Work Sans", sans-serif';
   ctx.fillStyle = 'rgba(244,236,226,0.4)';
   ctx.fillText('Généré avec l\'app Soirée', RECAP_W/2, RECAP_H - 50);
 

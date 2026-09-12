@@ -56,6 +56,11 @@ const PIL_PROMPTS = {
 let myId = null, myCode = null, amHost = false;
 let state = null;
 let roleSeen = false;
+let hostNarratorMode = 'device', hostNarratorName = '';
+
+function escapeHtml(v){
+  return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
 function shuffleArr(arr){
   const a=[...arr];
@@ -96,13 +101,33 @@ function renderLanding(){
 }
 
 function renderHostCreateForm(){
+  hostNarratorMode = 'device'; hostNarratorName = '';
   frame().innerHTML =
     '<div class="title" style="font-size:24px;">Héberger</div>'+
-    '<div class="subtitle">Ce téléphone sera l\'écran commun — pose-le au centre, ou branche-le à une enceinte.</div>'+
+    '<div class="subtitle">Qui anime la partie ?</div>'+
+    '<div class="landing-choice narrator-opt selected" id="nm-device">'+
+      '<h3>Appareil au milieu</h3><p>Pose ce téléphone au centre de la table — il pilote tout, personne n\'est aux commandes.</p>'+
+    '</div>'+
+    '<div class="landing-choice narrator-opt" id="nm-human">'+
+      '<h3>Je suis le narrateur</h3><p>J\'anime la partie sur mon téléphone. Je ne joue pas — mais je paie le prix.</p>'+
+    '</div>'+
+    '<input class="field hidden" id="in-narrator-name" maxlength="16" placeholder="Ton prénom (narrateur)">'+
     '<button class="btn btn-primary" id="do-host">Créer la partie</button>'+
     '<div class="error-msg" id="err"></div>'+
     '<div class="spacer"></div>'+
     '<div class="landing-choice" id="back">← Retour</div>';
+  const nmDevice = document.getElementById('nm-device');
+  const nmHuman = document.getElementById('nm-human');
+  const nameField = document.getElementById('in-narrator-name');
+  const selectNarratorMode = mode => {
+    hostNarratorMode = mode;
+    nmDevice.classList.toggle('selected', mode==='device');
+    nmHuman.classList.toggle('selected', mode==='human');
+    nameField.classList.toggle('hidden', mode!=='human');
+  };
+  nmDevice.onclick = ()=> selectNarratorMode('device');
+  nmHuman.onclick = ()=> selectNarratorMode('human');
+  nameField.oninput = e=> hostNarratorName = e.target.value;
   document.getElementById('back').onclick = renderLanding;
   document.getElementById('do-host').onclick = hostCreateRoom;
 }
@@ -141,6 +166,9 @@ async function hostCreateRoom(){
     code, createdAt: Date.now(), hostId: myId,
     status:'lobby', night:0,
     players:{}, roles:{}, order:[], bonds:{}, powers:{barmanUsed:false, alcooliqueSaved:false},
+    narratorMode: hostNarratorMode,
+    narratorName: hostNarratorMode==='human' ? (hostNarratorName.trim() || 'Le narrateur') : null,
+    narratorDrinks: 0,
   });
   saveSession();
   attachListener();
@@ -197,7 +225,12 @@ function alivePlayers(){
   return (state.order||[]).filter(pid => state.players[pid] && (!state.roles[pid] || state.roles[pid].alive!==false))
     .map(pid=> ({id:pid, name:state.players[pid].name, role: state.roles[pid]}));
 }
-function playerName(pid){ return state.players[pid] ? state.players[pid].name : '???'; }
+function playerName(pid){ return state.players[pid] ? escapeHtml(state.players[pid].name) : '???'; }
+function narratorName(){ return escapeHtml(state.narratorName || 'Le narrateur'); }
+function hostTag(label){
+  const badge = state.narratorMode==='human' ? '<span class="narrator-badge">🍺 '+(state.narratorDrinks||0)+'</span>' : '';
+  return '<div class="host-tag">'+label+badge+'</div>';
+}
 function roleOf(pid){ return state.roles[pid]; }
 
 /* ================= HOST-side game engine ================= */
@@ -217,7 +250,14 @@ async function startGame(){
   await db.ref('games/'+myCode).update({
     roles, bonds, powers:{barmanUsed:false, alcooliqueSaved:false},
     night:1, status:'night-intro', nightData:null, submission:null, pendingTarget:null, winner:null,
+    narratorDrinks: nextNarratorDrinks(1),
   });
+}
+// Ajoute n gorgées au compteur du narrateur si le mode "narrateur humain" est actif ;
+// renvoie le compteur inchangé sinon (pour toujours pouvoir écrire narratorDrinks sans test).
+function nextNarratorDrinks(n){
+  if(state.narratorMode!=='human') return state.narratorDrinks||0;
+  return (state.narratorDrinks||0) + n;
 }
 function randomOther(order, exclude){
   const opts = order.filter(p=>p!==exclude);
@@ -249,13 +289,18 @@ async function beginNightSteps(){
 }
 
 async function processSubmission(sub){
-  // sub = {type, actorId, targetId} — targetId null means "passer"
+  // sub = {type, actorId, targetId} — targetId null means "passer".
+  // Realtime Database ne stocke jamais une valeur null : elle supprime la clé,
+  // donc on la relit ici sous forme d'undefined. On la re-normalise en null
+  // tout de suite pour ne pas écrire un `undefined` dans nightData (rejeté
+  // par le SDK) et pour que les tests d'égalité avec null plus bas restent corrects.
+  const targetId = sub.targetId === undefined ? null : sub.targetId;
   const nd = state.nightData || {};
-  if(sub.type==='videur') nd.videurTarget = sub.targetId;
-  if(sub.type==='barman'){ nd.barmanRedirect = sub.targetId; if(sub.targetId!==null) await db.ref('games/'+myCode+'/powers/barmanUsed').set(true); }
-  if(sub.type==='chimiste') nd.chimisteTarget = sub.targetId;
-  if(sub.type==='pilliers') nd.pilliersTarget = sub.targetId;
-  if(sub.type==='ethylotest') nd.ethylotestCheck = {targetId: sub.targetId, isPillier: sub.targetId ? state.roles[sub.targetId].camp==='pilliers' : null};
+  if(sub.type==='videur') nd.videurTarget = targetId;
+  if(sub.type==='barman'){ nd.barmanRedirect = targetId; if(targetId!==null) await db.ref('games/'+myCode+'/powers/barmanUsed').set(true); }
+  if(sub.type==='chimiste') nd.chimisteTarget = targetId;
+  if(sub.type==='pilliers') nd.pilliersTarget = targetId;
+  if(sub.type==='ethylotest') nd.ethylotestCheck = {targetId, isPillier: targetId ? state.roles[targetId].camp==='pilliers' : null};
 
   const nextIdx = state.stepIdx + 1;
   await db.ref('games/'+myCode).update({ nightData: nd, submission:null, stepIdx: nextIdx });
@@ -282,7 +327,10 @@ async function resolveNight(nd){
       }
     }
   }
-  await db.ref('games/'+myCode).update({ roles, status:'morning', nightData: Object.assign({}, nd, {died}) });
+  await db.ref('games/'+myCode).update({
+    roles, status:'morning', nightData: Object.assign({}, nd, {died}),
+    narratorDrinks: nextNarratorDrinks(1),
+  });
 }
 
 function checkWin(){
@@ -296,7 +344,7 @@ function checkWin(){
 
 async function afterMorning(){
   const win = checkWin();
-  if(win) return db.ref('games/'+myCode).update({status:'end', winner:win});
+  if(win) return db.ref('games/'+myCode).update({status:'end', winner:win, narratorDrinks: nextNarratorDrinks(1)});
   await db.ref('games/'+myCode).update({status:'day', dayEndsAt: Date.now()+90000});
 }
 
@@ -330,13 +378,19 @@ async function confirmSentence(){
     roles[wingmanPid].alive = false;
     mirrorPid = wingmanPid;
   }
-  await db.ref('games/'+myCode).update({ roles, status:'sentence', sentenceResult:{pid, saved:false, wasInnocent, mirrorPid, wasMauvais:r.key==='mauvais'} });
+  await db.ref('games/'+myCode).update({
+    roles, status:'sentence', sentenceResult:{pid, saved:false, wasInnocent, mirrorPid, wasMauvais:r.key==='mauvais'},
+    narratorDrinks: nextNarratorDrinks(wasInnocent ? 2 : 0),
+  });
 }
 
 async function afterSentence(){
   const win = checkWin();
-  if(win) return db.ref('games/'+myCode).update({status:'end', winner:win});
-  await db.ref('games/'+myCode).update({status:'night-intro', night: state.night+1, pendingTarget:null, sentenceResult:null});
+  if(win) return db.ref('games/'+myCode).update({status:'end', winner:win, narratorDrinks: nextNarratorDrinks(1)});
+  await db.ref('games/'+myCode).update({
+    status:'night-intro', night: state.night+1, pendingTarget:null, sentenceResult:null,
+    narratorDrinks: nextNarratorDrinks(1),
+  });
 }
 
 async function submitAction(type, targetId){
@@ -362,7 +416,7 @@ function renderHostLobby(){
   const order = state.order||[];
   const ready = order.length >= PIL_MIN_PLAYERS && order.length <= PIL_MAX_PLAYERS;
   frame().innerHTML =
-    '<div class="host-tag">Écran de la table</div>'+
+    hostTag('Écran de la table')+
     '<div class="room-code-display"><div class="lbl">Code de partie</div><div class="code">'+state.code+'</div></div>'+
     '<div class="player-list">'+
       order.map(pid=>'<div class="player-row"><span><span class="dot"></span>'+playerName(pid)+'</span></div>').join('')+
@@ -402,7 +456,8 @@ function renderHostGame(){
   const s = state;
   let body = '', footer = '';
   if(s.status==='night-intro'){
-    body = '<div class="pil-night-pulse"></div><div class="pil-rule-line" style="margin-top:22px;">Tout le monde ferme les yeux (ou pas — chacun a son téléphone)</div><div style="font-size:12px;color:var(--text-faint);margin-top:6px;">Nuit '+s.night+'</div>';
+    body = '<div class="pil-night-pulse"></div><div class="pil-rule-line" style="margin-top:22px;">Tout le monde ferme les yeux (ou pas — chacun a son téléphone)</div><div style="font-size:12px;color:var(--text-faint);margin-top:6px;">Nuit '+s.night+'</div>'+
+      (s.narratorMode==='human' ? '<div class="pil-narrator-penalty">🍺 '+narratorName()+' boit 1 gorgée — le prix de tout savoir.</div>' : '');
     footer = '<button class="btn btn-primary" id="b1">Commencer les appels</button>';
     setTimeout(()=> document.getElementById('b1').onclick = beginNightSteps);
   } else if(s.status==='night-step'){
@@ -419,6 +474,10 @@ function renderHostGame(){
       const info = ROLE_INFO[roleOf(pid).key];
       return '<div class="pil-rule-line" style="margin-top:10px;">'+playerName(pid)+' est retrouvé inconscient — cul sec.</div><div class="pil-camp-tag camp-'+info.camp+'">'+info.name+'</div>';
     }).join('');
+    if(s.narratorMode==='human'){
+      body += '<div class="pil-narrator-penalty">🍺 '+narratorName()+' boit 1 gorgée — '+
+        (died.length===0 ? 'pour nous avoir fait attendre pour rien.' : 'pour avoir regardé sans rien dire.')+'</div>';
+    }
     footer = '<button class="btn btn-primary" id="b2">Continuer</button>';
     setTimeout(()=> document.getElementById('b2').onclick = afterMorning);
   } else if(s.status==='day'){
@@ -444,7 +503,7 @@ function renderHostGame(){
   } else if(s.status==='end'){
     return renderEndScreen(true);
   }
-  frame().innerHTML = '<div class="host-tag">Écran de la table — Nuit '+s.night+'</div><div class="pil-body">'+body+'</div>'+footer;
+  frame().innerHTML = hostTag('Écran de la table — Nuit '+s.night)+'<div class="pil-body">'+body+'</div>'+footer;
 }
 
 function renderSentenceHTML(){
@@ -459,6 +518,7 @@ function renderSentenceHTML(){
   if(sr.wasInnocent) extra += '<div class="pil-rule-line" style="color:var(--clay);margin-top:10px;">Erreur judiciaire ! Tout le monde boit 2 gorgées de pénalité.</div>';
   if(sr.wasMauvais) extra += '<div class="pil-rule-line" style="color:var(--accent);margin-top:6px;">C\'était le Mauvais Buveur — tournée générale !</div>';
   if(sr.mirrorPid) extra += '<div class="pil-rule-line" style="color:var(--clay);margin-top:6px;">'+playerName(sr.mirrorPid)+' était son Wingman — il boit cul sec en miroir !</div>';
+  if(sr.wasInnocent && s.narratorMode==='human') extra += '<div class="pil-narrator-penalty">🍺 '+narratorName()+' boit 2 gorgées de plus — il n\'a pas su calmer le débat.</div>';
   return '<div class="pil-rule-line">'+playerName(sr.pid)+'</div><div class="pil-camp-tag camp-'+info.camp+'">'+info.name+'</div><div class="pil-rule-line" style="margin-top:12px;">Cul sec, et révèle son identité.</div>'+extra;
 }
 
@@ -466,7 +526,7 @@ function renderDayScreen(isHost){
   const s = state;
   const remaining = Math.max(0, Math.ceil((s.dayEndsAt - Date.now())/1000));
   frame().innerHTML =
-    (isHost ? '<div class="host-tag">Écran de la table</div>' : roleBadge())+
+    (isHost ? hostTag('Écran de la table') : roleBadge())+
     '<div class="pil-body"><div class="pil-timer-big" id="timer">'+remaining+'</div><div class="pil-timer-sub">Débat — silence après le gong</div></div>'+
     (isHost ? '<button class="btn btn-ghost" id="skip-debate">Passer au vote</button>' : '');
   if(isHost){ const b = document.getElementById('skip-debate'); if(b) b.onclick = endDebate; }
@@ -485,7 +545,7 @@ function renderVoteCountdown(isHost){
   const elapsed = Date.now() - s.voteStartedAt;
   const n = Math.max(0, 3 - Math.floor(elapsed/800));
   frame().innerHTML =
-    (isHost ? '<div class="host-tag">Écran de la table</div>' : roleBadge())+
+    (isHost ? hostTag('Écran de la table') : roleBadge())+
     '<div class="pil-body"><div class="pil-timer-sub">Tout le monde pointe un suspect...</div><div class="pil-timer-big">'+(n>0?n:'👉')+'</div></div>';
   clearInterval(window.__pilTick);
   window.__pilTick = setInterval(()=>{
@@ -505,11 +565,19 @@ function renderEndScreen(isHost){
     roster += '<div class="'+(s.roles[pid].alive?'':'dead')+'">'+playerName(pid)+' — '+info.name+'</div>';
   });
   roster += '</div>';
+  const narratorTally = s.narratorMode==='human'
+    ? '<div class="pil-narrator-penalty" style="margin-top:14px;">🍺 '+narratorName()+' a bu '+(s.narratorDrinks||0)+' gorgée'+((s.narratorDrinks||0)>1?'s':'')+' ce soir — et une dernière pour la route.</div>'
+    : '';
   frame().innerHTML =
-    (isHost ? '<div class="host-tag">Écran de la table</div>' : '')+
-    '<div class="pil-body"><div style="font-family:Fraunces,serif;font-size:26px;color:var(--accent);">'+label+'</div>'+roster+'</div>'+
+    (isHost ? hostTag('Écran de la table') : '')+
+    '<div class="pil-body"><div style="font-family:Unbounded,sans-serif;font-size:26px;color:var(--accent);">'+label+'</div>'+roster+narratorTally+'</div>'+
     (isHost ? '<button class="btn btn-primary" id="replay">Rejouer (mêmes joueurs)</button>' : '<div class="pil-rule-line">Merci d\'avoir joué !</div>');
-  if(isHost){ document.getElementById('replay').onclick = ()=> db.ref('games/'+myCode).update({status:'lobby', roles:{}, bonds:{}, night:0, sentenceResult:null, pendingTarget:null, winner:null}); }
+  if(isHost){
+    document.getElementById('replay').onclick = ()=> db.ref('games/'+myCode).update({
+      status:'lobby', roles:{}, bonds:{}, night:0, sentenceResult:null, pendingTarget:null, winner:null,
+      narratorDrinks:0,
+    });
+  }
 }
 
 /* ---- Player screens ---- */

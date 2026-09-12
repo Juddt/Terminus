@@ -78,6 +78,7 @@ function resumeSession(){
   state.stats.playerChallenges = state.stats.playerChallenges || {};
   state.stats.playerDrinks = state.stats.playerDrinks || {};
 
+  document.getElementById('frame').classList.toggle('chaos-mode', state.intensityValue >= 85);
   goTo('main');
   document.getElementById('global-fill').style.width =
     Math.max(0, (state.globalSecondsLeft / state.globalSecondsTotal) * 100) + '%';
@@ -85,6 +86,8 @@ function resumeSession(){
   renderChallengeCounter();
 
   if(state.lastItem){
+    document.getElementById('screen-main').dataset.type = (typeof EYEBROW_TO_TYPE !== 'undefined' && EYEBROW_TO_TYPE[state.lastItem.eyebrow]) || 'defi';
+    document.getElementById('ticket-num').textContent = 'N° ' + String(state.queueIndex).padStart(3,'0') + ' / ' + state.typesQueue.length;
     document.getElementById('item-eyebrow').textContent = state.lastItem.eyebrow;
     document.getElementById('item-text').textContent = soberize(state.lastItem.text);
     const tagsWrap = document.getElementById('item-players');
