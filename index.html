@@ -634,7 +634,7 @@
   // proportions (boutons, textes, fond… tout suit) au lieu de rester une colonne
   // étroite. --app-scale n'est utilisé que par la media query correspondante.
   function fitFrameScale(){
-    const DESIGN_W = 480, DESIGN_H = 900, MAX_SCALE = 1.8;
+    const DESIGN_W = 480, DESIGN_H = 700, MAX_SCALE = 2.2;
     const scale = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H, MAX_SCALE);
     document.documentElement.style.setProperty('--app-scale', scale);
   }

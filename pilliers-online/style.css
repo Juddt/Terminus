@@ -96,7 +96,7 @@ h1,h2,h3{font-family:Unbounded,sans-serif; font-weight:600; margin:0;}
 @media (min-width:900px){
   html,body{ background:var(--surface-2); }
   #frame{
-    width:480px; max-width:none; min-height:0; height:900px;
+    width:480px; max-width:none; min-height:0; height:700px;
     transform:scale(var(--app-scale, 1));
     transform-origin:center center;
   }
