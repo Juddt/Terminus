@@ -88,3 +88,16 @@ h1,h2,h3{font-family:Unbounded,sans-serif; font-weight:600; margin:0;}
 .pil-narrator-penalty{font-size:13px; color:var(--clay); background:rgba(196,52,43,0.1); border-radius:10px; padding:8px 12px; margin-top:12px; max-width:300px;}
 .footer-row{display:flex; gap:10px; margin-top:14px;}
 .footer-row .btn{flex:1;}
+
+/* --- Interface ordinateur (même logique que css/app.css du site principal,
+   notes détaillées là-bas) : sous 900px rien ne change ; au-dessus, #frame est
+   agrandi et mis à l'échelle (transform:scale) pour occuper l'écran, boutons,
+   textes et fond compris, plutôt que de rester une colonne étroite. */
+@media (min-width:900px){
+  html,body{ background:var(--surface-2); }
+  #frame{
+    width:480px; max-width:none; min-height:0; height:900px;
+    transform:scale(var(--app-scale, 1));
+    transform-origin:center center;
+  }
+}

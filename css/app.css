@@ -253,3 +253,20 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
   0%,100%{ box-shadow:0 10px 26px rgba(30,26,20,0.16), 0 0 0 0 rgba(196,52,43,0.5); }
   50%{ box-shadow:0 10px 26px rgba(30,26,20,0.16), 0 0 0 7px rgba(196,52,43,0); }
 }
+
+/* --- Interface ordinateur ----------------------------------------------------
+   Sous 900px de large, rien ne change : #frame occupe tout l'écran comme avant.
+   Au-dessus, plutôt qu'une colonne étroite perdue dans un fond noir, on agrandit
+   #frame lui-même (boutons, textes, fond : tout suit, puisque c'est un simple
+   transform:scale) pour qu'il remplisse l'écran en conservant ses proportions.
+   --app-scale est calculée en JS (voir index.html, fitFrameScale) à partir du
+   canevas de référence 480×900 et plafonnée pour ne pas devenir démesurée sur
+   un très grand écran ; elle n'est utilisée que par cette media query. */
+@media (min-width:900px){
+  html,body{ background:var(--bg); }
+  #frame{
+    width:480px; max-width:none; height:900px;
+    transform:scale(var(--app-scale, 1));
+    transform-origin:center center;
+  }
+}

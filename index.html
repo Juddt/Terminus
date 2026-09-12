@@ -628,6 +628,18 @@
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   }
+
+  // Interface ordinateur (voir css/app.css, min-width:900px) : au-delà de ce seuil,
+  // #frame est agrandi et mis à l'échelle pour occuper l'écran en conservant ses
+  // proportions (boutons, textes, fond… tout suit) au lieu de rester une colonne
+  // étroite. --app-scale n'est utilisé que par la media query correspondante.
+  function fitFrameScale(){
+    const DESIGN_W = 480, DESIGN_H = 900, MAX_SCALE = 1.8;
+    const scale = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H, MAX_SCALE);
+    document.documentElement.style.setProperty('--app-scale', scale);
+  }
+  fitFrameScale();
+  window.addEventListener('resize', fitFrameScale);
 </script>
 </body>
 </html>
