@@ -52,14 +52,24 @@ function palmierStartGame(){
 
 /* --- Header & status --- */
 function palmUpdateHeader(){
-  document.getElementById('palm-cards-left').textContent = palm.deck.length;
   document.getElementById('palm-kings-count').textContent = palm.kingsDrawn;
   document.getElementById('palm-collapse-count').textContent = palm.collapseCount;
   const bar = document.getElementById('palm-status-bar');
   let html = '';
-  if(palm.questionMaster!==null) html += '<div class="master-pill">Maître Question <span class="mn">'+palm.players[palm.questionMaster]+'</span></div>';
-  if(palm.freezeMaster!==null) html += '<div class="master-pill">Maître Freeze <span class="mn">'+palm.players[palm.freezeMaster]+'</span></div>';
+  if(palm.questionMaster!==null) html += palmRoleHTML('🎤', 'Maître de la Question', palm.players[palm.questionMaster]);
+  if(palm.freezeMaster!==null)   html += palmRoleHTML('❄️', 'Maître du Freeze', palm.players[palm.freezeMaster]);
   bar.innerHTML = html;
+}
+
+// Un rôle en cours, pas un bouton : aucune ombre, aucun relief cliquable, mais assez
+// de présence pour qu'on se souvienne qui le détient une heure plus tard.
+function palmRoleHTML(symbol, role, name){
+  return '<div class="palm-role">'+
+      '<span class="palm-role-sym">'+symbol+'</span>'+
+      '<span class="palm-role-label">'+role+'</span>'+
+      '<span class="palm-role-sep">·</span>'+
+      '<span class="palm-role-name">'+escapeHtml(name)+'</span>'+
+    '</div>';
 }
 function palmPlayer(){ return palm.players[palm.currentIdx % palm.players.length]; }
 
@@ -106,33 +116,32 @@ function palmCardMiniHTML(card){
 function palmGetRule(card){
   const v = card.value;
   const red = palmIsRed(card.suit);
-  const p = palmPlayer();
   switch(v){
     case 'A': return red
-      ? {d:p+' boit cul sec'}
-      : {d:p+' choisit qui doit boire cul sec'};
+      ? {d:'Tu bois cul sec'}
+      : {d:'Tu choisis qui boit cul sec'};
     case '2': return red
-      ? {d:p+' doit boire 2 gorgées'}
-      : {d:p+' donne 2 gorgées'};
+      ? {d:'Tu bois 2 gorgées'}
+      : {d:'Tu donnes 2 gorgées'};
     case '3': return red
-      ? {d:p+' doit boire 3 gorgées'}
-      : {d:p+' donne 3 gorgées'};
+      ? {d:'Tu bois 3 gorgées'}
+      : {d:'Tu donnes 3 gorgées'};
     case '4': return {d:'Floor to the floor !'};
     case '5': return {d:'Five to the sky !'};
     case '6': return {d:'Dans ma valise il y a…'};
-    case '7': return {d:p+' devient le Maître de la question', master:'question'};
-    case '8': return {d:p+' distribue 8 gorgées'};
+    case '7': return {d:'Tu deviens le Maître de la Question', master:'question'};
+    case '8': return {d:'Tu distribues 8 gorgées'};
     case '9': return {d:'J\'ai déjà / J\'ai jamais'};
-    case '10': return {d:p+' devient le Maître du freeze', master:'freeze'};
+    case '10': return {d:'Tu deviens le Maître du Freeze', master:'freeze'};
     case 'V': return {d:'Jeu du thème'};
     case 'D': return {d:'Tout le monde boit une gorgée'};
     case 'R':
       palm.kingsDrawn++;
       if(palm.kingsDrawn < 4){
         const left = 4 - palm.kingsDrawn;
-        return {d:p+' doit inventer une règle', kings:left};
+        return {d:'Tu inventes une règle', kings:left};
       } else {
-        return {d:p+' a tiré le 4ème Roi — CUL SEC !', gameover:true};
+        return {d:'4ème Roi — CUL SEC !', gameover:true};
       }
     default: return {d:''};
   }

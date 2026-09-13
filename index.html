@@ -231,17 +231,14 @@
   <div class="screen" id="screen-palmier">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="palmierQuit()">Quitter</button>
+        <button class="top-btn" onclick="goTo('home')">Accueil</button>
         <div class="game-topbar-right">
-          <button class="top-btn" onclick="goTo('home')">Accueil</button>
           <button class="top-btn icon-only" onclick="showRulesOverlay('palmier')" aria-label="Règles">?</button>
         </div>
       </div>
       <div class="game-badges">
-        <div class="badge"><span class="bv" id="palm-cards-left">52</span>cartes</div>
         <div class="badge"><span class="bv" id="palm-kings-count">0</span>/4 Rois</div>
         <div class="badge"><span class="bv" id="palm-collapse-count">0</span>/5 chutes</div>
-        
       </div>
     </div>
     <div id="palm-status-bar" class="game-status"></div>
