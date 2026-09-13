@@ -14,6 +14,14 @@
 .pil-role-card{width:220px; border-radius:16px; padding:24px 18px; margin-top:16px; box-shadow:0 10px 30px rgba(0,0,0,0.4);}
 .pil-role-card.camp-pilliers{background:linear-gradient(160deg,#3a1414,#210a0a); border:1px solid var(--clay);}
 .pil-role-card.camp-village{background:linear-gradient(160deg,#20301f,#131f13); border:1px solid var(--sage);}
+
+/* Le bloc secret prend la couleur du camp, mais SEULEMENT une fois ouvert : le voile
+   reste rigoureusement neutre, sinon sa teinte trahirait le camp avant lecture. */
+.secret.camp-pilliers .secret-content{background:linear-gradient(160deg,#3A1414,#210A0A);}
+.secret.camp-village .secret-content{background:linear-gradient(160deg,#20301F,#131F13);}
+.secret.camp-solo .secret-content{background:linear-gradient(160deg,#2E2A16,#1A170B);}
+.pil-pass-small{font-family:'Anton',sans-serif; font-size:21px; color:var(--text-dim);
+  line-height:1; overflow-wrap:anywhere; max-width:300px;}
 .pil-role-card.camp-solo{background:linear-gradient(160deg,#2c2412,#1c160a); border:1px solid var(--accent);}
 .pil-role-camp{font-size:10px; letter-spacing:2px; text-transform:uppercase; opacity:0.7; color:#FBF4E7;}
 .pil-role-name{font-family:'Anton',sans-serif; font-size:24px; color:#FBF4E7; margin:8px 0 10px;}

@@ -142,13 +142,27 @@ function pilRevealShow(){
   const info = ROLE_INFO[p.key];
   const body = document.getElementById('pil-body');
   const footer = document.getElementById('pil-footer');
+  // Le rôle ne s'affiche que sous le doigt : c'est le cœur du jeu, et le téléphone
+  // passe de main en main autour de la table.
   body.innerHTML =
-    '<div class="pil-role-card camp-'+info.camp+'">'+
+    '<div class="pil-pass-small">'+escapeHtml(p.name)+'</div>'+
+    secretHTML(
       '<div class="pil-role-camp">'+CAMP_LABEL[info.camp]+'</div>'+
       '<div class="pil-role-name">'+info.name+'</div>'+
-      '<div class="pil-role-desc">'+info.desc+'</div>'+
-    '</div>';
-  footer.innerHTML = '<button class="btn btn-primary" onclick="pilRevealNext()">C\'est vu, masquer et passer</button>';
+      '<div class="pil-role-desc">'+info.desc+'</div>',
+      { id:'pil-secret', hint:'Maintiens pour voir ton rôle' })+
+    '<div class="secret-gate-hint" id="pil-gate">Garde le doigt appuyé, lis, relâche.</div>';
+  // La couleur du camp habille le bloc secret une fois ouvert.
+  const sec = document.getElementById('pil-secret');
+  if(sec) sec.classList.add('camp-'+info.camp);
+  footer.innerHTML = '<button class="btn btn-primary" id="pil-next-btn" disabled '+
+    'onclick="pilRevealNext()">C\'est vu, masquer et passer</button>';
+  secretBind('pil-secret', function(){
+    const b = document.getElementById('pil-next-btn');
+    if(b) b.disabled = false;
+    const g = document.getElementById('pil-gate');
+    if(g) g.textContent = 'Relâche, puis passe le téléphone.';
+  });
 }
 
 function pilRevealNext(){

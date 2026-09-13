@@ -234,5 +234,35 @@ check('PMU : une carte fait avancer le bon as d\'exactement une case',
 check('PMU : les obstacles font bien reculer', pmuAudit.reculs > 0, pmuAudit.reculs+' reculs observés');
 check('PMU : toute course se termine sur un as arrivé à la case 8', pmuAudit.courses > 250, pmuAudit.courses+'/300');
 
+
+// --- LE SECRET (consultation privée sur téléphone partagé) --------------------------
+// Un rôle ou un mot secret ne doit JAMAIS être lisible tant que le doigt n'est pas
+// posé : un voisin lirait par-dessus l'épaule. Le voile doit donc être opaque — pas un
+// simple flou, qui se devine encore.
+const secret = vm.runInContext("secretHTML('<i>mot</i>', {id:'s1'})", ctx);
+check('Le secret pose un voile par-dessus son contenu',
+  secret.includes('secret-veil') && secret.includes('secret-content'));
+check('Le contenu secret est bien dans le bloc', secret.includes('<i>mot</i>'));
+
+const shared = fs.readFileSync(path.join(root,'css','games-shared.css'),'utf8');
+const veil = (shared.match(/\.secret-veil\{[^}]*\}/) || [''])[0];
+check('Le voile est opaque, pas un flou', /background:/.test(veil) && !/blur/.test(veil), veil ? 'règle trouvée' : 'RÈGLE ABSENTE');
+check('Le voile ne disparaît qu\'à l\'ouverture', /\.secret\.open\s+\.secret-veil\{[^}]*opacity:0/.test(shared));
+check('Aucune sélection de texte possible sur le secret', /\.secret\{[^}]*user-select:none/.test(shared));
+
+// Le bouton « suivant » reste bloqué tant que le secret n'a pas été consulté.
+els['s1'] = el('s1');
+const handlers = {};
+els['s1'].addEventListener = (ev, fn)=>{ (handlers[ev] = handlers[ev] || []).push(fn); };
+let seen = false;
+vm.runInContext("secretBind('s1', function(){ __seen = true; })", ctx);
+ctx.__seen = false;
+(handlers.pointerdown || []).forEach(fn => fn({ cancelable:false }));
+check('Consulter le secret débloque la suite', ctx.__seen === true);
+check('Relâcher referme le secret', (function(){
+  (handlers.pointerup || []).forEach(fn => fn());
+  return !els['s1'].classList.contains('open');
+})());
+
 console.log(ok?'\nMINI-JEUX CONFORMES':'\nDES ÉCARTS SUBSISTENT');
 process.exit(ok?0:1);

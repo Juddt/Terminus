@@ -75,3 +75,6 @@
 #und-body{overflow-y:auto; -webkit-overflow-scrolling:touch; justify-content:flex-start; padding:16px;}
 #und-body::-webkit-scrollbar{display:none;}
 #und-body::before, #und-body::after{content:''; margin:auto; flex-shrink:0;}
+
+.und-pass-small{font-family:'Anton',sans-serif; font-size:21px; color:var(--text-dim);
+  line-height:1; overflow-wrap:anywhere; max-width:300px;}

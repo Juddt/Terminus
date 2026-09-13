@@ -45,3 +45,63 @@ function deckHTML(count, opts){
       (o.label === false ? '' : '<div class="pc-deck-count">' + count + ' carte' + (count > 1 ? 's' : '') + '</div>') +
     '</div>';
 }
+
+// ===================================================================================
+// LE SECRET — consultation privée sur un téléphone partagé
+// -----------------------------------------------------------------------------------
+// Un seul téléphone circule autour de la table : afficher un rôle ou un mot secret dès
+// qu'on touche l'écran suffit à ce que le voisin le lise par-dessus l'épaule. Le secret
+// reste donc MASQUÉ, et ne se dévoile que tant qu'un doigt reste appuyé dessus : on
+// peut se tourner, cacher l'écran, lire, puis relâcher — et il se referme aussitôt.
+//
+// Le bouton « suivant » n'apparaît qu'une fois le secret réellement consulté : personne
+// ne passe le téléphone sans avoir vu son rôle.
+//
+// secretHTML(contenu, options) pose le bloc ; secretBind() l'active après insertion.
+// ===================================================================================
+
+function secretHTML(inner, opts){
+  const o = opts || {};
+  return '<div class="secret" id="'+(o.id || 'secret')+'">'+
+      '<div class="secret-content">'+inner+'</div>'+
+      '<div class="secret-veil">'+
+        '<div class="secret-lock">'+
+          '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+            'stroke-width="1.6" aria-hidden="true">'+
+            '<rect x="4" y="10" width="16" height="11" rx="2"/>'+
+            '<path d="M8 10V7a4 4 0 0 1 8 0v3"/>'+
+          '</svg>'+
+        '</div>'+
+        '<div class="secret-hint">'+(o.hint || 'Maintiens le doigt appuyé pour voir')+'</div>'+
+        '<div class="secret-sub">Personne d\'autre ne regarde&nbsp;?</div>'+
+      '</div>'+
+    '</div>';
+}
+
+// Active un bloc secret. `onSeen` est appelé la PREMIÈRE fois qu'il est consulté.
+function secretBind(id, onSeen){
+  const el = document.getElementById(id || 'secret');
+  if(!el) return;
+  let seen = false;
+  const open = (e)=>{
+    if(e && e.cancelable) e.preventDefault();
+    el.classList.add('open');
+    if(!seen){
+      seen = true;
+      Sound.play('capOpen');
+      if(typeof onSeen === 'function') onSeen();
+    }
+  };
+  const close = ()=> el.classList.remove('open');
+  // pointerdown/up couvre le tactile et la souris d'un seul jeu d'événements ;
+  // pointercancel et pointerleave referment si le doigt glisse hors du bloc.
+  el.addEventListener('pointerdown', open);
+  el.addEventListener('pointerup', close);
+  el.addEventListener('pointercancel', close);
+  el.addEventListener('pointerleave', close);
+  // Accessibilité clavier : Espace ou Entrée maintenus ouvrent aussi.
+  el.setAttribute('tabindex', '0');
+  el.addEventListener('keydown', (e)=>{ if(e.key === ' ' || e.key === 'Enter') open(e); });
+  el.addEventListener('keyup', close);
+  el.addEventListener('blur', close);
+}

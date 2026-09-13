@@ -169,16 +169,31 @@ function undRenderReveal(){
            '<div class="und-sub">Écoute, déduis, et fais-toi passer pour un Citoyen.</div>';
   } else {
     card = '<div class="und-role">Ton mot</div>'+
-           '<div class="und-word">'+p.word+'</div>'+
+           '<div class="und-word">'+escapeHtml(p.word)+'</div>'+
            '<div class="und-sub">Un seul mot par tour pour le décrire. Sans jamais le dire.</div>';
   }
   if(p.dict){
     card += '<div class="und-dict-tag">Tu es le Dictateur. Trois pouvoirs secrets, un seul usage chacun.</div>';
   }
 
-  document.getElementById('und-body').innerHTML = card;
+  // Le mot ne s'affiche que sous le doigt : sur un téléphone qui circule, l'afficher
+  // d'emblée suffisait à ce que le voisin le lise par-dessus l'épaule.
+  document.getElementById('und-body').innerHTML =
+    '<div class="und-pass-small">'+escapeHtml(p.name)+'</div>'+
+    secretHTML(card, { id:'und-secret', hint:'Maintiens pour voir ton mot' })+
+    '<div class="secret-gate-hint" id="und-gate">Garde le doigt appuyé, lis, relâche.</div>';
   document.getElementById('und-footer').innerHTML =
-    '<button class="btn btn-primary" onclick="undNextReveal()">'+(isLast ? 'Tout le monde a vu' : 'J&rsquo;ai vu — au suivant')+'</button>';
+    '<button class="btn btn-primary" id="und-next-btn" disabled onclick="undNextReveal()">'+
+      (isLast ? 'Tout le monde a vu' : 'J&rsquo;ai vu — au suivant')+'</button>';
+
+  // Le bouton ne s'active qu'une fois le mot réellement consulté : personne ne passe
+  // le téléphone sans avoir vu son rôle.
+  secretBind('und-secret', function(){
+    const b = document.getElementById('und-next-btn');
+    if(b) b.disabled = false;
+    const g = document.getElementById('und-gate');
+    if(g) g.textContent = 'Relâche, puis passe le téléphone.';
+  });
 }
 
 function undNextReveal(){
