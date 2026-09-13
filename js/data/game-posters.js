@@ -3,7 +3,7 @@
 // -----------------------------------------------------------------------------------
 // Chaque jeu est présenté par SON PROPRE OBJET, celui-là même qu'on manipulera en
 // jouant : le cube du Duel de Dés, la pièce à tranche de Pile ou Face, le paquet de
-// Purple, la cible, la piste du PMU, le palmier sur sa bouteille…
+// Purple, la cible, la piste du PMU, le cercle de cartes du Palmier…
 //
 // C'est un choix délibéré plutôt qu'une série d'icônes dessinées à part. D'abord parce
 // qu'un objet réel, avec sa matière, son volume et son ombre de contact, est bien plus
@@ -85,12 +85,24 @@ const GAME_POSTERS = {
       posterCard('D', '♠', 'transform:rotate(15deg) translate(-14px, 4px);')+
     '</div>',
 
-  // Les quatre paliers du Bus : une carte vue, les suivantes encore cachées.
-  bus: '<div class="poster-ladder">'+
-      '<div class="poster-rung done">'+posterCard('9', '♦', '--pc-w:34px;')+'<span></span></div>'+
-      '<div class="poster-rung active"><em>?</em><span></span></div>'+
-      '<div class="poster-rung"><em>?</em><span></span></div>'+
-      '<div class="poster-rung"><em>?</em><span></span></div>'+
+  // Le Bus : LA MONTÉE. Quatre barreaux gris avec des points d'interrogation, c'était
+  // un schéma, pas un objet — plat, sans matière, et ça ne disait pas ce qu'on joue.
+  // Ce sont maintenant les quatre cartes de la manche, posées en escalier : la première
+  // déjà retournée, la suivante éclairée (c'est celle qu'on devine), les deux dernières
+  // encore fermées, chacune plus haute et plus penchée que la précédente. On lit la
+  // progression, l'enjeu qui monte, et la carte qui vient.
+  bus: '<div class="poster-climb">'+
+      '<span class="climb-beam" aria-hidden="true"></span>'+
+      posterCard('9', '\u2666', '--pc-w:40px;', 'climb-card climb-1')+
+      '<div class="pc pc-black climb-card climb-2 climb-next" style="--pc-w:40px;">'+
+        '<div class="pc-inner"><div class="pc-back"></div></div>'+
+      '</div>'+
+      '<div class="pc pc-black climb-card climb-3" style="--pc-w:40px;">'+
+        '<div class="pc-inner"><div class="pc-back"></div></div>'+
+      '</div>'+
+      '<div class="pc pc-black climb-card climb-4" style="--pc-w:40px;">'+
+        '<div class="pc-inner"><div class="pc-back"></div></div>'+
+      '</div>'+
     '</div>',
 
   // La cible, avec ses couronnes et quelques cartes posées.
@@ -120,25 +132,34 @@ const GAME_POSTERS = {
       }).join('')+
     '</div>',
 
-  // Le palmier : la bouteille et sa couronne de cartes en équilibre.
-  palmier: '<div class="poster-palm">'+
-      '<div class="palm-scene" style="height:150px;">'+
-        '<div class="palm-bottle">'+
-          '<div class="palm-bottle-neck"></div>'+
-          '<div class="palm-bottle-body"><span class="palm-bottle-shine"></span></div>'+
-        '</div>'+
-        [['A','♠',1],['7','♥',-1],['R','♣',1],['4','♦',-1],['9','♠',1]]
-          .map((c, i) => {
-            const side = c[2];
-            const rank = Math.floor(i / 2);
-            const angle = side * Math.min(70, 12 + rank * 20);
-            return '<div class="palm-stack-card '+(c[1] === '♥' || c[1] === '♦' ? 'red' : 'black')+'" '+
-              'style="transform:translateX(calc(-50% + '+(side * rank * 3)+'px)) translateY(-'+(2 + i * 3)+'px) '+
-              'rotate('+angle+'deg);">'+
-              '<span class="psc-val">'+c[0]+'</span><span class="psc-suit">'+c[1]+'</span></div>';
-          }).join('')+
-      '</div>'+
+  // Le Palmier : LE CERCLE. Le jeu, c'est le cercle de cartes autour de la table — et
+  // les cartes qui rayonnent depuis le centre, comme les palmes qui donnent son nom au
+  // jeu. La bouteille a disparu : elle occupait le centre, écrasait la moitié basse de
+  // l'affiche et n'était pas ce qu'on manipule. Le cercle complet, lui, se reconnaît
+  // d'un coup d'œil et dit la règle : on tourne, chacun tire.
+  palmier: '<div class="poster-ring">'+
+      '<span class="ring-core" aria-hidden="true"></span>'+
+      (function(){
+        const FACES = { 0:['A','\u2660'], 4:['7','\u2665'], 8:['R','\u2663'], 12:['4','\u2666'] };
+        let out = '';
+        for(let i = 0; i < 16; i++){
+          const angle = i * 22.5;
+          const face = FACES[i];
+          // Chaque carte est tournée vers l'extérieur puis poussée sur le cercle : elles
+          // rayonnent au lieu de s'empiler, et aucune n'en recouvre une autre.
+          const pos = 'transform:rotate('+angle+'deg) translateY(-66px);';
+          if(face){
+            out += posterCard(face[0], face[1], '--pc-w:30px;'+pos, 'ring-card');
+          } else {
+            out += '<div class="pc pc-black ring-card" style="--pc-w:30px;'+pos+'">'+
+                     '<div class="pc-inner"><div class="pc-back"></div></div>'+
+                   '</div>';
+          }
+        }
+        return out;
+      })()+
     '</div>',
+
 
   // UnderDicateur : un mot sous scellé, et le doute.
   underdicateur: '<div class="poster-secret">'+
