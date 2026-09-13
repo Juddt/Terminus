@@ -1,12 +1,117 @@
-.pmu-track{width:100%; overflow-x:auto; margin:8px 0;}
-.pmu-row{display:flex; align-items:center; gap:3px; margin-bottom:4px; height:42px;}
-.pmu-label{width:24px; font-size:18px; text-align:center; flex-shrink:0;}
-.pmu-cell{width:36px; height:36px; border-radius:6px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(255,255,255,0.3); position:relative;}
-.pmu-cell.finish{border-color:rgba(232,255,61,0.3); background:rgba(232,255,61,0.08);}
-.pmu-cell.obstacle{border-color:rgba(163,80,58,0.3); background:rgba(163,80,58,0.06);}
-.pmu-cell.obstacle.flipped{background:rgba(163,80,58,0.2);}
-.pmu-horse{width:30px; height:42px; background:#f6f1e7; border-radius:5px; box-shadow:0 3px 8px rgba(0,0,0,0.4); display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:700; font-family:'Anton',sans-serif; position:absolute; z-index:2;}
-.pmu-horse.r{color:#a82020;}
-.pmu-horse.b{color:#1a1a1a;}
-.pmu-lastcard{display:flex; align-items:center; gap:10px; justify-content:center; margin:10px 0;}
-.pmu-bets{font-size:12px; color:var(--text-dim); text-align:center; line-height:1.8;}
+/* ===================================================================================
+   LE PMU — signature : LA COURSE
+   -----------------------------------------------------------------------------------
+   Quatre couloirs, quatre as qui GLISSENT le long de leur piste. La position est un
+   pourcentage, la transition CSS fait le mouvement : les dépassements et les reculs
+   sur obstacle se lisent au moment où ils arrivent.
+
+   L'ancienne piste était une grille de neuf cellules par couloir — à 390 px de large,
+   chaque case faisait 30 px et l'as tenait à peine dedans ; surtout, il SAUTAIT d'une
+   cellule à l'autre, ce qui ne raconte pas une course.
+   =================================================================================== */
+
+#screen-pmu{padding:0;}
+#screen-pmu-bet{padding:0;}
+
+/* La dernière carte retournée : c'est elle qui vient de faire avancer un as. */
+.pmu-last{display:flex; align-items:center; justify-content:center; min-height:76px; gap:8px;}
+.pmu-last-empty{font-size:13px; color:var(--text-faint);}
+
+/* --- La piste ------------------------------------------------------------------------ */
+.pmu-track{position:relative; width:100%; max-width:330px; display:flex; flex-direction:column;
+  gap:7px; padding:12px 10px 10px; border-radius:16px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
+  border:1px solid var(--line);}
+
+.pmu-lane{display:flex; align-items:center; gap:8px;}
+.pmu-lane-suit{width:18px; flex-shrink:0; text-align:center; font-size:15px; color:var(--text-dim);}
+.pmu-lane-suit.red{color:#D8515C;}
+.pmu-lane-suit.dim{color:var(--text-faint); font-size:12px;}
+
+/* Le rail : la surface sur laquelle l'as se déplace. */
+.pmu-rail{position:relative; flex:1; height:30px; border-radius:8px;
+  background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.05);}
+.pmu-rail-marks span{position:absolute; top:4px; bottom:4px; width:1px;
+  background:rgba(255,255,255,0.07); transform:translateX(-50%);}
+
+/* L'as. `left` est un pourcentage : la transition rend le déplacement visible. */
+.pmu-runner{position:absolute; top:50%; left:0; transform:translate(-50%, -50%);
+  width:26px; height:34px; border-radius:5px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; line-height:1;
+  background:radial-gradient(ellipse at 30% 20%, #FFFFFF, #F2EDE0 70%, #DED6C3);
+  box-shadow:0 3px 9px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.5) inset;
+  transition:left .42s cubic-bezier(.3,.8,.35,1);}
+.pmu-runner-rank{font-family:'Work Sans',sans-serif; font-weight:700; font-size:11px;}
+.pmu-runner-suit{font-size:11px;}
+.pmu-runner.red{color:#B3202A;}
+.pmu-runner.black{color:#15130E;}
+.pmu-lane.winner .pmu-rail{border-color:var(--accent); background:rgba(232,255,61,0.08);}
+.pmu-lane.winner .pmu-runner{box-shadow:0 0 0 2px var(--accent), 0 4px 12px rgba(0,0,0,0.6);}
+
+/* Les obstacles, alignés sous la piste, chacun à la case qu'il garde. */
+.pmu-obstacles{display:flex; align-items:center; gap:8px; margin-top:2px;}
+.pmu-obstacles .pmu-rail{height:22px; background:none; border:none;}
+.pmu-obs{position:absolute; top:50%; transform:translate(-50%, -50%);
+  width:22px; height:18px; border-radius:4px; display:flex; align-items:center; justify-content:center;
+  font-size:9px; color:var(--text-faint);
+  background:linear-gradient(155deg, #24241A, #14140E); border:1px solid rgba(232,255,61,0.15);
+  transition:background .3s ease, color .3s ease, border-color .3s ease;}
+.pmu-obs.flipped{background:#F2EDE0; border-color:transparent; font-weight:700;
+  font-family:'Work Sans',sans-serif; color:#15130E;}
+.pmu-obs.flipped.red{color:#B3202A;}
+
+.pmu-finish-label{position:absolute; right:8px; top:-8px; font-size:9px; letter-spacing:1.6px;
+  text-transform:uppercase; color:var(--text-faint); background:var(--bg); padding:0 5px;}
+
+/* --- Les paris ----------------------------------------------------------------------- */
+.pmu-bets{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; max-width:330px; margin-top:4px;}
+.pmu-bet{display:flex; align-items:center; gap:6px; padding:5px 10px; border-radius:10px;
+  border:1px solid var(--line); background:rgba(255,255,255,0.035); font-size:12.5px; color:var(--text-dim);}
+.pmu-bet-name{overflow-wrap:anywhere; max-width:90px;}
+.pmu-bet-horse{font-size:13px;}
+.pmu-bet-horse.red{color:#D8515C;}
+.pmu-bet-amount{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-faint);}
+.pmu-bet.won{border-color:var(--accent); color:var(--accent); background:rgba(232,255,61,0.08);}
+.pmu-bet.won .pmu-bet-amount{color:var(--accent);}
+.pmu-bet.lost{opacity:0.5;}
+
+/* --- Résultat ------------------------------------------------------------------------ */
+.pmu-result{display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:6px;}
+.pmu-result-title{font-family:'Anton',sans-serif; font-size:29px; line-height:1; color:var(--accent);}
+.pmu-result-line{font-size:13.5px; color:var(--text-dim); line-height:1.45; max-width:300px;}
+.pmu-result-line.win{color:var(--accent);}
+.pmu-result-line.lose{color:var(--clay);}
+
+/* --- Les paris (écran de mise) -------------------------------------------------------- */
+.pmu-bet-who{font-family:'Anton',sans-serif; font-size:27px; line-height:1; color:var(--accent);
+  overflow-wrap:anywhere; max-width:300px;}
+.pmu-bet-prompt{font-size:13.5px; color:var(--text-dim);}
+.pmu-horses{display:flex; gap:10px; justify-content:center;}
+.pmu-horse-pick{width:62px; height:86px; border-radius:10px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  border:1px solid var(--line); background:var(--surface-2); color:var(--text-dim);
+  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), background .15s ease;}
+.pmu-horse-pick:active{transform:scale(0.94);}
+.pmu-horse-pick .rank{font-family:'Work Sans',sans-serif; font-weight:700; font-size:17px;}
+.pmu-horse-pick .suit{font-size:24px;}
+.pmu-horse-pick.selected{background:radial-gradient(ellipse at 30% 20%, #FFFFFF, #F2EDE0 70%, #DED6C3);
+  border-color:transparent; color:#15130E; box-shadow:0 6px 16px rgba(0,0,0,0.5);}
+.pmu-horse-pick.selected.red{color:#B3202A;}
+.pmu-amounts{display:flex; gap:8px; justify-content:center;}
+.pmu-amount{width:46px; height:46px; border-radius:12px; display:flex; align-items:center;
+  justify-content:center; cursor:pointer; font-family:'Anton',sans-serif; font-size:17px;
+  border:1px solid var(--line); background:var(--surface-2); color:var(--text-dim);
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), background .15s ease;}
+.pmu-amount:active{transform:scale(0.94);}
+.pmu-amount.selected{background:var(--accent); color:var(--ink-on-light); border-color:transparent;}
+
+@media (prefers-reduced-motion: reduce){ .pmu-runner{transition:none;} }
+
+@media (max-height:720px){
+  .pmu-last{min-height:62px;}
+  .pmu-rail{height:26px;}
+  .pmu-runner{width:23px; height:30px;}
+  .pmu-result-title{font-size:24px;}
+  .pmu-horse-pick{width:54px; height:74px;}
+}

@@ -22,7 +22,7 @@ const ctx={console,
   escapeHtml:v=>String(v), goTo(){}, openSetupFor(){}, registerScreenCleanup(){}};
 ctx.window.matchMedia=()=>({matches:false});
 vm.createContext(ctx);
-['js/data/games-catalog.js','js/games/shared-cards.js','js/games/des.js','js/games/pof.js','js/games/purple.js','js/games/bus.js','js/games/cible.js'].forEach(f=>vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f}));
+['js/data/games-catalog.js','js/games/shared-cards.js','js/games/des.js','js/games/pof.js','js/games/purple.js','js/games/bus.js','js/games/cible.js','js/games/pmu.js'].forEach(f=>vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f}));
 
 let ok=true;
 function check(label, cond, detail){
@@ -189,6 +189,50 @@ const cards = JSON.parse(vm.runInContext('JSON.stringify(cible.cards.map(functio
 check('Cible : 21 cartes posées', cards.length===21, cards.length);
 check('Cible : toutes les positions sont dans le plateau',
   cards.every(c=> c.x>=0 && c.x<=100 && c.y>=0 && c.y<=100));
+
+
+// --- LE PMU -------------------------------------------------------------------------
+// Règle : 8 cases, 7 obstacles. Une carte fait avancer l'as de sa couleur d'une case ;
+// quand tous les as ont dépassé un obstacle, il se retourne et l'as de SA couleur
+// recule d'une case. Premier à 8 : ses parieurs distribuent le double de leur mise.
+check('PMU : 8 cases jusqu\'à l\'arrivée', vm.runInContext('PMU_FINISH', ctx)===8);
+check('PMU : 7 obstacles', vm.runInContext('PMU_OBSTACLES', ctx)===7);
+check('PMU : quatre couleurs en lice', vm.runInContext('PMU_SUITS.length', ctx)===4);
+
+const pmuAudit = vm.runInContext(`(function(){
+  var ecarts = 0, courses = 0, reculs = 0;
+  for(var t = 0; t < 300; t++){
+    pmu.players = [{name:'A', horse:'\u2665', bet:1}];
+    pmuStartRace();
+    var guard = 0;
+    while(!pmu.winner && pmu.deck.length && guard++ < 300){
+      var before = {}; PMU_SUITS.forEach(function(s){ before[s] = pmu.horses[s]; });
+      var flippedBefore = pmu.obstacles.filter(function(o){return o.flipped}).length;
+      pmuFlipCard();
+      var suit = pmu.currentCard.suit;
+      var flippedAfter = pmu.obstacles.filter(function(o){return o.flipped}).length;
+      var avance = Math.min(8, before[suit] + 1);
+      if(flippedAfter > flippedBefore){
+        reculs++;
+        var obs = pmu.obstacles.filter(function(o){return o.flipped})[flippedAfter - 1];
+        var attendu = {}; PMU_SUITS.forEach(function(s){ attendu[s] = s === suit ? avance : before[s]; });
+        attendu[obs.suit] = Math.max(0, attendu[obs.suit] - 1);
+        PMU_SUITS.forEach(function(s){ if(pmu.horses[s] !== attendu[s]) ecarts++; });
+      } else {
+        PMU_SUITS.forEach(function(s){
+          var att = s === suit ? avance : before[s];
+          if(pmu.horses[s] !== att) ecarts++;
+        });
+      }
+    }
+    if(pmu.winner){ courses++; if(pmu.horses[pmu.winner] < 8) ecarts++; }
+  }
+  return { ecarts: ecarts, courses: courses, reculs: reculs };
+})()`, ctx);
+check('PMU : une carte fait avancer le bon as d\'exactement une case',
+  pmuAudit.ecarts===0, pmuAudit.ecarts+' écart(s) sur '+pmuAudit.courses+' courses');
+check('PMU : les obstacles font bien reculer', pmuAudit.reculs > 0, pmuAudit.reculs+' reculs observés');
+check('PMU : toute course se termine sur un as arrivé à la case 8', pmuAudit.courses > 250, pmuAudit.courses+'/300');
 
 console.log(ok?'\nMINI-JEUX CONFORMES':'\nDES ÉCARTS SUBSISTENT');
 process.exit(ok?0:1);
