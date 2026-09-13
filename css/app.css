@@ -10,9 +10,65 @@
 /* Éclairage rasant plutôt que des disques rayés : la lumière vient du haut, le bas
    reste dans le noir charbon. Aucune forme dure, rien qui découpe l'écran. */
 #screen-home::before{content:''; position:absolute; top:-30%; left:50%; transform:translateX(-50%); width:150%; height:70%; background:radial-gradient(ellipse at center, var(--accent) 0%, transparent 62%); opacity:0.10; filter:blur(30px); pointer-events:none; z-index:0;}
-.home-content{position:relative; z-index:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:64px 24px 40px; box-sizing:border-box; text-align:center;}
-.hero-title{font-family:'Anton', sans-serif; font-weight:400; font-size:52px; letter-spacing:1px; color:var(--text); line-height:0.95;}
+.home-content{position:relative; z-index:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(26px,6vh,52px); padding:58px 22px 34px; box-sizing:border-box; text-align:center;}
+.home-mark{display:flex; flex-direction:column; align-items:center;}
+.hero-title{font-family:'Anton', sans-serif; font-weight:400; font-size:60px; letter-spacing:1px; line-height:1.14;
+  background:linear-gradient(178deg, #FFFFFF 14%, #EFEFE8 48%, #9D9D92 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,0.6)) drop-shadow(0 0 26px rgba(232,255,61,0.14));}
 .hero-tag{font-size:14px; letter-spacing:0; text-transform:none; color:var(--text-dim); margin-top:10px; text-align:center; font-family:'Work Sans',sans-serif;}
+
+/* --- DÉCOR DE L'ACCUEIL ------------------------------------------------------------
+   L'accueil était un aplat noir : deux rectangles posés sur du vide. On lui donne de la
+   profondeur avec trois halos flous très lents, un faisceau rasant, quelques éclats
+   sphériques et un grain fin. Tout est purement décoratif : conteneur en z-index 0 et
+   pointer-events:none, le contenu passe au-dessus en z-index 1. Rien ne peut donc
+   recouvrir un bouton ni intercepter un geste.
+   Les animations tournent entre 17 et 26 s et ne descendent jamais sous 0.55 d'opacité :
+   ça respire, ça ne clignote pas. */
+.home-decor{position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+.hd-glow{position:absolute; border-radius:50%; filter:blur(52px);}
+.hd-glow-1{width:340px; height:340px; top:-90px; left:-110px;
+  background:radial-gradient(circle, rgba(232,255,61,0.30), transparent 68%);}
+.hd-glow-2{width:300px; height:300px; bottom:4%; right:-120px;
+  background:radial-gradient(circle, rgba(255,59,92,0.26), transparent 68%);}
+.hd-glow-3{width:260px; height:260px; top:44%; left:-90px;
+  background:radial-gradient(circle, rgba(90,120,255,0.22), transparent 70%);}
+
+/* Faisceau rasant : une diagonale claire, très diffuse, qui donne un sens à la lumière. */
+.hd-beam{position:absolute; top:-30%; left:-10%; width:80%; height:160%;
+  transform:rotate(18deg); filter:blur(26px); opacity:0.5;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.055) 45%, transparent);}
+
+/* Éclats : des sphères satinées hors focus, comme des objets posés loin derrière. */
+.hd-orb{position:absolute; border-radius:50%;
+  background:radial-gradient(circle at 32% 26%, rgba(255,255,255,0.30), rgba(255,255,255,0.06) 42%, rgba(255,255,255,0.02) 62%, transparent 74%);
+  box-shadow:0 0 34px rgba(255,255,255,0.06), 0 0 0 1px rgba(255,255,255,0.05) inset;}
+.hd-orb-1{width:76px; height:76px; top:17%; right:12%; filter:blur(1.5px);}
+.hd-orb-2{width:38px; height:38px; top:57%; right:22%; filter:blur(0.6px); opacity:0.75;}
+.hd-orb-3{width:120px; height:120px; bottom:12%; left:-30px; filter:blur(5px); opacity:0.5;}
+
+/* Grain : une trame très fine qui casse le dégradé et évite l'aplat plastique. */
+.hd-grain{position:absolute; inset:0; opacity:0.05; mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(255,255,255,0.9) 0.5px, transparent 0.5px);
+  background-size:3px 3px;}
+
+@media (prefers-reduced-motion: no-preference){
+  .hd-glow-1{animation:hdDrift1 22s ease-in-out infinite;}
+  .hd-glow-2{animation:hdDrift2 26s ease-in-out infinite;}
+  .hd-glow-3{animation:hdDrift1 19s ease-in-out infinite reverse;}
+  .hd-beam{animation:hdBeam 17s ease-in-out infinite;}
+  .hd-orb-1{animation:hdPulse 13s ease-in-out infinite;}
+  .hd-orb-3{animation:hdPulse 18s ease-in-out infinite reverse;}
+  @keyframes hdDrift1{ 0%,100%{ transform:translate(0,0) scale(1); opacity:0.95; }
+                       50%{ transform:translate(26px,34px) scale(1.12); opacity:0.7; } }
+  @keyframes hdDrift2{ 0%,100%{ transform:translate(0,0) scale(1.06); opacity:0.8; }
+                       50%{ transform:translate(-30px,-26px) scale(0.94); opacity:1; } }
+  @keyframes hdBeam{ 0%,100%{ transform:rotate(18deg) translateX(-8%); opacity:0.4; }
+                     50%{ transform:rotate(18deg) translateX(16%); opacity:0.62; } }
+  @keyframes hdPulse{ 0%,100%{ transform:translateY(0); opacity:0.8; }
+                      50%{ transform:translateY(-14px); opacity:0.55; } }
+}
 
 .mark{display:flex; flex-direction:column; align-items:center; gap:14px;}
 .mark-dot{width:46px; height:46px; border-radius:50%; border:1px solid var(--accent); display:flex; align-items:center; justify-content:center;}
@@ -815,19 +871,59 @@
    Deux rectangles de même famille (mêmes angles, même contour fin), différenciés par
    la matière : le before prend le jaune signature, la bibliothèque reste sur la
    surface sombre. Plus de partage Chill/Chaos : l'intensité est pilotée par le moteur. */
-.entry{width:100%; display:flex; flex-direction:column; align-items:flex-start; gap:6px;
-  border:1px solid var(--line); border-radius:18px; padding:22px 22px; margin-bottom:12px;
-  background:var(--surface); text-align:left; cursor:pointer;
-  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 10px 26px rgba(0,0,0,0.45);
-  transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+/* --- LES DEUX ENTRÉES DE L'ACCUEIL ------------------------------------------------
+   Deux portes, lisibles en une seconde : un intitulé de catégorie, le nom de l'action,
+   une phrase qui dit franchement à quoi s'attendre, et une ligne de détail. Le before
+   prend le jaune signature ; la bibliothèque reste sombre mais reçoit son propre
+   éclairage pour ne pas passer pour une option de second rang. */
+.entry{position:relative; width:100%; display:flex; flex-direction:column; align-items:flex-start;
+  gap:3px; border:1px solid var(--line); border-radius:20px; padding:18px 20px 17px;
+  margin-bottom:12px; background:var(--surface); text-align:left; cursor:pointer;
+  overflow:hidden; isolation:isolate;
+  box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 14px 34px rgba(0,0,0,0.5);
+  transition:transform .14s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease;}
 .entry:active{transform:scale(0.975);}
-.entry-name{font-family:'Anton',sans-serif; font-size:25px; letter-spacing:0.6px; line-height:1; color:var(--text);}
-.entry-tag{font-family:'Work Sans',sans-serif; font-size:13px; line-height:1.35; color:var(--text-dim);}
+
+/* Reflet : une bande claire en diagonale, comme sur une surface satinée. Elle glisse
+   une fois à l'apparition, puis se tient tranquille. */
+.entry-glint{position:absolute; top:-60%; left:-30%; width:34%; height:220%;
+  transform:rotate(20deg); pointer-events:none; z-index:1;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);}
+.entry > *:not(.entry-glint){position:relative; z-index:2;}
+
+.entry-kicker{font-size:10px; letter-spacing:2.6px; text-transform:uppercase;
+  color:var(--text-faint); margin-bottom:2px;}
+.entry-name{font-family:'Anton',sans-serif; font-size:29px; letter-spacing:0.4px;
+  line-height:1; color:var(--text);}
+.entry-tag{font-family:'Work Sans',sans-serif; font-size:13.5px; line-height:1.35;
+  color:var(--text-dim); margin-top:5px;}
+.entry-meta{font-size:11px; letter-spacing:0.3px; color:var(--text-faint); margin-top:7px;
+  padding-top:7px; border-top:1px solid var(--line); width:100%;}
+
+/* Le before : jaune plein, la seule surface vraiment lumineuse de l'écran. */
 .entry-primary{border-color:transparent;
-  background:linear-gradient(168deg, var(--accent-bright), var(--accent) 58%, var(--accent-deep));
-  box-shadow:0 1px 0 rgba(255,255,255,0.55) inset, 0 14px 32px rgba(232,255,61,0.20);}
+  background:linear-gradient(168deg, var(--accent-bright), var(--accent) 56%, var(--accent-deep));
+  box-shadow:0 1px 0 rgba(255,255,255,0.6) inset, 0 16px 40px rgba(232,255,61,0.24);}
+.entry-primary .entry-kicker{color:rgba(13,13,13,0.58);}
 .entry-primary .entry-name{color:var(--ink-on-light);}
-.entry-primary .entry-tag{color:rgba(13,13,13,0.72);}
+.entry-primary .entry-tag{color:rgba(13,13,13,0.8); font-weight:500;}
+.entry-primary .entry-meta{color:rgba(13,13,13,0.6); border-top-color:rgba(13,13,13,0.18);}
+
+/* La bibliothèque : sombre, mais éclairée par en dessous — pas une option grise. */
+.entry-games{background:
+    radial-gradient(ellipse 120% 90% at 15% 120%, rgba(255,59,92,0.20), transparent 62%),
+    radial-gradient(ellipse 110% 90% at 88% -10%, rgba(232,255,61,0.16), transparent 60%),
+    linear-gradient(168deg, #22221A, #141410 62%, #0E0E0A);
+  border-color:rgba(232,255,61,0.22);}
+.entry-games .entry-name{color:var(--accent);}
+
+@media (prefers-reduced-motion: no-preference){
+  .entry-glint{animation:entryGlint 1.5s cubic-bezier(.3,.7,.4,1) .35s both;}
+  @keyframes entryGlint{ from{ transform:rotate(20deg) translateX(-40px); opacity:0; }
+                         35%{ opacity:1; }
+                         to{ transform:rotate(20deg) translateX(420px); opacity:0; } }
+}
+
 
 
 /* Sous-titre des réglages : dit d'emblée que c'est court */

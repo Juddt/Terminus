@@ -41,6 +41,20 @@
   <button id="sound-toggle-btn" onclick="Sound.toggle()">🔊</button>
 
   <div class="screen active" id="screen-home">
+    <!-- Décor : des halos flous et des éclats posés derrière le contenu, jamais devant.
+         L'écran d'accueil était un aplat noir avec deux rectangles ; il lui manquait de
+         la profondeur. Tout est en pointer-events:none et en z-index négatif par rapport
+         au contenu — rien ne peut intercepter un geste. -->
+    <div class="home-decor" aria-hidden="true">
+      <span class="hd-glow hd-glow-1"></span>
+      <span class="hd-glow hd-glow-2"></span>
+      <span class="hd-glow hd-glow-3"></span>
+      <span class="hd-grain"></span>
+      <span class="hd-beam"></span>
+      <span class="hd-orb hd-orb-1"></span>
+      <span class="hd-orb hd-orb-2"></span>
+      <span class="hd-orb hd-orb-3"></span>
+    </div>
     <div class="age-badge" onclick="openLegalScreen()">18+</div>
     <div class="home-content">
       <div id="resume-banner" class="resume-banner hidden">
@@ -50,31 +64,34 @@
           <button class="btn btn-ghost" style="padding:10px 16px;" onclick="dismissResumableSession()">Ignorer</button>
         </div>
       </div>
-      <div style="display:flex; flex-direction:column; align-items:center;">
+      <div class="home-mark">
         <div class="hero-title">SOIRÉE</div>
         <div class="hero-tag">Ce soir, personne ne gère</div>
       </div>
       <div style="width:100%;">
-        <!-- Le before se lance directement dans son ambiance : le choix Chill/Chaos se
-             fait ici, plus dans la page de réglages. -->
         <!-- Deux entrées, pas plus. L'intensité du before n'est plus un choix offert au
              joueur : elle est pilotée par la trame du moteur (voir STRUCTURES et
              updateIntensityForIndex), qui fait monter et redescendre la pression toute
              seule au fil de la soirée. -->
         <button class="entry entry-primary" onclick="openLaunchEntry()">
+          <span class="entry-glint" aria-hidden="true"></span>
+          <span class="entry-kicker">Le mode complet</span>
           <span class="entry-name">Lancer le before</span>
-          <span class="entry-tag">L&rsquo;app enchaîne tout. Vous jouez.</span>
+          <span class="entry-tag">Pour les sacs bien remplis, pas les petites sacoches.</span>
+          <span class="entry-meta">10, 30 ou 60 min &middot; ça enchaîne tout seul</span>
         </button>
-        <button class="entry" onclick="openGamesList()">
+        <button class="entry entry-games" onclick="openGamesList()">
+          <span class="entry-glint" aria-hidden="true"></span>
+          <span class="entry-kicker">À la carte</span>
           <span class="entry-name">Choisir un jeu</span>
-          <span class="entry-tag">Votre jeu préféré, quand vous voulez.</span>
+          <span class="entry-tag">Neuf classiques. Tu vises, tu lances, ça pique.</span>
+          <span class="entry-meta">Dés &middot; Cartes &middot; Bluff &middot; Course</span>
         </button>
         <div class="home-links">
           <span onclick="openCustomScreen()">Mes ajouts</span>
           <span onclick="openLegalScreen()">Infos l&eacute;gales</span>
         </div>
       </div>
-      <div></div>
     </div>
   </div>
 

@@ -768,6 +768,7 @@ function resolvePrediction(right){
     players.forEach(p=>{
       state.stats.playerDrinks[p.name] = (state.stats.playerDrinks[p.name]||0) + 1;
     });
+    if(window.fireGlitch) window.fireGlitch();
   }
   advanceQueue();
 }
@@ -825,6 +826,7 @@ function markChallengeResult(done){
       rec.failed++;
       // Raté = tu bois, convention classique des jeux à gages.
       state.stats.playerDrinks[p.name] = (state.stats.playerDrinks[p.name]||0) + 1;
+      if(window.fireGlitch) window.fireGlitch();
     }
   });
   advanceQueue();

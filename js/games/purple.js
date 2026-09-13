@@ -185,6 +185,7 @@ function purpleResolve(choice, drawn, correct){
     purple.sipPot = 0;
     purple.potCards = [];
     Sound.play('fail');
+    if(window.fireGlitch) window.fireGlitch();
     if(navigator.vibrate) navigator.vibrate([90,50,90]);
   }
 
