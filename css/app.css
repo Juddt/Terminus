@@ -509,21 +509,21 @@
 #trail-world{transition:transform 1s linear;}
 .trail.frozen #trail-world{transition:none;}
 
-.trail-todo{fill:none; stroke:rgba(255,255,255,0.07); stroke-width:1.3; stroke-linecap:round;}
-.trail-done{fill:none; stroke:var(--trail-hue, var(--accent)); stroke-width:1.35; stroke-linecap:round;
-  opacity:0.78; transition:stroke-dashoffset 1s linear, stroke .5s ease, opacity .5s ease;}
-.trail-done-glow{fill:none; stroke:var(--trail-hue, var(--accent)); stroke-width:3.4; stroke-linecap:round;
-  opacity:0.16; filter:blur(2.6px); transition:stroke-dashoffset 1s linear, stroke .5s ease, opacity .5s ease;}
+.trail-todo{fill:none; stroke:rgba(255,255,255,0.042); stroke-width:1.2; stroke-linecap:round;}
+.trail-done{fill:none; stroke:var(--trail-hue, var(--accent)); stroke-width:1.3; stroke-linecap:round;
+  opacity:0.5; transition:stroke-dashoffset 1s linear, stroke .5s ease, opacity .5s ease;}
+.trail-done-glow{fill:none; stroke:var(--trail-hue, var(--accent)); stroke-width:3.2; stroke-linecap:round;
+  opacity:0.11; filter:blur(2.8px); transition:stroke-dashoffset 1s linear, stroke .5s ease, opacity .5s ease;}
 .trail.frozen .trail-done, .trail.frozen .trail-done-glow{transition:stroke .5s ease, opacity .5s ease;}
-.trail-mark{fill:rgba(255,255,255,0.17);}
+.trail-mark{fill:rgba(255,255,255,0.11);}
 
 /* Repère : sa position à l'écran est fixe, c'est le décor qui se déplace dessous. */
-.trail-head-halo{fill:var(--trail-hue, var(--accent)); opacity:0.34; filter:blur(2.2px);}
+.trail-head-halo{fill:var(--trail-hue, var(--accent)); opacity:0.30; filter:blur(2.4px);}
 .trail-head-core{fill:#FFFFFF;}
 
 /* Arrivée : un palier posé en haut du tracé, éteint jusqu'à la finale. */
-.trail-finish{fill:none; stroke:rgba(255,255,255,0.22); stroke-width:1.4; stroke-linecap:round;
-  transition:stroke .6s ease, opacity .6s ease; opacity:0.6;}
+.trail-finish{fill:none; stroke:rgba(255,255,255,0.18); stroke-width:1.3; stroke-linecap:round;
+  transition:stroke .6s ease, opacity .6s ease; opacity:0.5;}
 .trail-finish-glow{fill:var(--accent); opacity:0; filter:blur(7px); transition:opacity .6s ease;}
 
 /* Deux voiles, deux rôles distincts.
@@ -533,7 +533,7 @@
    ::before — le PIED D'ÉCRAN : le tracé s'efface en approchant des commandes, pour ne
    jamais venir zébrer les boutons. */
 .trail::after{content:''; position:absolute; left:-10%; right:-10%; top:11%; height:49%;
-  background:radial-gradient(ellipse at center, rgba(13,13,13,0.9) 28%, rgba(13,13,13,0.62) 56%, rgba(13,13,13,0) 82%);}
+  background:radial-gradient(ellipse at center, rgba(13,13,13,0.95) 32%, rgba(13,13,13,0.72) 58%, rgba(13,13,13,0) 84%);}
 .trail::before{content:''; position:absolute; left:0; right:0; bottom:0; height:24%; z-index:1;
   background:linear-gradient(to top, var(--bg) 34%, rgba(13,13,13,0.82) 62%, rgba(13,13,13,0) 100%);}
 
@@ -608,9 +608,6 @@
   .top-btn .label-long{display:none;}
 }
 .topbar-secondary{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; min-height:22px;}
-.trail-remaining{font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:0.09em;
-  text-transform:uppercase; color:var(--text-faint); margin-left:auto;}
-.trail.near-end ~ .topbar .trail-remaining{color:var(--clay);}
 
 /* Zone de scène : au-dessus du décor, et défilable si la consigne est longue ou
    l'écran petit — le contenu défile, jamais les commandes. */

@@ -107,8 +107,8 @@ const Trail = {
             '<circle class="fx fx-spark" id="fx-spark" r="13"/>'+
             '<circle class="fx fx-duel fx-duel-a" id="fx-duel-a" r="5"/>'+
             '<circle class="fx fx-duel fx-duel-b" id="fx-duel-b" r="5"/>'+
-            '<circle class="trail-head-halo" r="9"/>'+
-            '<circle class="trail-head-core" r="3.1"/>'+
+            '<circle class="trail-head-halo" r="7.6"/>'+
+            '<circle class="trail-head-core" r="2.4"/>'+
           '</g>'+
         '</g>'+
       '</svg>';
