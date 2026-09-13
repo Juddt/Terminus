@@ -22,7 +22,7 @@ const ctx={console,
   escapeHtml:v=>String(v), goTo(){}, openSetupFor(){}, registerScreenCleanup(){}};
 ctx.window.matchMedia=()=>({matches:false});
 vm.createContext(ctx);
-['js/data/games-catalog.js','js/games/shared-cards.js','js/games/des.js','js/games/pof.js','js/games/purple.js'].forEach(f=>vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f}));
+['js/data/games-catalog.js','js/games/shared-cards.js','js/games/des.js','js/games/pof.js','js/games/purple.js','js/games/bus.js','js/games/cible.js'].forEach(f=>vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f}));
 
 let ok=true;
 function check(label, cond, detail){
@@ -137,6 +137,58 @@ Object.keys(THEORIE).forEach(key=>{
   check('Probabilité « '+c.label+' » conforme au paquet',
     Math.abs(rate - THEORIE[key]) < 0.012, rate.toFixed(4)+' (théorie '+THEORIE[key]+')');
 });
+
+
+// --- LE BUS -------------------------------------------------------------------------
+// Règle : quatre questions, pénalités 1/2/3/4. Égalité comptée comme réussite au
+// tour « plus haut / plus bas », bornes exclues au tour « dedans / dehors ».
+const steps = vm.runInContext('BUS_STEPS.map(function(s){return s.sips})', ctx);
+check('Bus : pénalités 1/2/3/4', JSON.stringify(steps)===JSON.stringify([1,2,3,4]), steps.join('/'));
+check('Bus : quatre questions', vm.runInContext('BUS_STEPS.length', ctx)===4);
+// L'ordre des valeurs doit couvrir les treize rangs, As bas, Roi haut.
+// busCardVal prend une CARTE ({suit, value}), pas une valeur nue.
+const order = vm.runInContext("PALM_VALUES.map(function(v){return busCardVal({suit:'♠', value:v})})", ctx);
+check('Bus : les 13 rangs sont ordonnés de 1 à 13',
+  JSON.stringify(order)===JSON.stringify([1,2,3,4,5,6,7,8,9,10,11,12,13]), order.join(','));
+
+// --- LA CIBLE -----------------------------------------------------------------------
+// Règle : 21 cartes, 10/6/4/1 par couronne, enjeux 1/2/3/5.
+const zones = JSON.parse(vm.runInContext('JSON.stringify(CIBLE_ZONES)', ctx));
+check('Cible : 21 cartes au total', vm.runInContext('CIBLE_TOTAL_CARDS', ctx)===21);
+check('Cible : 10/6/4/1 par couronne',
+  JSON.stringify(zones.map(z=>z.n))===JSON.stringify([10,6,4,1]), zones.map(z=>z.n).join('/'));
+check('Cible : enjeux 1/2/3/5',
+  JSON.stringify(zones.map(z=>z.sips))===JSON.stringify([1,2,3,5]), zones.map(z=>z.sips).join('/'));
+
+// Géométrie : sur un plateau de 320 px, aucune carte ne doit sortir du feutre ni
+// mordre sur la bande radiale d'une autre couronne. C'est ce qui faisait se chevaucher
+// les cartes du centre.
+const BOARD = 320, R = BOARD / 2;
+let geoOk = true;
+const bands = zones.map(z=>{
+  const r = z.radius / 100 * BOARD;
+  const half = z.cardW * 1.4 / 2;
+  return { z:z.z, inner: Math.max(0, r - half), outer: r + half };
+});
+bands.forEach(b=>{
+  if(b.outer > R){ console.error('CIBLE: la couronne '+b.z+' dépasse du feutre ('+b.outer.toFixed(1)+' > '+R+')'); geoOk=false; }
+});
+for(let i=0;i<bands.length-1;i++){
+  // bands[0] est la couronne extérieure : sa bande doit rester au-delà de la suivante.
+  if(bands[i].inner < bands[i+1].outer){
+    console.error('CIBLE: les couronnes '+bands[i].z+' et '+bands[i+1].z+' se chevauchent ('+
+      bands[i].inner.toFixed(1)+' < '+bands[i+1].outer.toFixed(1)+')');
+    geoOk=false;
+  }
+}
+check('Cible : les quatre couronnes ne se chevauchent pas', geoOk);
+
+// Les positions calculées restent dans le plateau, en pourcentage.
+vm.runInContext("cible.players=['A','B']; cibleNewTarget();", ctx);
+const cards = JSON.parse(vm.runInContext('JSON.stringify(cible.cards.map(function(c){return {x:c.x,y:c.y,z:c.zone}}))', ctx));
+check('Cible : 21 cartes posées', cards.length===21, cards.length);
+check('Cible : toutes les positions sont dans le plateau',
+  cards.every(c=> c.x>=0 && c.x<=100 && c.y>=0 && c.y<=100));
 
 console.log(ok?'\nMINI-JEUX CONFORMES':'\nDES ÉCARTS SUBSISTENT');
 process.exit(ok?0:1);

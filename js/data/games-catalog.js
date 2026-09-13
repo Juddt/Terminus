@@ -39,14 +39,15 @@ const GAMES = [
     id:"cible", icon:"🎯", cardGrad:"linear-gradient(135deg,#FF7A59,#FF3D77)", tagline:'Vise le centre. Plus c\'est risqué, plus ça arrose.', name:"La Cible", joueurs:"2-10", duree:"15-30 min",
     difficulty:"Facile", category:"Devinette",
     interactive: true, launchFn: 'cibleSetup', startFn: 'cibleStart',
-    desc:"25 cartes cachées en forme de cible. Plus tu vises le centre, plus tu risques gros. Devine juste ou bois.",
+    desc:"21 cartes cachées en forme de cible. Plus tu vises le centre, plus la question est dure et plus l'enjeu monte.",
     rules:[
-      {card:'Ext.', text:'Rouge ou Noir ? → 1 gorgée'},
-      {card:'Cercle 2', text:'Pair ou Impair ? → 2 gorgées'},
-      {card:'Cercle 3', text:'Devine le symbole → 3 gorgées'},
-      {card:'Centre', text:'Devine la valeur exacte → 5 gorgées'},
-      {card:'Réussi', text:'Tu distribues les gorgées'},
-      {card:'Raté', text:'Tu bois les gorgées'},
+      {card:'Couronne', text:'10 cartes — Rouge ou noir ? → 1 gorgée'},
+      {card:'Cercle 2', text:'6 cartes — Pair ou impair ? → 2 gorgées'},
+      {card:'Cercle 3', text:'4 cartes — Devine le symbole → 3 gorgées'},
+      {card:'Centre', text:'1 carte — Devine la valeur → 5 gorgées'},
+      {card:'Touché', text:'L\'enjeu s\'ajoute à la cagnotte, qui reste en jeu'},
+      {card:'Manqué', text:'Tu bois la cagnotte plus l\'enjeu, et elle repart à zéro'},
+      {card:'Effets', text:'As, Roi, Dame, Valet, 7 et 10 déclenchent un effet'},
     ]
   },
   {

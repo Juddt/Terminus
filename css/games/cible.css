@@ -1,28 +1,102 @@
-#screen-cible-setup{padding-top:20px;}
-#cible-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
-#cible-chips .chip{display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:13px; color:var(--text);}
-#cible-chips .chip .x{cursor:pointer; margin-left:4px; color:var(--text-faint);}
+/* ===================================================================================
+   LA CIBLE — signature : VISER, PUIS L'IMPACT
+   -----------------------------------------------------------------------------------
+   Un vrai plateau de tir : un feutre sombre, des couronnes en creux, un centre qui
+   attire l'œil. Les cartes sont POSÉES DESSUS, à leur place, et l'on garde le plateau
+   à l'écran pendant la question — la carte visée reste éclairée, les autres s'effacent.
+   On ne bascule pas sur un écran hors contexte : le geste de visée doit rester lisible
+   jusqu'à l'impact.
+
+   Tout est dimensionné en pourcentage du plateau : l'ancienne cible était figée à
+   360 px et débordait de l'écran sur un téléphone étroit.
+   =================================================================================== */
+
 #screen-cible{padding:0;}
-.cible-wrap{position:relative; width:360px; height:360px; margin:0 auto; flex-shrink:0;}
-.cible-ring{position:absolute; border-radius:50%; border:1px dashed; top:50%; left:50%; transform:translate(-50%,-50%); opacity:0.25;}
-.cible-ring.z1{width:340px; height:340px; border-color:var(--sage);}
-.cible-ring.z2{width:220px; height:220px; border-color:#C9AF4B;}
-.cible-ring.z3{width:110px; height:110px; border-color:var(--accent);}
-.cible-ring.z4{width:48px; height:48px; border-color:var(--clay); background:rgba(163,80,58,0.08);}
-.cc{position:absolute; border-radius:5px; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; transform:translate(-50%,-50%); transition:transform 0.12s; font-family:'Anton',sans-serif; flex-direction:column; line-height:1.1;}
-.cc:active{transform:translate(-50%,-50%) scale(0.9);}
-.cc.z1{width:34px; height:48px; font-size:14px; background:rgba(138,154,126,0.2); border:1px solid rgba(138,154,126,0.5);}
-.cc.z2{width:38px; height:54px; font-size:15px; background:rgba(201,175,75,0.15); border:1px solid rgba(201,175,75,0.5);}
-.cc.z3{width:42px; height:60px; font-size:17px; background:rgba(201,123,74,0.18); border:1px solid rgba(201,123,74,0.5);}
-.cc.z4{width:50px; height:70px; font-size:22px; background:rgba(163,80,58,0.22); border:1px solid rgba(163,80,58,0.6);}
-.cc.revealed{cursor:default; opacity:0.7;}
-.cc.revealed.red-card{background:#f6f1e7; color:#a82020; border-color:rgba(0,0,0,0.15); opacity:0.8; box-shadow:0 2px 6px rgba(0,0,0,0.3);}
-.cc.revealed.black-card{background:#f6f1e7; color:#1a1a1a; border-color:rgba(0,0,0,0.15); opacity:0.8; box-shadow:0 2px 6px rgba(0,0,0,0.3);}
-.cc .cc-sip{font-size:6px; color:var(--text-faint); font-family:'Work Sans',sans-serif; font-weight:400;}
-.cc .cc-val{font-size:inherit; line-height:1;}
-.cc .cc-suit{font-size:0.6em;}
-.sip-pot{font-family:'Anton',sans-serif; font-size:42px; color:var(--accent); font-weight:600; text-align:center; line-height:1;}
-.sip-pot-label{font-size:11px; color:var(--text-faint); text-align:center; margin-bottom:2px;}
-.cible-question{font-family:'Anton',sans-serif; font-size:18px; color:var(--text); text-align:center; margin-top:6px;}
-.cible-result{font-family:'Anton',sans-serif; font-size:18px; text-align:center; margin-top:4px;}
-.cible-special{font-size:12px; color:var(--accent); text-align:center; margin-top:4px;}
+
+.cible-aim{font-family:'Anton',sans-serif; font-size:23px; line-height:1.1; color:var(--accent);
+  overflow-wrap:anywhere; max-width:300px;}
+.cible-legend{font-size:12px; color:var(--text-faint); margin-top:-4px;}
+.cible-question{font-family:'Anton',sans-serif; font-size:21px; color:var(--text); line-height:1.2;}
+.cible-stake{font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:var(--text-faint);}
+.cible-pot{font-size:13px; color:var(--text-dim);}
+.cible-pot b{font-family:'Anton',sans-serif; font-weight:400; font-size:19px; color:var(--accent);}
+
+/* --- Le plateau --------------------------------------------------------------------- */
+.cible-board{position:relative; width:min(100%, 320px); aspect-ratio:1; margin:2px auto; flex-shrink:0;
+  border-radius:50%;
+  /* Feutre sombre, éclairé par le haut : la cible est un objet posé, pas un cercle tracé. */
+  background:radial-gradient(circle at 50% 34%, #1E1E18 0%, #131310 46%, #0B0B08 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,0.05), inset 0 -14px 30px rgba(0,0,0,0.7),
+             0 16px 36px rgba(0,0,0,0.55);}
+
+.cible-ring{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  border-radius:50%; border:1px solid rgba(255,255,255,0.11);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 0 rgba(0,0,0,0.5);}
+.cible-ring.z1{width:98%; height:98%;}
+.cible-ring.z2{width:72%; height:72%;}
+.cible-ring.z3{width:44%; height:44%; border-color:rgba(232,255,61,0.26);}
+/* Le centre : la seule tache de rose de l'écran, là où se joue le coup le plus cher. */
+.cible-bull{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:21%; height:21%; border-radius:50%;
+  background:radial-gradient(circle at 40% 34%, rgba(255,59,92,0.30), rgba(255,59,92,0.08) 70%);
+  border:1px solid rgba(255,59,92,0.42);}
+
+/* Une carte posée sur la cible. --cw porte sa largeur, réglée par couronne. */
+.cible-slot{position:absolute; transform:translate(-50%,-50%);
+  width:var(--cw, 32px); height:calc(var(--cw, 32px) * 1.4);
+  padding:0; border:0; background:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:opacity .22s ease, transform .14s cubic-bezier(.34,1.56,.64,1);}
+.cible-slot:not(.revealed)::before{content:''; position:absolute; inset:0;
+  border-radius:calc(var(--cw, 32px) * 0.11);
+  background:linear-gradient(155deg, #24241A, #14140E);
+  border:1px solid rgba(232,255,61,0.18);
+  box-shadow:0 4px 10px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.1) inset;}
+.cible-slot-sips{position:relative; font-family:'Anton',sans-serif;
+  font-size:calc(var(--cw, 32px) * 0.46); color:var(--accent); line-height:1;}
+.cible-slot:active{transform:translate(-50%,-50%) scale(0.9);}
+.cible-slot.dim{opacity:0.22; pointer-events:none;}
+.cible-slot.aimed{transform:translate(-50%,-50%) scale(1.22); z-index:3;}
+.cible-slot.aimed::before{border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(232,255,61,0.35), 0 6px 16px rgba(0,0,0,0.6);}
+.cible-slot.revealed{pointer-events:none; opacity:0.6;}
+
+/* --- Réponses ------------------------------------------------------------------------ */
+#cible-footer{flex-direction:column;}
+#cible-footer > .btn{width:100%;}
+.cible-rouge{background:linear-gradient(178deg, #C8303A, #92202A) !important;
+  border-color:transparent !important; color:#FFF3EE !important;}
+.cible-suits{display:grid; grid-template-columns:repeat(4, 1fr); gap:9px; width:100%;}
+.cible-suits .btn{padding:14px 4px; font-size:23px; min-height:54px;}
+/* Treize valeurs : une grille régulière, jamais une ligne qui déborde. */
+.cible-values{display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; width:100%;}
+.cible-val-btn{min-height:44px; border:1px solid var(--line); border-radius:11px;
+  background:var(--surface-2); color:var(--text); font-family:'Anton',sans-serif; font-size:16px;
+  cursor:pointer; box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), background .15s ease;}
+.cible-val-btn:active{transform:scale(0.94); background:var(--accent); color:var(--ink-on-light);}
+
+/* --- L'impact ------------------------------------------------------------------------ */
+.cible-impact-card{display:flex; justify-content:center; margin-bottom:4px;}
+.cible-outcome{font-family:'Anton',sans-serif; font-size:33px; line-height:1;}
+.cible-outcome.win{color:var(--accent);}
+.cible-outcome.lose{color:var(--clay);}
+.cible-outcome-sub{font-size:14px; color:var(--text-dim); line-height:1.4; max-width:290px;}
+.cible-luck{font-size:12px; color:var(--text-faint); line-height:1.4; max-width:280px; font-style:italic;}
+.cible-special{font-size:13px; color:var(--accent); line-height:1.4; max-width:290px;
+  border-top:1px solid var(--line); padding-top:9px; margin-top:4px;}
+
+@media (prefers-reduced-motion: no-preference){
+  .cible-outcome{animation:pofVerdict .34s cubic-bezier(.22,1,.36,1) both;}
+  /* L'impact : une onde qui part de la carte retournée, une seule fois. */
+  .cible-impact-card{animation:cibleImpact .42s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes cibleImpact{ from{transform:scale(0.7); opacity:0;} 60%{transform:scale(1.06);} to{transform:none; opacity:1;} }
+}
+
+@media (max-height:720px){
+  .cible-board{width:min(100%, 250px);}
+  .cible-aim{font-size:19px;}
+  .cible-question{font-size:18px;}
+  .cible-outcome{font-size:27px;}
+  .cible-val-btn{min-height:38px; font-size:14px;}
+}

@@ -1,60 +1,78 @@
+// ===================================================================================
+// LA CIBLE — signature : VISER, ET L'IMPACT
+// -----------------------------------------------------------------------------------
+// Règles (mécanique inchangée) :
+//   21 cartes face cachée, disposées en cible. Plus on vise le centre, plus la question
+//   est dure et plus l'enjeu monte :
+//     Couronne extérieure — 10 cartes — Rouge ou noir ?        1 gorgée
+//     Deuxième cercle     —  6 cartes — Pair ou impair ?       2 gorgées
+//     Troisième cercle    —  4 cartes — Devine le symbole      3 gorgées
+//     Centre              —  1 carte  — Devine la valeur       5 gorgées
+//   Réussi : l'enjeu s'ajoute à la cagnotte, qui reste en jeu.
+//   Raté   : le joueur boit la cagnotte plus l'enjeu, et la cagnotte repart à zéro.
+//   Certaines cartes déclenchent en plus un effet (As, Roi, Dame, Valet, 7, 10). Le 7
+//   inverse le sens du jeu.
+//
+// La carte visée est choisie AVANT la question : c'est le geste de visée qui engage, et
+// c'est l'impact au moment du retournement qui conclut.
+// ===================================================================================
+
 const cible = {
-  players:[], currentIdx:0, cards:[], selectedIdx:null, direction:1, sipPot:0
+  players:[], currentIdx:0, cards:[], selectedIdx:null, sipPot:0, direction:1,
+  busy:false
 };
 
-// Saisie des prénoms : page de configuration unique, bornée par le champ `joueurs`
-// du catalogue (voir playerBounds). L'écran de saisie propre à ce jeu a été retiré —
-// il faisait doublon, avec ses propres bornes et ses propres règles de validation.
+// Les quatre couronnes : combien de cartes, quel rayon (en % du plateau), quel enjeu,
+// quelle question. Le rayon est relatif, donc la cible s'adapte à la largeur de l'écran.
+// Rayons et tailles calibrés pour qu'AUCUNE carte n'en chevauche une autre ni ne
+// dépasse du feutre : chaque couronne occupe une bande radiale qui lui est propre
+// (voir tests/test-games.js, qui vérifie la géométrie).
+const CIBLE_ZONES = [
+  { z:1, n:10, sips:1, radius:44,  question:'Rouge ou noir ?',      cardW:26 },
+  { z:2, n:6,  sips:2, radius:31,  question:'Pair ou impair ?',     cardW:30 },
+  { z:3, n:4,  sips:3, radius:17,  question:'Devine le symbole',    cardW:30 },
+  { z:4, n:1,  sips:5, radius:0,   question:'Devine la valeur',     cardW:34 }
+];
+const CIBLE_TOTAL_CARDS = CIBLE_ZONES.reduce((a, z) => a + z.n, 0);   // 21
+
 function cibleSetup(){
   openSetupFor({ type:'game', game: GAMES.find(g => g.id === 'cible') });
 }
-
-// Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
-// ce jeu ne manipule que des prénoms.
 function cibleStart(players){
   cible.players = (players || []).map(p => p.name);
   cibleStartGame();
 }
 
 function cibleStartGame(){
-  if(cible.players.length<2) return;
+  if(cible.players.length < 2) return;
   cible.currentIdx = 0;
-  cible.direction = 1;
   cible.sipPot = 0;
+  cible.direction = 1;
+  cible.busy = false;
   goTo('cible');
   cibleNewTarget();
 }
 
 function ciblePlayer(){ return cible.players[cible.currentIdx]; }
 
-function cibleMakeDeck(){
-  const d=[];
-  PALM_SUITS.forEach(s=> PALM_VALUES.forEach(v=> d.push({suit:s, value:v})));
-  for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
-  return d;
-}
-
 function cibleNewTarget(){
-  const deck = cibleMakeDeck();
+  const deck = makeShuffledDeck();
   cible.cards = [];
   cible.selectedIdx = null;
-  // Zone 1: 12 cards, Zone 2: 8 cards, Zone 3: 4 cards, Zone 4: 1 card
-  const zones = [
-    {z:1,n:10,sips:1,r:165,offset:0},
-    {z:2,n:6,sips:2,r:108,offset:Math.PI/6},
-    {z:3,n:4,sips:3,r:54,offset:Math.PI/4},
-    {z:4,n:1,sips:5,r:0,offset:0}
-  ];
+  cible.busy = false;
   let di = 0;
-  zones.forEach(zone=>{
-    for(let i=0;i<zone.n;i++){
-      const card = deck[di++];
-      const angle = (i / zone.n) * Math.PI * 2 - Math.PI/2 + zone.offset;
-      cible.cards.push({
-        ...card, zone:zone.z, sips:zone.sips, revealed:false,
-        x: 180 + Math.cos(angle) * zone.r,
-        y: 180 + Math.sin(angle) * zone.r,
-      });
+  CIBLE_ZONES.forEach(zone => {
+    for(let i = 0; i < zone.n; i++){
+      // Chaque couronne est décalée d'un demi-pas : les cartes ne s'alignent pas
+      // radialement d'une couronne à l'autre, la cible respire.
+      const angle = (i / zone.n) * Math.PI * 2 - Math.PI / 2 + (zone.z * Math.PI / 7);
+      cible.cards.push(Object.assign({}, deck[di++], {
+        zone: zone.z, sips: zone.sips, revealed: false,
+        // Positions en POURCENTAGE du plateau : la cible suit la largeur de l'écran au
+        // lieu d'être figée à 360 px, où elle débordait sur un téléphone étroit.
+        x: 50 + Math.cos(angle) * zone.radius,
+        y: 50 + Math.sin(angle) * zone.radius
+      }));
     }
   });
   cibleUpdateHeader();
@@ -62,139 +80,172 @@ function cibleNewTarget(){
 }
 
 function cibleUpdateHeader(){
-  document.getElementById('cible-header').innerHTML =
-    '<div class="badge">Joueur <span class="bv">'+(cible.currentIdx+1)+'/'+cible.players.length+'</span></div>';
+  const el = document.getElementById('cible-header');
+  if(!el) return;
+  el.innerHTML = '<div class="badge">Joueur <span class="bv">'+(cible.currentIdx + 1)+'</span>/'+cible.players.length+'</div>'+
+    (cible.sipPot > 0 ? '<div class="badge">Cagnotte <span class="bv">'+cible.sipPot+'</span></div>' : '')+
+    (cible.direction < 0 ? '<div class="badge">Sens inversé</div>' : '');
+}
+
+// --- LE PLATEAU ---------------------------------------------------------------------
+function cibleBoardHTML(highlightIdx){
+  let h = '<div class="cible-board">'+
+    '<div class="cible-ring z1"></div>'+
+    '<div class="cible-ring z2"></div>'+
+    '<div class="cible-ring z3"></div>'+
+    '<div class="cible-bull"></div>';
+  cible.cards.forEach((c, i) => {
+    const sel = highlightIdx === i;
+    const dim = highlightIdx != null && highlightIdx !== i;
+    const style = 'left:'+c.x.toFixed(2)+'%; top:'+c.y.toFixed(2)+'%; --cw:'+
+      CIBLE_ZONES[c.zone - 1].cardW+'px';
+    if(c.revealed){
+      h += '<div class="cible-slot z'+c.zone+' revealed'+(sel ? ' hit' : '')+'" style="'+style+'">'+
+        cardHTML(c, { width: CIBLE_ZONES[c.zone - 1].cardW, revealed:true })+'</div>';
+    } else {
+      h += '<button class="cible-slot z'+c.zone+(dim ? ' dim' : '')+(sel ? ' aimed' : '')+'" style="'+style+'" '+
+        'onclick="cibleSelectCard('+i+')" aria-label="Carte à '+c.sips+' gorgées">'+
+        '<span class="cible-slot-sips">'+c.sips+'</span>'+
+      '</button>';
+    }
+  });
+  return h + '</div>';
 }
 
 function cibleRenderTarget(){
   const body = document.getElementById('cible-body');
   const footer = document.getElementById('cible-footer');
-  let h = '';
-  if(cible.sipPot > 0){
-    h += '<div class="sip-pot">'+cible.sipPot+'</div><div class="sip-pot-label">gorgée'+(cible.sipPot>1?'s':'')+' en jeu</div>';
-  }
-  h += '<div class="palm-player-big" style="font-size:22px;margin-bottom:2px;">'+ciblePlayer()+', choisis une carte</div>';
-  h += '<div class="cible-wrap">';
-  h += '<div class="cible-ring z1"></div><div class="cible-ring z2"></div><div class="cible-ring z3"></div><div class="cible-ring z4"></div>';
-  cible.cards.forEach((c,i)=>{
-    const zClass = 'z'+c.zone;
-    if(c.revealed){
-      const col = palmIsRed(c.suit) ? 'red-card' : 'black-card';
-      h += '<div class="cc '+zClass+' revealed '+col+'" style="left:'+c.x+'px;top:'+c.y+'px;"><span class="cc-val">'+c.value+'</span><span class="cc-suit">'+c.suit+'</span></div>';
-    } else {
-      h += '<div class="cc '+zClass+' hidden-card" style="left:'+c.x+'px;top:'+c.y+'px;" onclick="cibleSelectCard('+i+')"><span class="cc-val">'+c.sips+'</span><span class="cc-sip">gorgée'+(c.sips>1?'s':'')+'</span></div>';
-    }
-  });
-  h += '</div>';
-  body.innerHTML = h;
+  cible.busy = false;
+  body.innerHTML =
+    '<div class="cible-aim">'+escapeHtml(ciblePlayer())+', vise une carte</div>'+
+    '<div class="cible-legend">Plus tu vises le centre, plus la question est dure</div>'+
+    cibleBoardHTML(null)+
+    (cible.sipPot > 0
+      ? '<div class="cible-pot"><b>'+cible.sipPot+'</b> gorgée'+(cible.sipPot > 1 ? 's' : '')+' en jeu</div>'
+      : '');
   footer.innerHTML = '<button class="btn btn-ghost" onclick="cibleNewTarget()">Nouvelle cible</button>';
 }
 
+// --- LA VISÉE -----------------------------------------------------------------------
 function cibleSelectCard(idx){
+  if(cible.busy) return;
   const card = cible.cards[idx];
-  if(card.revealed) return;
+  if(!card || card.revealed) return;
   cible.selectedIdx = idx;
+  Sound.play('tick');
+
+  const zone = CIBLE_ZONES[card.zone - 1];
   const body = document.getElementById('cible-body');
   const footer = document.getElementById('cible-footer');
-  const z = card.zone;
 
-  let question = '', btns = '';
-  if(z === 1){
-    question = 'Rouge ou Noir ?';
-    btns = '<button class="btn btn-primary" onclick="cibleGuess(\'rouge\')" style="flex:1;background:#A3503A;">Rouge</button>'+
-           '<button class="btn btn-primary" onclick="cibleGuess(\'noir\')" style="flex:1;background:#2a2a2a;color:var(--text);">Noir</button>';
-  } else if(z === 2){
-    question = 'Pair ou Impair ?';
-    btns = '<button class="btn btn-primary" onclick="cibleGuess(\'pair\')" style="flex:1;">Pair</button>'+
-           '<button class="btn btn-primary" onclick="cibleGuess(\'impair\')" style="flex:1;">Impair</button>';
-  } else if(z === 3){
-    question = 'Devine le symbole';
-    btns = ['♥','♦','♣','♠'].map(s=>
-      '<button class="btn btn-primary" onclick="cibleGuess(\''+s+'\')" style="flex:1;padding:14px 8px;font-size:18px;">'+s+'</button>'
-    ).join('');
-  } else {
-    question = 'Devine la valeur';
-    btns = '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
-    PALM_VALUES.forEach(v=>{
-      btns += '<button class="btn btn-ghost" onclick="cibleGuess(\''+v+'\')" style="width:auto;padding:10px 14px;flex:0;">'+v+'</button>';
-    });
-    btns += '</div>';
-  }
-
+  // La carte visée reste à sa place sur la cible, les autres s'effacent : on garde le
+  // repère de ce qu'on a choisi, au lieu de basculer sur un écran sans contexte.
   body.innerHTML =
-    '<div class="palm-player-big" style="font-size:22px;">'+ciblePlayer()+'</div>'+
-    '<div class="cible-question">'+question+'</div>';
-  footer.innerHTML = '<div style="display:flex;gap:8px;width:100%;">'+btns+'</div>';
+    '<div class="cible-aim">'+escapeHtml(ciblePlayer())+'</div>'+
+    '<div class="cible-question">'+zone.question+'</div>'+
+    '<div class="cible-stake">'+zone.sips+' gorgée'+(zone.sips > 1 ? 's' : '')+' en jeu</div>'+
+    cibleBoardHTML(idx);
+
+  let btns;
+  if(card.zone === 1){
+    btns = '<button class="btn btn-primary cible-rouge" onclick="cibleGuess(\'rouge\')">Rouge</button>'+
+           '<button class="btn btn-ghost" onclick="cibleGuess(\'noir\')">Noir</button>';
+  } else if(card.zone === 2){
+    btns = '<button class="btn btn-primary" onclick="cibleGuess(\'pair\')">Pair</button>'+
+           '<button class="btn btn-ghost" onclick="cibleGuess(\'impair\')">Impair</button>';
+  } else if(card.zone === 3){
+    btns = '<div class="cible-suits">'+['♥','♦','♣','♠'].map(s =>
+      '<button class="btn '+(palmIsRed(s) ? 'btn-primary cible-rouge' : 'btn-ghost')+'" '+
+        'onclick="cibleGuess(\''+s+'\')">'+s+'</button>').join('')+'</div>';
+  } else {
+    btns = '<div class="cible-values">'+PALM_VALUES.map(v =>
+      '<button class="cible-val-btn" onclick="cibleGuess(\''+v+'\')">'+v+'</button>').join('')+'</div>';
+  }
+  footer.innerHTML = btns;
 }
 
+// --- L'IMPACT -----------------------------------------------------------------------
 function cibleGuess(answer){
-  Sound.play('cardFlip');
+  if(cible.busy) return;                    // verrou anti-double-appui
+  cible.busy = true;
   const idx = cible.selectedIdx;
   const card = cible.cards[idx];
-  const z = card.zone;
-  let correct = false;
+  if(!card){ cible.busy = false; return; }
 
-  if(z === 1){
-    const isRed = palmIsRed(card.suit);
-    correct = (answer==='rouge' && isRed) || (answer==='noir' && !isRed);
-  } else if(z === 2){
-    const numVal = parseInt(card.value);
-    if(isNaN(numVal)){
-      correct = Math.random() < 0.5; // figures: coin flip
+  let correct = false;
+  let luck = false;
+  if(card.zone === 1){
+    correct = (answer === 'rouge') === palmIsRed(card.suit);
+  } else if(card.zone === 2){
+    const n = parseInt(card.value, 10);
+    if(isNaN(n)){
+      // Une figure (As, Valet, Dame, Roi) n'est ni paire ni impaire : le sort tranche,
+      // à 50/50. C'est la mécanique d'origine — on la DIT au joueur dans le résultat
+      // plutôt que de la laisser passer pour une erreur de sa part.
+      correct = Math.random() < 0.5;
+      luck = true;
     } else {
-      correct = (answer==='pair' && numVal%2===0) || (answer==='impair' && numVal%2!==0);
+      correct = (answer === 'pair') === (n % 2 === 0);
     }
-  } else if(z === 3){
-    correct = (answer === card.suit);
+  } else if(card.zone === 3){
+    correct = answer === card.suit;
   } else {
-    correct = (answer === card.value);
+    correct = answer === card.value;
   }
 
   card.revealed = true;
+  Sound.play('cardFlip');
 
-  // Special effects
-  let special = '';
-  if(card.value==='A') special = 'As — tout le monde boit 1 gorgée';
-  else if(card.value==='R') special = 'Roi 👑 — invente une règle';
-  else if(card.value==='D') special = 'Dame — duel avec le joueur de ton choix';
-  else if(card.value==='V') special = 'Valet — ton voisin de gauche boit';
-  else if(card.value==='7') special = '7 — sens de jeu inversé !';
-  else if(card.value==='10') special = '10 — double ou rien !';
+  // Effets de carte : inchangés.
+  const SPECIALS = {
+    A:  'As — tout le monde boit une gorgée',
+    R:  'Roi — invente une règle pour la suite',
+    D:  'Dame — duel avec le joueur de ton choix',
+    V:  'Valet — ton voisin de gauche boit',
+    '7':'7 — le sens du jeu s\'inverse',
+    '10':'10 — double ou rien'
+  };
+  const special = SPECIALS[card.value] || '';
+  if(card.value === '7') cible.direction *= -1;
 
-  if(card.value==='7') cible.direction *= -1;
-
-  let resultTitle = '', resultSub = '';
+  let main, sub;
   if(correct){
     cible.sipPot += card.sips;
-    resultTitle = 'Gagné';
-    resultSub = '+'+card.sips+' gorgée'+(card.sips>1?'s':'')+' au compteur';
+    main = 'Touché';
+    sub = '+'+card.sips+' gorgée'+(card.sips > 1 ? 's' : '')+' dans la cagnotte';
     Sound.play('success');
   } else {
-    const totalDrink = cible.sipPot + card.sips;
-    resultTitle = 'Perdu';
-    resultSub = ciblePlayer()+' boit '+totalDrink+' gorgée'+(totalDrink>1?'s':'');
+    const total = cible.sipPot + card.sips;
+    main = 'Manqué';
+    sub = escapeHtml(ciblePlayer())+' boit '+total+' gorgée'+(total > 1 ? 's' : '');
     cible.sipPot = 0;
     Sound.play('fail');
+    if(navigator.vibrate) navigator.vibrate([90,50,90]);
   }
 
   const body = document.getElementById('cible-body');
   const footer = document.getElementById('cible-footer');
-  const red = palmIsRed(card.suit);
-
   body.innerHTML =
-    '<div class="palm-card '+(red?'red':'black')+'" style="width:70px;height:98px;font-size:28px;">'+
-      '<div class="card-val">'+card.value+'</div>'+
-      '<div class="card-suit" style="font-size:14px;">'+card.suit+'</div>'+
-    '</div>'+
-    '<div style="font-family:Unbounded,sans-serif;font-size:28px;color:'+(correct?'var(--sage)':'var(--clay)')+';">'+resultTitle+'</div>'+
-    '<div style="font-size:14px;color:var(--text-dim);">'+resultSub+'</div>'+
+    '<div class="cible-impact-card">'+cardHTML(card, { width:76, revealed:true })+'</div>'+
+    '<div class="cible-outcome '+(correct ? 'win' : 'lose')+'">'+main+'</div>'+
+    '<div class="cible-outcome-sub">'+sub+'</div>'+
+    (luck ? '<div class="cible-luck">Une figure : ni paire ni impaire — le sort a tranché</div>' : '')+
     (special ? '<div class="cible-special">'+special+'</div>' : '');
 
-  footer.innerHTML = '<button class="btn btn-primary" onclick="cibleNextPlayer()">Joueur suivant</button>';
+  cibleUpdateHeader();
+  cible.busy = false;
+  footer.innerHTML = '<button class="btn btn-primary" onclick="cibleNextPlayer()">Suivant</button>';
 }
 
 function cibleNextPlayer(){
   cible.currentIdx = (cible.currentIdx + cible.direction + cible.players.length) % cible.players.length;
+  // La cible se renouvelle quand toutes les cartes ont été retournées ; sinon on garde
+  // le plateau en cours, avec ses trous — c'est la mémoire de la partie.
+  const left = cible.cards.filter(c => !c.revealed).length;
+  if(left === 0){ cibleNewTarget(); return; }
   cibleUpdateHeader();
   cibleRenderTarget();
 }
+
+function cibleQuit(){ cible.busy = false; goTo('games-list'); }
+registerScreenCleanup('cible', function(){ cible.busy = false; });
