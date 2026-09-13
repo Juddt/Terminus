@@ -1,5 +1,90 @@
-#screen-bus-setup{padding-top:20px;}
-#bus-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
-#bus-chips .chip{display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:13px; color:var(--text);}
-#bus-chips .chip .x{cursor:pointer; margin-left:4px; color:var(--text-faint);}
+/* ===================================================================================
+   LE BUS — signature : LA MONTÉE, puis LE COULOIR
+   -----------------------------------------------------------------------------------
+   Deux moments, deux mises en scène. L'ancienne version affichait la même rangée de
+   quatre cartes dans les deux cas, si bien qu'on ne voyait pas qu'on changeait de jeu.
+
+   1. LA MONTÉE — quatre paliers empilés, dont l'enjeu grossit à vue d'œil. Le palier
+      joué est éclairé, les paliers franchis portent leur carte, ceux à venir restent
+      éteints : on lit d'un coup d'œil où on en est et ce que coûte la marche suivante.
+   2. LE COULOIR — cinq cases à franchir. Une figure et l'on retombe à la première ;
+      c'est ce retour en arrière VISIBLE qui fait le sel du jeu.
+   =================================================================================== */
+
 #screen-bus{padding:0;}
+
+.bus-who{font-family:'Anton',sans-serif; font-size:27px; line-height:1; color:var(--accent);
+  overflow-wrap:anywhere; max-width:300px;}
+.bus-free{font-family:'Anton',sans-serif; font-size:27px; line-height:1.1; color:var(--accent);
+  overflow-wrap:anywhere; max-width:310px;}
+
+/* --- La montée ---------------------------------------------------------------------- */
+.bus-ladder{display:flex; flex-direction:column; gap:7px; width:100%; max-width:320px; margin:6px 0;}
+.bus-step{display:flex; align-items:center; gap:12px; padding:8px 12px;
+  border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,0.022);
+  opacity:0.42; transition:opacity .25s ease, border-color .25s ease, background .25s ease;}
+.bus-step.active{opacity:1; border-color:var(--accent); background:rgba(232,255,61,0.07);}
+.bus-step.done{opacity:1;}
+
+.bus-step-card{width:40px; height:56px; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
+.bus-slot-empty{width:40px; height:56px; border-radius:6px; border:1px dashed var(--line);
+  display:flex; align-items:center; justify-content:center; color:var(--text-faint); font-size:15px;}
+
+.bus-step-text{flex:1; min-width:0; text-align:left;}
+.bus-step-q{font-family:'Anton',sans-serif; font-size:16px; line-height:1.1; color:var(--text);}
+.bus-step-sips{font-size:11px; color:var(--text-faint); margin-top:2px;}
+.bus-step.active .bus-step-q{color:var(--accent);}
+
+/* Quatre réponses (les couleurs) : une grille, pas quatre boutons écrasés sur une ligne. */
+.bus-answers{display:flex; gap:9px; width:100%;}
+.bus-answers .btn{flex:1 1 0; min-width:0;}
+.bus-answers.four{display:grid; grid-template-columns:repeat(4, 1fr);}
+.bus-answers.four .btn{padding:16px 4px; font-size:22px; min-height:54px;}
+
+.bus-verdict{font-family:'Anton',sans-serif; font-size:23px; line-height:1.2; max-width:300px; margin-top:2px;}
+.bus-verdict.win{color:var(--accent);}
+.bus-verdict.lose{color:var(--clay);}
+
+/* --- Classement --------------------------------------------------------------------- */
+.bus-section-title{font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
+.bus-scores{display:flex; flex-direction:column; gap:7px; width:100%; max-width:320px;}
+.bus-score-row{display:flex; align-items:center; gap:10px;}
+.bus-score-name{flex:0 0 34%; text-align:left; font-size:14px; color:var(--text-dim);
+  overflow-wrap:anywhere;}
+.bus-score-bar{flex:1; height:9px; border-radius:6px; background:rgba(255,255,255,0.06); overflow:hidden;}
+.bus-score-bar span{display:block; height:100%; border-radius:6px; background:var(--text-faint);
+  transition:width .4s cubic-bezier(.22,1,.36,1);}
+.bus-score-val{flex:0 0 26px; text-align:right; font-family:'IBM Plex Mono',monospace;
+  font-size:13px; color:var(--text-dim);}
+.bus-score-row.worst .bus-score-name{color:var(--clay); font-weight:600;}
+.bus-score-row.worst .bus-score-bar span{background:var(--clay);}
+.bus-score-row.worst .bus-score-val{color:var(--clay);}
+.bus-boarding{font-family:'Anton',sans-serif; font-size:22px; color:var(--clay); line-height:1.2;
+  margin-top:10px; max-width:300px; overflow-wrap:anywhere;}
+
+/* --- Le couloir ---------------------------------------------------------------------- */
+.bus-corridor{display:flex; gap:6px; align-items:center; justify-content:center;
+  flex-wrap:wrap; margin:10px 0 4px;}
+.bus-cell{width:46px; height:64px; display:flex; align-items:center; justify-content:center;
+  border-radius:8px; transition:border-color .2s ease;}
+.bus-cell-empty{width:100%; height:100%; border-radius:8px; border:1px dashed var(--line);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text-faint);}
+.bus-cell.current .bus-cell-empty{border-color:var(--accent); border-style:solid; color:var(--accent);}
+.bus-corridor-hint{font-size:12.5px; color:var(--text-dim); line-height:1.4; max-width:290px;}
+
+@media (prefers-reduced-motion: no-preference){
+  .bus-verdict{animation:pofVerdict .32s cubic-bezier(.22,1,.36,1) both;}
+  .bus-step.active{animation:busStepIn .3s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes busStepIn{ from{transform:translateX(-6px);} to{transform:none;} }
+}
+
+@media (max-height:720px){
+  .bus-who, .bus-free{font-size:22px;}
+  .bus-ladder{gap:5px;}
+  .bus-step{padding:6px 10px; gap:9px;}
+  .bus-step-card, .bus-slot-empty{width:34px; height:48px;}
+  .bus-step-q{font-size:14px;}
+  .bus-cell{width:40px; height:56px;}
+  .bus-verdict{font-size:19px;}
+}
