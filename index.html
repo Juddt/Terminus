@@ -7,6 +7,11 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0D0D0D">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<!-- Sans cette déclaration, le navigateur réclame /favicon.ico à la RACINE du domaine —
+     soit hors du site quand il est publié dans un sous-dossier (GitHub Pages) : 404 à
+     chaque chargement, et un onglet sans icône. -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
 <!-- Sans ces deux balises, « Ajouter à l'écran d'accueil » sur iPhone ouvre l'app
      dans une fenêtre Safari avec sa barre d'adresse, au lieu du plein écran. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
