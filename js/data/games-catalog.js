@@ -4,7 +4,7 @@
 const GAMES = [
   {
     id:"palmier", icon:"🌴", cardGrad:"linear-gradient(135deg,#3ADC8F,#1E8F5C)", tagline:'Empile les cartes sans tout faire tomber.', name:"Le Palmier", joueurs:"2-10", duree:"20-40 min",
-    difficulty:"Modéré", category:"Adresse",
+    difficulty:"Modéré", category:"Soft",
     interactive: true, launchFn: 'palmierSetup', startFn: 'palmStart',
     desc:"Pioche une carte, applique la règle, et pose-la en équilibre sur le palmier — sans le faire s'écrouler. 5 chutes = perdu !",
     rules:[
@@ -23,7 +23,7 @@ const GAMES = [
   },
   {
     id:"bus", icon:"🚌", cardGrad:"linear-gradient(135deg,#4DA6FF,#2D5FE0)", tagline:'Devine tes cartes cachées... ou monte dans le bus.', name:"Le Bus", joueurs:"2-10", duree:"10-20 min",
-    difficulty:"Modéré", category:"Devinette",
+    difficulty:"Modéré", category:"Malin",
     interactive: true, launchFn: 'busSetup', startFn: 'busStartFromSetup',
     desc:"Devine les caractéristiques de tes 4 cartes cachées. Le pire joueur monte dans le bus — et là, bonne chance.",
     rules:[
@@ -37,7 +37,7 @@ const GAMES = [
   },
   {
     id:"cible", icon:"🎯", cardGrad:"linear-gradient(135deg,#FF7A59,#FF3D77)", tagline:'Vise le centre. Plus c\'est risqué, plus ça arrose.', name:"La Cible", joueurs:"2-10", duree:"15-30 min",
-    difficulty:"Facile", category:"Devinette",
+    difficulty:"Facile", category:"Soft",
     interactive: true, launchFn: 'cibleSetup', startFn: 'cibleStart',
     desc:"21 cartes cachées en forme de cible. Plus tu vises le centre, plus la question est dure et plus l'enjeu monte.",
     rules:[
@@ -52,7 +52,7 @@ const GAMES = [
   },
   {
     id:"purple", icon:"🃏", cardGrad:"linear-gradient(135deg,#B18BFF,#8B4DFF)", tagline:'Rouge, noir ou Purple : annonce et assume.', name:"Purple", joueurs:"2-10", duree:"10-20 min",
-    difficulty:"Facile", category:"Bluff",
+    difficulty:"Facile", category:"Culotté",
     interactive: true, launchFn: 'purpleSetup', startFn: 'purpleStart',
     desc:"Prédi la couleur des prochaines cartes. Rouge, Noir ou Purple — plus tu vises haut, plus tu risques.",
     rules:[
@@ -67,7 +67,7 @@ const GAMES = [
   },
   {
     id:"pmu", icon:"🐎", cardGrad:"linear-gradient(135deg,#FFC24D,#E0912D)", tagline:'Mise sur un cheval, regarde la course s\'emballer.', name:"Le PMU", joueurs:"2-8", duree:"5-15 min",
-    difficulty:"Facile", category:"Bluff",
+    difficulty:"Facile", category:"Culotté",
     interactive: true, launchFn: 'pmuSetup', startFn: 'pmuStartFromSetup',
     desc:"Pariez sur le bon cheval et regardez la course. Le perdant boit sa mise, le gagnant distribue le double.",
     rules:[
@@ -81,7 +81,7 @@ const GAMES = [
   },
   {
     id:"des", icon:"🎲", cardGrad:"linear-gradient(135deg,#FF6B9E,#FF3D77)", tagline:'Un dé chacun. Le plus bas boit. Brutal.', name:"Le Duel de Dés", joueurs:"2", duree:"5-10 min",
-    difficulty:"Intense", category:"Rapide",
+    difficulty:"Intense", category:"Chaos",
     interactive: true, launchFn: 'desSetup', startFn: 'desStart',
     desc:"Chacun lance un dé. Le plus bas boit la multiplication des deux. Simple, brutal, rapide.",
     rules:[
@@ -92,7 +92,7 @@ const GAMES = [
   },
   {
     id:"pof", icon:"🪙", cardGrad:"linear-gradient(135deg,#FFE066,#FFC24D)", tagline:'Pile ou face, en mode fun ou en mode prison.', name:"Pile ou Face", joueurs:"2+", duree:"5-15 min",
-    difficulty:"Intense", category:"Rapide",
+    difficulty:"Intense", category:"Chaos",
     interactive: true, launchFn: 'pofSetup', startFn: 'pofStartFromSetup',
     desc:"Parie et retourne la pièce. Mode Fun pour les timides, Mode Prison pour les téméraires.",
     rules:[
@@ -104,7 +104,7 @@ const GAMES = [
   },
   {
     id:"underdicateur", icon:"🕵️", cardGrad:"linear-gradient(135deg,#6B5CE0,#3D2E8F)", tagline:'Un mot pour presque tout le monde... sauf pour toi.', name:"UnderDicateur", joueurs:"4-12", duree:"20-40 min",
-    difficulty:"Intense", category:"Bluff",
+    difficulty:"Intense", category:"Malin",
     interactive: true, launchFn: 'underdicateurSetup', startFn: 'undStart',
     desc:"Presque tout le monde a le même mot. Presque. Un mot chacun par tour, un vote — et un Dictateur qui manipule la partie dans l'ombre.",
     rules:[
@@ -119,6 +119,7 @@ const GAMES = [
   },
   {
     id:"pilliers", icon:"🍻", cardGrad:"linear-gradient(135deg,#FF9433,#E0562D)", tagline:'Le loup-garou version troquet, entre amis.', name:"Les Pilliers", joueurs:"3-20", duree:"30-60 min", materiel:"1 téléphone au centre",
+    difficulty:"Intense", category:"Malin",
     interactive: true, launchFn: 'pilSetup', startFn: 'pilStart', onlineUrl: 'pilliers-online/index.html',
     desc:"Un Loup-Garou version bar. Le camp des Pilliers élimine en secret chaque nuit, le village débat et vote le jour. Rôles cachés, alcootest, chimiste, mouchard... et une bonne dose de cul secs.",
     rules:[

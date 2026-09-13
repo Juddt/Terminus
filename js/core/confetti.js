@@ -32,13 +32,19 @@
     window.addEventListener('resize', resize);
   }
 
+  // Dimensions de la fenêtre, ou 0 si l'environnement ne les expose pas.
+  function vw(){ return window.innerWidth || (document.documentElement||{}).clientWidth || 0; }
+  function vh(){ return window.innerHeight || (document.documentElement||{}).clientHeight || 0; }
+
   function resize(){
     if(!canvas) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.width = Math.floor(innerWidth * dpr);
-    H = canvas.height = Math.floor(innerHeight * dpr);
-    canvas.style.width = innerWidth + 'px';
-    canvas.style.height = innerHeight + 'px';
+    const w = vw(), h = vh();
+    if(!w || !h) return;
+    W = canvas.width = Math.floor(w * dpr);
+    H = canvas.height = Math.floor(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
     ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
@@ -52,25 +58,25 @@
   function flash(intensity){
     return { life: 320, t: 0, draw(p){
       const a = decay(p) * intensity;
-      const g = ctx.createRadialGradient(innerWidth/2, innerHeight*0.42, 0,
-                                         innerWidth/2, innerHeight*0.42, innerHeight*0.75);
+      const g = ctx.createRadialGradient(vw()/2, vh()*0.42, 0,
+                                         vw()/2, vh()*0.42, vh()*0.75);
       g.addColorStop(0, rgba(ACCENT, a * 0.5));
       g.addColorStop(0.45, rgba(ACCENT, a * 0.12));
       g.addColorStop(1, rgba(ACCENT, 0));
       ctx.fillStyle = g;
-      ctx.fillRect(0, 0, innerWidth, innerHeight);
+      ctx.fillRect(0, 0, vw(), vh());
     }};
   }
 
   // --- L'ONDE : un anneau net qui s'ouvre depuis le centre. -------------------------
   function shockwave(color, delay){
     return { life: 620, t: -(delay || 0), draw(p){
-      const r = innerHeight * 0.08 + p * innerHeight * 0.62;
+      const r = vh() * 0.08 + p * vh() * 0.62;
       ctx.save();
       ctx.strokeStyle = rgba(color, decay(p) * 0.7);
       ctx.lineWidth = 2 + (1 - p) * 4;
       ctx.beginPath();
-      ctx.arc(innerWidth/2, innerHeight*0.44, r, 0, Math.PI*2);
+      ctx.arc(vw()/2, vh()*0.44, r, 0, Math.PI*2);
       ctx.stroke();
       ctx.restore();
     }};
@@ -79,7 +85,7 @@
   // --- LES BARRES NÉON : des traits horizontaux qui balaient l'écran. ---------------
   function neonBars(count, color){
     const bars = Array.from({length: count}, ()=>({
-      y: Math.random() * innerHeight,
+      y: Math.random() * vh(),
       h: 1 + Math.random() * 3,
       dir: Math.random() < 0.5 ? -1 : 1,
       speed: 0.6 + Math.random() * 1.6,
@@ -90,9 +96,9 @@
         const bp = Math.max(0, Math.min(1, (p - b.off) / (1 - b.off)));
         if(bp <= 0) return;
         const a = decay(bp) * 0.85;
-        const w = innerWidth * (0.25 + bp * 1.1);
-        const x = b.dir > 0 ? -innerWidth*0.2 + bp * innerWidth * b.speed
-                            : innerWidth*1.2 - bp * innerWidth * b.speed - w;
+        const w = vw() * (0.25 + bp * 1.1);
+        const x = b.dir > 0 ? -vw()*0.2 + bp * vw() * b.speed
+                            : vw()*1.2 - bp * vw() * b.speed - w;
         const g = ctx.createLinearGradient(x, 0, x + w, 0);
         g.addColorStop(0, rgba(color, 0));
         g.addColorStop(0.5, rgba(color, a));
@@ -108,7 +114,7 @@
   // une coupure de courant.
   function glitch(){
     const slices = Array.from({length: 3}, ()=>({
-      y: innerHeight * (0.25 + Math.random() * 0.5),
+      y: vh() * (0.25 + Math.random() * 0.5),
       h: 6 + Math.random() * 26,
       dx: (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 40),
       at: Math.random() * 0.5
@@ -118,9 +124,9 @@
         if(p < s.at || p > s.at + 0.3) return;
         const a = 0.5 * (1 - (p - s.at) / 0.3);
         ctx.fillStyle = rgba(ACCENT, a * 0.55);
-        ctx.fillRect(s.dx, s.y, innerWidth, s.h * 0.5);
+        ctx.fillRect(s.dx, s.y, vw(), s.h * 0.5);
         ctx.fillStyle = rgba(CLAY, a * 0.4);
-        ctx.fillRect(-s.dx * 0.6, s.y + s.h * 0.5, innerWidth, s.h * 0.4);
+        ctx.fillRect(-s.dx * 0.6, s.y + s.h * 0.5, vw(), s.h * 0.4);
       });
     }};
   }
@@ -128,8 +134,8 @@
   // --- LA MONTÉE : des éclats qui filent vers le haut, comme des étincelles. --------
   function embers(count, color){
     const parts = Array.from({length: count}, ()=>({
-      x: innerWidth * (0.1 + Math.random() * 0.8),
-      y: innerHeight * (0.55 + Math.random() * 0.4),
+      x: vw() * (0.1 + Math.random() * 0.8),
+      y: vh() * (0.55 + Math.random() * 0.4),
       vy: 1.6 + Math.random() * 3.4,
       vx: (Math.random() - 0.5) * 1.2,
       r: 1 + Math.random() * 2.4,
@@ -139,7 +145,7 @@
       parts.forEach(s=>{
         const sp = Math.max(0, (p - s.off) / (1 - s.off));
         if(sp <= 0) return;
-        const y = s.y - sp * s.vy * innerHeight * 0.34;
+        const y = s.y - sp * s.vy * vh() * 0.34;
         const x = s.x + Math.sin(sp * 6 + s.x) * 8 * s.vx;
         ctx.fillStyle = rgba(color, decay(sp) * 0.9);
         ctx.beginPath();
@@ -154,7 +160,7 @@
     if(!loop.last) loop.last = ts;
     const dt = Math.min(48, ts - loop.last);
     loop.last = ts;
-    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    ctx.clearRect(0, 0, vw(), vh());
     // Les effets s'additionnent : c'est ce qui donne l'impression d'un seul moment fort
     // plutôt que d'une succession de petites animations.
     ctx.globalCompositeOperation = 'lighter';
@@ -168,7 +174,7 @@
     });
     ctx.globalCompositeOperation = 'source-over';
     if(effects.length){ raf = requestAnimationFrame(loop); }
-    else { raf = null; loop.last = 0; ctx.clearRect(0, 0, innerWidth, innerHeight); }
+    else { raf = null; loop.last = 0; ctx.clearRect(0, 0, vw(), vh()); }
   }
 
   // taille : 'small' (une réussite), 'big' (la finale), 'huge' (fin de soirée).

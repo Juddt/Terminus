@@ -208,6 +208,7 @@
     <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
     <h2 style="font-size:22px; margin-bottom:4px;">Choisir un jeu</h2>
     <div id="games-filter-wrap" class="games-filter-wrap"></div>
+    <div id="games-filter-hint" class="games-filter-hint"></div>
     <div id="games-list-wrap" class="games-scene"></div>
     <div class="games-nav">
       <div class="games-nav-btn" onclick="scrollGamesScene(-1)" aria-label="Jeu précédent">←</div>
@@ -493,7 +494,7 @@
   <div id="rules-overlay" class="rules-overlay hidden" onclick="closeRulesOverlay()">
     <div class="rules-modal" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-family:Anton,sans-serif;font-size:18px;">Règles</div>
+        <div style="font-family:Anton,sans-serif;font-size:18px;" id="rules-overlay-title">Règles</div>
         <div style="cursor:pointer;color:var(--text-dim);font-size:18px;" onclick="closeRulesOverlay()">✕</div>
       </div>
       <div id="rules-overlay-content"></div>

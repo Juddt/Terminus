@@ -2,6 +2,21 @@
 // l'app reste ouverte, réinitialisé au rechargement (pas besoin de le sauvegarder).
 let gamesListCategoryFilter = 'all';
 
+/* --- LES PALIERS DE DÉFI -----------------------------------------------------------
+   Les anciennes catégories décrivaient la mécanique : Adresse, Devinette, Bluff,
+   Rapide. Mais à une table, personne ne se dit « je veux de la devinette » : la vraie
+   question est « on part sur quoi, là ? ». Les paliers répondent à celle-là, et ils
+   sont rangés dans l'ordre où une soirée monte — on descend la liste à mesure que le
+   before avance. Chacun porte sa promesse en une ligne : aucun n'a besoin d'être
+   expliqué deux fois. */
+const GAME_TIERS = [
+  { key:'Soft',    hint:'On se chauffe. Personne ne se met en danger.' },
+  { key:'Malin',   hint:'Il faut réfléchir, observer, démasquer.' },
+  { key:'Culotté', hint:'Il faut annoncer, parier, assumer.' },
+  { key:'Chaos',   hint:'Ça va vite et ça tape fort.' },
+];
+const TIER_SLUGS = { 'Soft':'soft', 'Malin':'malin', 'Culotté':'culotte', 'Chaos':'chaos' };
+
 // Correspondance label -> slug ASCII, pour éviter des noms de classe CSS accentués
 // (game-difficulty-Modéré) qui posent parfois problème selon les outils/navigateurs.
 const DIFFICULTY_SLUGS = { 'Facile':'facile', 'Modéré':'modere', 'Intense':'intense' };
@@ -39,8 +54,14 @@ function renderGamesList(){
       '<div class="game-stage-body">'+
         '<div class="game-name">'+g.name+'</div>'+
         (g.tagline ? '<div class="game-principle">'+soberize(g.tagline)+'</div>' : '')+
-        '<div class="game-stage-meta"><span>'+g.joueurs+' joueurs</span><span>'+g.duree+'</span></div>'+
-        '<button class="btn btn-primary" onclick="event.stopPropagation();'+g.launchFn+'()">Jouer</button>'+
+        '<div class="game-stage-meta">'+
+          '<span class="tier-chip tier-'+(TIER_SLUGS[g.category] || 'soft')+'">'+(g.category || '')+'</span>'+
+          '<span>'+g.joueurs+' joueurs</span><span>'+g.duree+'</span>'+
+        '</div>'+
+        '<div class="game-stage-actions">'+
+          '<button class="btn btn-primary" onclick="event.stopPropagation();'+g.launchFn+'()">Jouer</button>'+
+          '<button class="btn btn-ghost" onclick="event.stopPropagation();showRulesOverlay(\''+g.id+'\')">Règles</button>'+
+        '</div>'+
       '</div>';
     wrap.appendChild(stage);
   });
@@ -81,20 +102,31 @@ function setGamesListFilter(category){
   document.querySelectorAll('.games-filter-chip').forEach(el=>{
     el.classList.toggle('selected', el.dataset.category === category);
   });
+  // Le palier choisi dit ce qu'il promet, en une ligne, sous les puces : on comprend
+  // ce qu'on vient de sélectionner sans avoir à parcourir les jeux pour le déduire.
+  const hintEl = document.getElementById('games-filter-hint');
+  if(hintEl){
+    const tier = GAME_TIERS.find(t => t.key === category);
+    hintEl.textContent = tier ? tier.hint : 'Les neuf jeux, du plus doux au plus brutal.';
+  }
   renderGamesList();
 }
 
 function openGamesList(){
   const filterWrap = document.getElementById('games-filter-wrap');
   if(filterWrap && !filterWrap.dataset.built){
-    // Une puce "Tous" + une par catégorie présente dans le catalogue.
-    const categories = ['all', ...new Set(GAMES.map(g=>g.category).filter(Boolean))];
-    filterWrap.innerHTML = categories.map(c=>
-      '<div class="games-filter-chip'+(c==='all'?' selected':'')+'" data-category="'+c+'" onclick="setGamesListFilter(\''+c+'\')">'+(c==='all'?'Tous':c)+'</div>'
-    ).join('');
+    // Une puce « Tous », puis un palier par niveau de défi réellement présent.
+    const present = new Set(GAMES.map(g=>g.category).filter(Boolean));
+    const tiers = GAME_TIERS.filter(t => present.has(t.key));
+    filterWrap.innerHTML =
+      '<div class="games-filter-chip selected" data-category="all" onclick="setGamesListFilter(\'all\')">Tous</div>'+
+      tiers.map(t=>
+        '<div class="games-filter-chip tier-'+TIER_SLUGS[t.key]+'" data-category="'+t.key+'" '+
+          'title="'+t.hint+'" onclick="setGamesListFilter(\''+t.key+'\')">'+t.key+'</div>'
+      ).join('');
     filterWrap.dataset.built = '1';
   }
-  renderGamesList();
+  setGamesListFilter(gamesListCategoryFilter);
   goTo('games-list');
 }
 
@@ -133,6 +165,8 @@ function openGameDetail(id){
 function showRulesOverlay(gameId){
   const g = GAMES.find(x=>x.id===gameId);
   if(!g) return;
+  const title = document.getElementById('rules-overlay-title');
+  if(title) title.textContent = g.name;
   const wrap = document.getElementById('rules-overlay-content');
   wrap.innerHTML = '';
   g.rules.forEach(r=>{
