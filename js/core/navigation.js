@@ -31,7 +31,11 @@ function renderGamesList(){
     stage.className = 'game-stage';
     stage.setAttribute('onclick', 'openGameDetail(\''+g.id+'\')');
     stage.innerHTML =
-      '<div class="game-stage-object" style="--stage-glow:'+stageGlow(g)+'">'+(GAME_ART[g.id]||'')+'</div>'+
+      // L'affiche montre l'objet réel du jeu (game-posters.js) ; la silhouette plate
+      // de game-art.js reste utilisée dans l'index compact, où la place est minuscule.
+      '<div class="game-stage-object" style="--stage-glow:'+stageGlow(g)+'">'+
+        '<div class="poster">'+(GAME_POSTERS[g.id] || GAME_ART[g.id] || '')+'</div>'+
+      '</div>'+
       '<div class="game-stage-body">'+
         '<div class="game-name">'+g.name+'</div>'+
         (g.tagline ? '<div class="game-principle">'+soberize(g.tagline)+'</div>' : '')+

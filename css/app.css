@@ -44,16 +44,116 @@
 .games-scene::-webkit-scrollbar{display:none;}
 .game-stage{flex:0 0 100%; scroll-snap-align:center; display:flex; flex-direction:column; align-items:center; text-align:center; padding:4px 30px 0; background:none; border:none; border-radius:0; cursor:pointer;}
 
-/* Socle lumineux : halo diffus + ellipse de contact, l'objet paraît posé sur une scène. */
-.game-stage-object{position:relative; width:100%; height:210px; display:flex; align-items:center; justify-content:center; background:none;}
-.game-stage-object::before{content:''; position:absolute; top:12%; left:50%; transform:translateX(-50%); width:74%; height:74%; border-radius:50%; background:var(--stage-glow, var(--accent)); opacity:0.17; filter:blur(34px);}
-.game-stage-object svg{position:relative; width:178px; height:178px; filter:drop-shadow(0 22px 26px rgba(0,0,0,0.6));
-  transition:transform .38s cubic-bezier(.22,1,.36,1);}
-.game-stage:active .game-stage-object svg{transform:scale(0.95);}
+/* --- LA SCÈNE DE PRÉSENTATION ------------------------------------------------------
+   Chaque jeu est présenté par SON objet (voir game-posters.js), posé dans une vraie
+   scène : un sol qui reçoit l'objet, une lumière rasante venue du haut-gauche, une
+   ombre de contact au sol, et un halo teinté par le jeu. C'est ce trio — appui,
+   lumière, ombre — qui fait qu'un objet paraît posé quelque part plutôt que collé sur
+   un fond. */
+.game-stage-object{position:relative; width:100%; height:212px; display:flex;
+  align-items:center; justify-content:center; background:none; perspective:800px;}
+
+/* Le halo, teinté par le jeu. */
+.game-stage-object::before{content:''; position:absolute; top:6%; left:50%;
+  transform:translateX(-50%); width:78%; height:76%; border-radius:50%;
+  background:var(--stage-glow, var(--accent)); opacity:0.15; filter:blur(38px);}
+/* Le sol : une ellipse sombre et floue, juste sous l'objet. */
+.game-stage-object::after{content:''; position:absolute; bottom:12px; left:50%;
+  transform:translateX(-50%); width:58%; height:20px; border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(0,0,0,0.78), rgba(0,0,0,0) 72%);}
+
+.poster{position:relative; z-index:1; display:flex; align-items:center; justify-content:center;
+  width:100%; height:100%;}
 @media (prefers-reduced-motion: no-preference){
-  .game-stage-object svg{animation:objectIn .5s cubic-bezier(.22,1,.36,1) both;}
-  @keyframes objectIn{ from{ opacity:0; transform:translateY(16px) scale(0.92);} to{ opacity:1; transform:none;} }
+  .poster{animation:objectIn .5s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes objectIn{ from{ opacity:0; transform:translateY(16px) scale(0.93);} to{ opacity:1; transform:none;} }
 }
+.game-stage:active .poster{transform:scale(0.96); transition:transform .18s ease;}
+
+/* Deux dés qui s'affrontent. */
+.poster-duo{display:flex; align-items:center; gap:6px; transform-style:preserve-3d;}
+.poster-duo .die-stage{width:78px; height:78px; margin-bottom:10px; --hop:0px;}
+.poster-duo .die-face{border-radius:13px; padding:10px; gap:4px;}
+.poster-duo .die-face::after{border-radius:13px;}
+.poster-duo .die-face-1{transform:translateZ(39px);}
+.poster-duo .die-face-6{transform:rotateY(180deg) translateZ(39px);}
+.poster-duo .die-face-3{transform:rotateY(90deg)  translateZ(39px);}
+.poster-duo .die-face-4{transform:rotateY(-90deg) translateZ(39px);}
+.poster-duo .die-face-5{transform:rotateX(90deg)  translateZ(39px);}
+.poster-duo .die-face-2{transform:rotateX(-90deg) translateZ(39px);}
+.poster-duo .die-shadow{width:66px; height:12px; bottom:-12px;}
+
+/* La pièce, saisie en plein basculement. */
+.poster-coin .coin-side{font-size:19px;}
+.poster-coin .coin-heads{transform:translateZ(6px);}
+.poster-coin .coin-tails{transform:rotateX(180deg) translateZ(6px);}
+.poster-coin .coin-edge-seg{width:12px; height:12px; margin-left:-6px; margin-top:-6px;}
+.poster-coin .coin-shadow{width:88px; bottom:-14px;}
+
+/* Le paquet et deux cartes retournées. */
+.poster-spread{display:flex; align-items:center; justify-content:center;}
+.poster-spread .pc-deck{margin-right:-10px;}
+.poster-spread .pc{margin-left:-12px;}
+
+/* Les quatre paliers du Bus. */
+.poster-ladder{display:flex; flex-direction:column; gap:6px; width:168px;}
+.poster-rung{display:flex; align-items:center; gap:9px; height:38px; padding:0 9px;
+  border:1px solid var(--line); border-radius:11px; background:rgba(255,255,255,0.025); opacity:0.4;}
+.poster-rung.done{opacity:1;}
+.poster-rung.active{opacity:1; border-color:var(--accent); background:rgba(232,255,61,0.08);}
+.poster-rung em{width:24px; height:32px; flex-shrink:0; border-radius:4px; border:1px dashed var(--line);
+  display:flex; align-items:center; justify-content:center; font-style:normal;
+  font-size:12px; color:var(--text-faint);}
+.poster-rung span{flex:1; height:5px; border-radius:3px; background:rgba(255,255,255,0.10);}
+.poster-rung.active span{background:var(--accent); opacity:0.55;}
+
+/* La cible, avec quelques enjeux posés dessus. */
+.poster-chip{position:absolute; transform:translate(-50%,-50%);
+  width:var(--cw); height:calc(var(--cw) * 1.4); border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Anton',sans-serif; font-size:calc(var(--cw) * 0.5); color:var(--accent);
+  background:linear-gradient(155deg, #24241A, #14140E);
+  border:1px solid rgba(232,255,61,0.2); box-shadow:0 3px 8px rgba(0,0,0,0.55);}
+
+/* La piste du PMU. */
+.poster-track{display:flex; flex-direction:column; gap:6px; width:180px;}
+.poster-lane{display:flex;}
+.poster-rail{position:relative; flex:1; height:26px; border-radius:7px;
+  background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.05);}
+.poster-runner{position:absolute; top:50%; transform:translate(-50%,-50%);
+  width:22px; height:30px; border-radius:4px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; line-height:1;
+  background:radial-gradient(ellipse at 30% 20%, #FFFFFF, #F2EDE0 70%, #DED6C3);
+  box-shadow:0 3px 8px rgba(0,0,0,0.6);}
+.poster-runner.red{color:#B3202A;}
+.poster-runner.black{color:#15130E;}
+
+/* Le palmier. */
+.poster-palm .palm-scene{width:190px;}
+.poster-palm .palm-stack-card{width:38px; height:54px; bottom:96px;}
+
+/* Le mot sous scellé d'UnderDicateur. */
+.poster-secret{display:flex; align-items:center; gap:10px;}
+.poster-word{padding:13px 15px; border-radius:12px; border:1px solid var(--line);
+  background:var(--surface-2); font-family:'Anton',sans-serif; font-size:17px; color:var(--text);
+  box-shadow:0 6px 16px rgba(0,0,0,0.45);}
+.poster-word.alt{color:var(--clay); border-color:rgba(255,59,92,0.35); background:rgba(255,59,92,0.07);}
+.poster-veil{width:46px; height:46px; border-radius:14px; display:flex; align-items:center;
+  justify-content:center; color:var(--accent);
+  border:1px solid rgba(232,255,61,0.3); background:rgba(232,255,61,0.08);}
+
+/* Les rôles des Pilliers, dont un resté caché. */
+.poster-roles{display:flex; align-items:center; gap:8px;}
+.poster-role{width:56px; height:78px; border-radius:10px; display:flex; align-items:center;
+  justify-content:center; text-align:center; padding:6px;
+  font-family:'Anton',sans-serif; font-size:12px; line-height:1.1;
+  box-shadow:0 8px 20px rgba(0,0,0,0.5);}
+.poster-role.village{background:linear-gradient(160deg,#20301F,#131F13);
+  border:1px solid var(--sage); color:var(--sage); transform:rotate(-7deg);}
+.poster-role.pilliers{background:linear-gradient(160deg,#3A1414,#210A0A);
+  border:1px solid var(--clay); color:var(--clay); transform:rotate(7deg);}
+.poster-role.hidden{background:linear-gradient(155deg, #24241A, #14140E);
+  border:1px solid rgba(232,255,61,0.18); color:var(--text-faint); font-size:20px; z-index:1;}
 
 .game-stage-body{padding:2px 0 0; width:100%;}
 .game-stage .game-name{font-family:'Anton', sans-serif; font-size:30px; letter-spacing:0.4px; color:var(--text); line-height:1.04; margin-bottom:8px;}
@@ -64,11 +164,12 @@
 
 /* Commandes stables : elles ne bougent pas d'un jeu à l'autre. */
 .games-nav{display:flex; align-items:center; justify-content:center; gap:16px; margin:16px 0 18px;}
-.games-nav-btn{width:48px; height:48px; flex-shrink:0; border-radius:50%; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:19px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
-.games-nav-btn:active{transform:scale(0.9);}
+.games-nav-btn{width:52px; height:46px; flex-shrink:0; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:19px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.games-nav-btn{box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 6px 16px rgba(0,0,0,0.4);}
+.games-nav-btn:active{transform:scale(0.94);}
 
 /* Index compact "Tous les jeux" */
-.games-index-toggle{width:100%; background:none; border:1px dashed var(--line); border-radius:16px; color:var(--text-dim); font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; padding:14px; cursor:pointer; font-family:'Work Sans',sans-serif;}
+.games-index-toggle{width:100%; background:rgba(255,255,255,0.035); border:1px solid var(--line); border-radius:15px; color:var(--text-dim); font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; padding:14px; cursor:pointer; font-family:'Work Sans',sans-serif;}
 .games-index{display:none; margin-top:12px;}
 .games-index.open{display:block;}
 .games-index-row{display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--line); cursor:pointer;}
@@ -486,8 +587,10 @@
 
 /* Filtre catégories du catalogue de jeux */
 .games-filter-wrap{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
-.games-filter-chip{font-size:12px; padding:8px 14px; border-radius:30px; border:1px solid var(--line); color:var(--text-dim); cursor:pointer;}
-.games-filter-chip.selected{border-color:var(--accent); color:var(--accent);}
+.games-filter-chip{font-size:12.5px; padding:9px 14px; border-radius:11px; border:1px solid var(--line);
+  background:rgba(255,255,255,0.03); color:var(--text-dim); cursor:pointer;
+  box-shadow:0 1px 0 rgba(255,255,255,0.04) inset;}
+.games-filter-chip.selected{border-color:transparent; color:var(--ink-on-light); background:var(--accent); font-weight:600;}
 
 /* Carte-souvenir (canvas) */
 .recap-preview{display:flex; justify-content:center;}
