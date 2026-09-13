@@ -5,6 +5,8 @@ let state = {
   durationMin:30, intensityValue:50, sessionMode:'full',
   globalSecondsTotal:0, globalSecondsLeft:0, globalInterval:null,
   ringInterval:null, activeRules:[],
+  // Missions et prédictions en attente de leur rappel (voir schedulePending).
+  pending:[], itemMeta:{}, rouletteInterval:null,
   ringTotal:10, ringLeft:10,
   paused:false, timeUp:false, timeUpGrace:0,
   climaxElapsedTarget:0, climaxFired:false,

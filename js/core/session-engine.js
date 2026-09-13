@@ -191,6 +191,8 @@ function launchSession(){
   // devient "Joueur N" (voir collectPlayers), le lancement n'est jamais bloqué.
   if(typeof collectPlayers === 'function') state.players = collectPlayers();
   state.activeRules = [];
+  state.pending = [];
+  state.itemMeta = {};
   state.climaxFired = false;
   state.timeUp = false;
   state.timeUpGrace = 0;
@@ -441,6 +443,24 @@ function advanceQueue(){
   updateIntensityForIndex(state.queueIndex);
   state.queueIndex++;
 
+  // Une règle arrivée à échéance est LEVÉE explicitement : une contrainte qui
+  // disparaîtrait en silence laisserait le groupe dans le doute.
+  const lifted = expireRules();
+  if(lifted.length){
+    renderRulesBanner();
+    renderItem('Règle levée', lifted[0], [], 0, { lifted:true });
+    return;
+  }
+
+  // Un rappel dû passe avant le contenu neuf : on revient sur ce qui a été promis.
+  const due = takeDuePending();
+  if(due){
+    const who = state.players.find(p => p.name === due.player);
+    renderItem(due.kind === 'mission' ? 'Mission — verdict' : 'Prédiction — verdict',
+      due.text, who ? [who] : [], 0, { recall: due.kind });
+    return;
+  }
+
   if(type === 'special'){
     if(isClimax){ fireClimax(); } else { showSpecialEvent(); }
     return;
@@ -450,9 +470,8 @@ function advanceQueue(){
     const r = drawFromBag('rule', getEffectiveRules());
     const players = pickPlayers(1);
     const text = fillTemplate(r.text, players);
-    state.activeRules.push(text);
+    addActiveRule(text, r.conflict);
     state.stats.rulesAdded++;
-    renderRulesBanner();
     renderItem('Nouvelle règle', text, [], Math.round(4*speedFactor()));
   } else if(type === 'challenge'){
     const c = drawFromBag('challenge', getEffectiveChallenges());
@@ -460,7 +479,7 @@ function advanceQueue(){
     const text = fillTemplate(c.text, players);
     state.stats.challenges++;
     players.forEach(p=>{ state.stats.targets[p.name] = (state.stats.targets[p.name]||0) + 1; });
-    renderItem('Défi', text, players, Math.round(25*speedFactor()));
+    renderItem('Défi', text, players, Math.round(25*speedFactor()), { kind: c.kind });
   } else if(type === 'minigame'){
     const m = drawFromBag('minigame', MINIGAMES);
     // Les mini-jeux n'ont pas de champ `n` : on déduit le nombre de joueurs à tirer des
@@ -473,20 +492,103 @@ function advanceQueue(){
   } else if(type === 'vote'){
     const v = drawFromBag('vote', VOTES);
     renderItem('Question', v.text, [], Math.round(20*speedFactor()));
+
+  // --- Familles ajoutées : chacune a sa mécanique, donc sa scène et ses commandes ---
+  } else if(type === 'quiz'){
+    const q = drawFromBag('quiz', QUIZ);
+    // La réponse voyage avec l'item : la scène la garde cachée jusqu'à la révélation.
+    renderItem('Quiz', q.q, [], 0, { answer: q.a });
+  } else if(type === 'dilemme'){
+    const d = drawFromBag('dilemme', DILEMMAS);
+    renderItem('Dilemme', d.a, [], 0, { optionA: d.a, optionB: d.b });
+  } else if(type === 'mission'){
+    const m = drawFromBag('mission', MISSIONS);
+    const players = pickPlayers(1);
+    players.forEach(p=>{ state.stats.targets[p.name] = (state.stats.targets[p.name]||0) + 1; });
+    // La mission court en arrière-plan : elle sera rappelée dans quelques manches.
+    schedulePending('mission', m.text, players[0], 4 + Math.floor(Math.random()*4));
+    renderItem('Mission secrète', m.text, players, 0, { secret:true });
+  } else if(type === 'prediction'){
+    const pr = drawFromBag('prediction', PREDICTIONS);
+    const players = pickPlayers(1);
+    const text = fillTemplate(pr.text, players);
+    schedulePending('prediction', text, players[0], 3 + Math.floor(Math.random()*4));
+    renderItem('Prédiction', text, players, 0);
+  } else if(type === 'destin'){
+    const d = drawFromBag('destin', DESTINS);
+    const players = pickPlayers(2);
+    const text = fillTemplate(d.text, players);
+    // Un destin lié est une règle qui ne concerne que deux personnes : il vit et
+    // expire comme les autres règles, et compte dans le plafond. Dans le panneau des
+    // règles, il faut en revanche les prénoms — hors de la scène, « ils » ne désigne
+    // plus personne.
+    addActiveRule(players[0].name + ' et ' + players[1].name + ' sont liés : ' +
+      text.charAt(0).toLowerCase() + text.slice(1), null);
+    players.forEach(p=>{ state.stats.targets[p.name] = (state.stats.targets[p.name]||0) + 1; });
+    renderItem('Destins liés', text, players, 0);
+  } else if(type === 'barman'){
+    const b = drawFromBag('barman', BARMAN);
+    const players = pickPlayers(1);
+    const text = fillTemplate(b.text, players);
+    players.forEach(p=>{ state.stats.targets[p.name] = (state.stats.targets[p.name]||0) + 1; });
+    renderItem('Barman', text, players, Math.round(40*speedFactor()));
+  } else if(type === 'tribunal'){
+    const t = drawFromBag('tribunal', TRIBUNAL);
+    const players = pickPlayers(1);
+    const text = fillTemplate(t.text, players);
+    players.forEach(p=>{ state.stats.targets[p.name] = (state.stats.targets[p.name]||0) + 1; });
+    renderItem('Tribunal', text, players, Math.round(30*speedFactor()));
+  } else if(type === 'roulette'){
+    const r = drawFromBag('roulette', ROULETTE);
+    // Le prénom n'est PAS choisi ici : la scène le tire en le faisant défiler, pour que
+    // le suspense du tirage soit réel à l'écran (voir renderScene, composition roulette).
+    renderItem('Roulette', r.text, [], 0);
+
   } else {
     const l = drawFromBag('light', LIGHT_EVENTS);
     renderItem('Moment', l.text, [], Math.round(l.dur*speedFactor()));
   }
 }
 
+// --- RAPPELS DIFFÉRÉS ---------------------------------------------------------------
+// Une mission secrète ou une prédiction n'a de sens que si l'on y revient. On note donc
+// l'échéance au moment où elle est posée, et le moteur intercale le rappel quand elle
+// arrive — c'est ce qui donne à la soirée une mémoire, plutôt qu'une suite de manches
+// sans lien entre elles.
+function schedulePending(kind, text, player, delay){
+  state.pending = state.pending || [];
+  state.pending.push({
+    kind, text,
+    player: player ? player.name : null,
+    dueIndex: state.queueIndex + Math.max(2, delay)
+  });
+}
+
+// Renvoie le rappel arrivé à échéance, s'il y en a un.
+function takeDuePending(){
+  if(!state.pending || !state.pending.length) return null;
+  const i = state.pending.findIndex(p => state.queueIndex >= p.dueIndex);
+  if(i < 0) return null;
+  return state.pending.splice(i, 1)[0];
+}
+
 // Fait correspondre le libellé affiché au type de ticket (couleur définie dans app.css
 // via #screen-main[data-type]) — le principe « Confetti » : la couleur du ticket annonce
 // le type de moment avant même la lecture.
-const EYEBROW_TO_TYPE = { 'Défi':'defi', 'Question':'vote', 'Nouvelle règle':'regle', 'Mini-jeu':'mini', 'Moment':'moment' };
+const EYEBROW_TO_TYPE = {
+  'Défi':'defi', 'Question':'vote', 'Nouvelle règle':'regle', 'Mini-jeu':'mini', 'Moment':'moment',
+  'Quiz':'quiz', 'Dilemme':'dilemme', 'Mission secrète':'mission', 'Prédiction':'prediction',
+  'Destins liés':'regle', 'Barman':'barman', 'Tribunal':'tribunal', 'Roulette':'roulette',
+  'Règle levée':'regle', 'Mission — verdict':'mission', 'Prédiction — verdict':'prediction'
+};
 
-function renderItem(eyebrow, text, players, seconds){
+function renderItem(eyebrow, text, players, seconds, meta){
+  // `meta` porte ce qui est propre à la famille : la réponse d'un quiz, les deux
+  // options d'un dilemme, le fait qu'un contenu soit secret ou qu'il s'agisse d'un
+  // rappel. La scène et les commandes s'y adaptent.
+  state.itemMeta = meta || {};
   renderScene(eyebrow, text, players, seconds);
-  state.lastItem = { eyebrow, text, players };
+  state.lastItem = { eyebrow, text, players, meta: state.itemMeta };
   renderMainFooter(eyebrow === 'D\u00e9fi');
   // Le compte \u00e0 rebours de manche n'appara\u00eet que si la consigne impose r\u00e9ellement un
   // temps limite ("en 20 secondes", "avant la fin du minuteur", "chrono"). Ailleurs il
@@ -511,9 +613,33 @@ function renderItem(eyebrow, text, players, seconds){
 function renderMainFooter(isChallenge){
   const wrap = document.getElementById('footer-buttons');
   const kind = state.sceneKind;
+  const meta = state.itemMeta || {};
   let main;
-  if(kind === 'regle'){
-    main = '<button class="ctrl ctrl-primary" onclick="advanceManually()">C\'est not\u00e9</button>';
+
+  if(kind === 'quiz'){
+    // Deux temps : on laisse le groupe trancher, PUIS on révèle. Révéler tout de suite
+    // supprimerait le seul moment intéressant du quiz.
+    main = '<button class="ctrl ctrl-primary" id="scene-main-btn" onclick="revealQuizAnswer()">R\u00e9v\u00e9ler la r\u00e9ponse</button>';
+  } else if(kind === 'dilemme'){
+    main = '<button class="ctrl ctrl-primary" id="scene-main-btn" onclick="advanceManually()">Tout le monde a choisi</button>';
+  } else if(kind === 'mission' && !meta.recall){
+    // Tant que la mission n'a pas \u00e9t\u00e9 lue sous le doigt, on ne passe pas : sinon elle
+    // serait manqu\u00e9e par celui-l\u00e0 m\u00eame qui doit l'accomplir.
+    main = '<button class="ctrl ctrl-primary" id="scene-main-btn" disabled onclick="advanceManually()">C\'est lu</button>';
+  } else if(kind === 'roulette'){
+    // Le bouton attend la fin du tirage : avancer pendant que les pr\u00e9noms d\u00e9filent
+    // n'aurait aucun sens.
+    main = '<button class="ctrl ctrl-primary" id="scene-main-btn" disabled onclick="advanceManually()">Continuer</button>';
+  } else if(kind === 'prediction' && meta.recall){
+    main = '<button class="ctrl ctrl-neutral" onclick="resolvePrediction(false)">Rat\u00e9</button>'+
+      '<button class="ctrl ctrl-primary" onclick="resolvePrediction(true)">Vu juste</button>';
+  } else if(kind === 'tribunal'){
+    main = '<button class="ctrl ctrl-neutral" onclick="advanceManually()">Acquitt\u00e9</button>'+
+      '<button class="ctrl ctrl-primary" onclick="advanceManually()">Coupable</button>';
+  } else if(kind === 'levee'){
+    main = '<button class="ctrl ctrl-primary" id="scene-main-btn" onclick="advanceManually()">Compris</button>';
+  } else if(kind === 'regle' || kind === 'destin'){
+    main = '<button class="ctrl ctrl-primary" id="scene-main-btn" onclick="advanceManually()">C\'est not\u00e9</button>';
   } else if(kind === 'vote'){
     // Le libell\u00e9 suit l'\u00e9tat du vote : tant que personne n'est d\u00e9sign\u00e9, on valide le
     // vote ; une fois le r\u00e9sultat r\u00e9v\u00e9l\u00e9, on continue. Jamais deux validations pour
@@ -525,14 +651,41 @@ function renderMainFooter(isChallenge){
     main = '<button class="ctrl ctrl-neutral challenge-btn-fail" onclick="markChallengeResult(false)">Rat\u00e9</button>'+
       '<button class="ctrl ctrl-primary challenge-btn-done" onclick="markChallengeResult(true)">R\u00e9ussi</button>';
   } else {
-    main = '<button class="ctrl ctrl-primary" onclick="advanceManually()">Continuer</button>';
+    main = '<button class="ctrl ctrl-primary" id="scene-main-btn" onclick="advanceManually()">Continuer</button>';
   }
+
   // Deuxi\u00e8me ligne : deux rectangles identiques, jamais des liens de texte dispers\u00e9s.
   wrap.innerHTML = '<div class="footer-main">'+main+'</div>'+
     '<div class="footer-aside">'+
       '<button class="ctrl" onclick="openPause()">Pause</button>'+
       '<button class="ctrl" onclick="skipActivity()">Passer</button>'+
     '</div>';
+}
+
+// Quiz : la r\u00e9ponse n'appara\u00eet qu'\u00e0 la demande, et le bouton passe \u00e0 « Continuer ».
+function revealQuizAnswer(){
+  const el = document.getElementById('quiz-answer');
+  if(el) el.classList.add('shown');
+  Sound.play('ding');
+  Trail.signal('vote-done');
+  const btn = document.getElementById('scene-main-btn');
+  if(btn){
+    btn.textContent = 'Continuer';
+    btn.setAttribute('onclick', 'advanceManually()');
+  }
+}
+
+// Pr\u00e9diction v\u00e9rifi\u00e9e : une pr\u00e9diction juste vaut une distribution, pas une gorg\u00e9e de
+// plus pour celui qui a devin\u00e9 \u2014 on ne r\u00e9compense pas en faisant boire.
+function resolvePrediction(right){
+  const players = (state.lastItem && state.lastItem.players) || [];
+  if(right && players.length && window.fireConfetti) window.fireConfetti('small');
+  if(!right && players.length){
+    players.forEach(p=>{
+      state.stats.playerDrinks[p.name] = (state.stats.playerDrinks[p.name]||0) + 1;
+    });
+  }
+  advanceQueue();
 }
 
 function renderChallengeCounter(){
@@ -617,12 +770,62 @@ function renderRulesBanner(){
   btn.innerHTML = 'Règles <span class="rules-count-num">'+n+'</span>';
 }
 
+// --- GOUVERNANCE DES RÈGLES ---------------------------------------------------------
+// Une règle est une contrainte qui pèse sur TOUTES les manches suivantes. Sans limite,
+// elles s'empilaient jusqu'à devenir ingérables (« interdit de dire je », « interdit de
+// croiser les jambes », « accent italique obligatoire »… toutes en même temps), et rien
+// ne les levait jamais.
+//
+//   — au plus MAX_ACTIVE_RULES en vigueur simultanément ;
+//   — chacune a une durée de vie en manches, et elle est LEVÉE explicitement, avec
+//     une annonce : une règle qui disparaît en silence laisse le groupe dans le doute ;
+//   — une nouvelle règle qui arrive alors que le plafond est atteint lève la plus
+//     ancienne, jamais une au hasard ;
+//   — deux règles marquées du même `conflit` ne coexistent jamais (ex. « parle
+//     uniquement en chuchotant » et « parle uniquement en criant »).
+const MAX_ACTIVE_RULES = 4;
+const RULE_LIFESPAN = 14;   // en manches
+
+// state.activeRules garde des objets {text, until, conflict}. Les anciennes snapshots
+// contenaient de simples chaînes : on les normalise à la lecture.
+function normalizeRule(r, idx){
+  if(typeof r === 'string') return { text:r, until: idx + RULE_LIFESPAN, conflict:null };
+  return r;
+}
+function ruleText(r){ return typeof r === 'string' ? r : r.text; }
+
+function addActiveRule(text, conflict){
+  state.activeRules = state.activeRules.map((r, i) => normalizeRule(r, state.queueIndex));
+  // Une règle qui en contredirait une autre remplace celle-ci.
+  if(conflict){
+    state.activeRules = state.activeRules.filter(r => r.conflict !== conflict);
+  }
+  state.activeRules.push({ text, until: state.queueIndex + RULE_LIFESPAN, conflict: conflict || null });
+  // Plafond : la plus ancienne saute.
+  while(state.activeRules.length > MAX_ACTIVE_RULES) state.activeRules.shift();
+  renderRulesBanner();
+}
+
+// Lève les règles arrivées à échéance et renvoie leurs textes, pour pouvoir l'annoncer.
+function expireRules(){
+  state.activeRules = state.activeRules.map((r, i) => normalizeRule(r, state.queueIndex));
+  const expired = state.activeRules.filter(r => state.queueIndex >= r.until);
+  if(expired.length) state.activeRules = state.activeRules.filter(r => state.queueIndex < r.until);
+  return expired.map(r => r.text);
+}
+
 function openRulesSheet(){
   const list = document.getElementById('rules-sheet-list');
   list.innerHTML = state.activeRules.length
-    ? state.activeRules.map(r=>
-        '<div class="rules-sheet-row"><span class="rules-sheet-dot"></span>'+escapeHtml(soberize(r))+'</div>'
-      ).join('')
+    ? state.activeRules.map(r=>{
+        const txt = ruleText(r);
+        // Combien de manches lui reste-t-il : une règle qui va tomber se joue autrement.
+        const left = (r && r.until != null) ? Math.max(0, r.until - state.queueIndex) : null;
+        return '<div class="rules-sheet-row"><span class="rules-sheet-dot"></span>'+
+          '<span>'+escapeHtml(soberize(txt))+
+          (left != null ? '<em class="rules-sheet-left">encore '+left+' manche'+(left>1?'s':'')+'</em>' : '')+
+          '</span></div>';
+      }).join('')
     : '<div class="rules-sheet-empty">Aucune règle active pour le moment.</div>';
   document.getElementById('rules-sheet').classList.add('open');
 }

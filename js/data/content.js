@@ -490,57 +490,263 @@ const DURATIONS = [
 // ressemblent pas trop. `finale:true` marque la dernière phase : c'est dans cette
 // phase que le climax garanti est ajouté (voir buildStructuredQueue).
 const STRUCTURES = {
+  // --- 10 MINUTES : une seule vague, courte et franche -----------------------------
   10: [
     { id:'d10-flash', phases:[
-      { share:0.30, tier:{min:0,max:0}, weights:{minigame:2, light:1, rule:1} },
-      { share:0.45, tier:{min:0,max:1}, weights:{challenge:3, minigame:2, vote:1} },
-      { share:0.25, tier:{min:1,max:2}, weights:{challenge:1, vote:1}, finale:true },
+      { share:0.30, tier:{min:0,max:0}, weights:{minigame:2, light:1, roulette:1} },
+      { share:0.45, tier:{min:0,max:1}, weights:{challenge:3, minigame:2, vote:1, dilemme:1} },
+      { share:0.25, tier:{min:1,max:2}, weights:{challenge:1, vote:1, tribunal:1}, finale:true },
     ]},
     { id:'d10-etincelle', phases:[
-      { share:0.25, tier:{min:0,max:0}, weights:{vote:1, minigame:1} },
-      { share:0.50, tier:{min:0,max:1}, weights:{minigame:2, challenge:3} },
-      { share:0.25, tier:{min:1,max:2}, weights:{challenge:1, light:1}, finale:true },
+      { share:0.25, tier:{min:0,max:0}, weights:{vote:1, quiz:1, minigame:1} },
+      { share:0.50, tier:{min:0,max:1}, weights:{minigame:2, challenge:3, roulette:1} },
+      { share:0.25, tier:{min:1,max:2}, weights:{challenge:1, light:1, dilemme:1}, finale:true },
+    ]},
+    { id:'d10-sec', phases:[
+      { share:0.35, tier:{min:0,max:0}, weights:{roulette:2, challenge:2, quiz:1} },
+      { share:0.40, tier:{min:1,max:1}, weights:{challenge:3, minigame:1, vote:1} },
+      { share:0.25, tier:{min:1,max:2}, weights:{challenge:2, special:1}, finale:true },
     ]},
   ],
+
+  // --- 30 MINUTES : deux ou trois vagues, avec de vraies respirations --------------
   30: [
     { id:'d30-ascension', phases:[
-      { share:0.15, tier:{min:0,max:0}, weights:{light:1, vote:1, rule:1} },
-      { share:0.30, tier:{min:0,max:1}, weights:{challenge:2, minigame:2, vote:1} },
-      { share:0.30, tier:{min:1,max:2}, weights:{challenge:3, minigame:2, special:1} },
-      { share:0.25, tier:{min:1,max:2}, weights:{challenge:2, vote:2}, finale:true },
+      { share:0.14, tier:{min:0,max:0}, weights:{light:1, vote:1, rule:1, quiz:1} },
+      { share:0.24, tier:{min:0,max:1}, weights:{challenge:2, minigame:2, vote:1, mission:1} },
+      { share:0.24, tier:{min:1,max:2}, weights:{challenge:3, minigame:2, special:1, tribunal:1} },
+      // La respiration : on redescend franchement avant la dernière montée.
+      { share:0.12, tier:{min:0,max:0}, weights:{light:2, quiz:1, vote:1} },
+      { share:0.26, tier:{min:1,max:2}, weights:{challenge:2, vote:2, roulette:1}, finale:true },
     ]},
     { id:'d30-montagnes-russes', phases:[
-      { share:0.15, tier:{min:0,max:0}, weights:{minigame:1, vote:1} },
-      { share:0.20, tier:{min:1,max:2}, weights:{challenge:2, minigame:1} },
-      { share:0.15, tier:{min:0,max:0}, weights:{light:2, vote:1} },
-      { share:0.25, tier:{min:1,max:2}, weights:{challenge:2, minigame:2, special:1} },
-      { share:0.25, tier:{min:1,max:2}, weights:{vote:1, challenge:2}, finale:true },
+      { share:0.15, tier:{min:0,max:0}, weights:{minigame:1, vote:1, quiz:1} },
+      { share:0.20, tier:{min:1,max:2}, weights:{challenge:2, minigame:1, destin:1} },
+      // Une respiration franche : c'est ce creux qui fait exister les pics.
+      { share:0.15, tier:{min:0,max:0}, weights:{light:2, vote:1, quiz:1} },
+      { share:0.25, tier:{min:1,max:2}, weights:{challenge:2, minigame:2, special:1, mission:1} },
+      { share:0.25, tier:{min:1,max:2}, weights:{vote:1, challenge:2, tribunal:1}, finale:true },
     ]},
-    { id:'d30-duel', phases:[
-      { share:0.15, tier:{min:0,max:0}, weights:{vote:1, minigame:1, rule:1} },
-      { share:0.45, tier:{min:0,max:2}, weights:{challenge:4, minigame:2} },
-      { share:0.20, tier:{min:1,max:2}, weights:{vote:2} },
-      { share:0.20, tier:{min:1,max:2}, weights:{challenge:1} , finale:true },
+    { id:'d30-tribunal', phases:[
+      { share:0.14, tier:{min:0,max:0}, weights:{vote:1, quiz:1, rule:1} },
+      { share:0.26, tier:{min:0,max:2}, weights:{challenge:3, dilemme:2, roulette:1} },
+      { share:0.12, tier:{min:0,max:1}, weights:{light:2, quiz:1} },
+      { share:0.22, tier:{min:1,max:2}, weights:{tribunal:2, vote:2, challenge:1} },
+      { share:0.26, tier:{min:1,max:2}, weights:{challenge:2, minigame:1, special:1}, finale:true },
+    ]},
+    { id:'d30-complots', phases:[
+      { share:0.16, tier:{min:0,max:0}, weights:{light:1, quiz:1, minigame:1} },
+      // Les missions et destins sont posés tôt : il leur faut du temps pour vivre.
+      { share:0.22, tier:{min:0,max:1}, weights:{mission:2, destin:1, challenge:2} },
+      { share:0.24, tier:{min:1,max:2}, weights:{challenge:3, minigame:2, prediction:1} },
+      { share:0.12, tier:{min:0,max:0}, weights:{light:2, barman:1} },
+      { share:0.26, tier:{min:1,max:2}, weights:{vote:2, challenge:2, roulette:1}, finale:true },
     ]},
   ],
+
+  // --- 1 HEURE : plusieurs cycles complets, des creux nets, une vraie conclusion ---
   60: [
     { id:'d60-marathon', phases:[
-      { share:0.10, tier:{min:0,max:0}, weights:{light:1, minigame:1, rule:1} },
-      { share:0.20, tier:{min:0,max:1}, weights:{challenge:2, minigame:2, vote:1} },
-      { share:0.08, tier:{min:0,max:0}, weights:{light:2} },
-      { share:0.20, tier:{min:1,max:2}, weights:{challenge:3, minigame:2, special:1} },
-      { share:0.07, tier:{min:0,max:1}, weights:{light:1, vote:1} },
-      { share:0.20, tier:{min:1,max:2}, weights:{challenge:3, minigame:2, vote:1} },
-      { share:0.15, tier:{min:1,max:2}, weights:{challenge:2, vote:1}, finale:true },
+      { share:0.10, tier:{min:0,max:0}, weights:{light:1, minigame:1, rule:1, quiz:1} },
+      { share:0.18, tier:{min:0,max:1}, weights:{challenge:2, minigame:2, vote:1, mission:1} },
+      { share:0.08, tier:{min:0,max:0}, weights:{light:2, quiz:1} },
+      { share:0.19, tier:{min:1,max:2}, weights:{challenge:3, minigame:2, special:1, destin:1} },
+      { share:0.07, tier:{min:0,max:1}, weights:{light:1, vote:1, barman:1} },
+      { share:0.20, tier:{min:1,max:2}, weights:{challenge:3, minigame:2, vote:1, tribunal:1} },
+      { share:0.18, tier:{min:1,max:2}, weights:{challenge:2, vote:1, roulette:1}, finale:true },
     ]},
     { id:'d60-grand-soir', phases:[
       { share:0.12, tier:{min:0,max:0}, weights:{vote:1, light:1, minigame:1, rule:1} },
-      { share:0.18, tier:{min:0,max:1}, weights:{minigame:2, challenge:2, vote:1} },
-      { share:0.15, tier:{min:1,max:2}, weights:{challenge:3, special:1} },
-      { share:0.10, tier:{min:0,max:0}, weights:{light:2} },
-      { share:0.20, tier:{min:1,max:2}, weights:{challenge:2, minigame:2, vote:1} },
-      { share:0.10, tier:{min:1,max:2}, weights:{special:1, vote:1} },
-      { share:0.15, tier:{min:2,max:2}, weights:{challenge:2, vote:1}, finale:true },
+      { share:0.16, tier:{min:0,max:1}, weights:{minigame:2, challenge:2, quiz:1, mission:1} },
+      { share:0.14, tier:{min:1,max:2}, weights:{challenge:3, special:1, dilemme:1} },
+      { share:0.10, tier:{min:0,max:0}, weights:{light:2, quiz:1} },
+      { share:0.18, tier:{min:1,max:2}, weights:{challenge:2, minigame:2, vote:1, tribunal:1} },
+      { share:0.12, tier:{min:1,max:2}, weights:{special:1, vote:1, prediction:1, barman:1} },
+      { share:0.18, tier:{min:2,max:2}, weights:{challenge:2, vote:1, roulette:1}, finale:true },
+    ]},
+    { id:'d60-cercle', phases:[
+      { share:0.10, tier:{min:0,max:0}, weights:{quiz:2, light:1, vote:1} },
+      { share:0.15, tier:{min:0,max:1}, weights:{roulette:2, challenge:2, minigame:1} },
+      { share:0.14, tier:{min:1,max:1}, weights:{dilemme:2, vote:2, challenge:1} },
+      { share:0.09, tier:{min:0,max:0}, weights:{light:2, barman:1} },
+      { share:0.18, tier:{min:1,max:2}, weights:{challenge:3, mission:1, destin:1, minigame:1} },
+      { share:0.16, tier:{min:1,max:2}, weights:{tribunal:2, challenge:2, special:1} },
+      { share:0.18, tier:{min:2,max:2}, weights:{challenge:2, vote:2, prediction:1}, finale:true },
     ]},
   ],
 };
+
+
+// ===================================================================================
+// NOUVELLES FAMILLES DE CONTENU
+// -----------------------------------------------------------------------------------
+// Les six familles d'origine (règles, défis, mini-jeux, votes, moments, événements)
+// couvraient bien « faire quelque chose » et « désigner quelqu'un », mais laissaient de
+// côté des mécaniques qui changent vraiment le rythme d'un before : savoir, trancher,
+// garder un secret, être jugé, promettre puis rendre des comptes.
+//
+// Chaque famille ci-dessous a sa propre MÉCANIQUE, donc sa propre scène et ses propres
+// commandes (voir scenes.js et renderMainFooter) — ce ne sont pas des défis déguisés.
+// Toutes restent jouables sans alcool et peuvent être passées.
+//
+// Convention commune : `tier` 0 (ouverture), 1 (cœur de soirée), 2 (fin de soirée).
+// ===================================================================================
+
+// --- QUIZ ---------------------------------------------------------------------------
+// Une question à laquelle il existe une vraie réponse, révélée après coup. Le plaisir
+// est dans le débat de dix secondes qui précède la révélation.
+const QUIZ = [
+  {q:"Combien de bulles y a-t-il environ dans une flûte de champagne ?", a:"Un million. Elles partent toutes du même défaut du verre.", tier:0},
+  {q:"Quel pays consomme le plus de bière par habitant ?", a:"La République tchèque, et de loin. Deux fois la France.", tier:0},
+  {q:"De quelle couleur est le soleil, vu de l'espace ?", a:"Blanc. C'est l'atmosphère qui le fait paraître jaune.", tier:0},
+  {q:"Combien de temps peut-on tenir sans dormir, record officiel ?", a:"Onze jours. Il a fini par halluciner des chemins de fer.", tier:0},
+  {q:"Quel est l'animal qui dort le plus longtemps par jour ?", a:"Le koala : jusqu'à vingt-deux heures. Une légende.", tier:0},
+  {q:"Combien de muscles faut-il pour sourire ?", a:"Une douzaine. Le double pour froncer les sourcils.", tier:0},
+  {q:"Quelle est la boisson la plus consommée au monde après l'eau ?", a:"Le thé. Loin devant le café.", tier:0},
+  {q:"En quelle année a été inventée la première bouteille en plastique ?", a:"1973. Vos parents ont bu dans du verre.", tier:0},
+  {q:"Combien de cartes différentes peut-on obtenir en mélangeant un jeu de 52 ?", a:"Plus qu'il n'y a d'atomes sur Terre. Chaque mélange est probablement inédit.", tier:1},
+  {q:"Quel fruit contient le plus de sucre ?", a:"La datte. Environ 65 %.", tier:1},
+  {q:"Combien de fois le cœur bat-il en une soirée de quatre heures ?", a:"À peu près vingt mille fois. Plus si la soirée est réussie.", tier:1},
+  {q:"Quelle est la ville la plus peuplée du monde ?", a:"Tokyo, avec son agglomération : trente-sept millions d'habitants.", tier:1},
+  {q:"Combien de langues parle-t-on dans le monde ?", a:"Environ sept mille. Une disparaît toutes les deux semaines.", tier:1},
+  {q:"Quel est l'objet le plus vendu de l'histoire ?", a:"Le Rubik's Cube. Devant l'iPhone.", tier:1},
+  {q:"Combien de pas fait-on en moyenne dans une vie ?", a:"De quoi faire cinq fois le tour de la Terre.", tier:1},
+  {q:"Quelle est la durée moyenne d'un baiser ?", a:"Douze secondes selon les études. Plus court qu'on ne croit.", tier:1},
+  {q:"Quel est le plus vieil alcool dont on ait trace ?", a:"Un vin de riz chinois, neuf mille ans avant nous.", tier:2},
+  {q:"Combien de temps met le corps à éliminer un verre d'alcool ?", a:"Environ une heure. Aucune astuce ne raccourcit ça.", tier:2},
+  {q:"Quelle proportion du corps humain est faite d'eau ?", a:"Environ soixante pour cent. Buvez-en aussi.", tier:2},
+  {q:"Quel est le record du monde du plus long éclat de rire ?", a:"Plus de trois heures. Personne ne sait comment.", tier:2},
+];
+
+// --- DILEMMES -----------------------------------------------------------------------
+// Deux options, aucune bonne réponse. Tout le monde choisit son camp, on compte, et la
+// minorité s'explique. Ce qui se joue n'est pas le choix mais la justification.
+const DILEMMAS = [
+  {a:"Ne plus jamais boire d'alcool", b:"Ne plus jamais boire de café", tier:0},
+  {a:"Savoir quand tu vas mourir", b:"Savoir comment", tier:1},
+  {a:"Perdre tous tes messages", b:"Perdre toutes tes photos", tier:0},
+  {a:"Être toujours en retard de dix minutes", b:"Être toujours en avance d'une heure", tier:0},
+  {a:"Ne plus jamais mentir", b:"Ne plus jamais qu'on te mente", tier:1},
+  {a:"Vivre sans musique", b:"Vivre sans films ni séries", tier:0},
+  {a:"Avoir raison mais seul", b:"Avoir tort mais avec tout le monde", tier:1},
+  {a:"Lire les pensées des autres", b:"Que personne ne puisse jamais lire les tiennes", tier:1},
+  {a:"Recommencer cette année", b:"Sauter directement à l'année prochaine", tier:1},
+  {a:"Dire toujours ce que tu penses", b:"Ne plus jamais pouvoir dire non", tier:1},
+  {a:"Que tes parents lisent ton téléphone", b:"Que tes amis lisent ton téléphone", tier:2},
+  {a:"Être célèbre et détesté", b:"Être inconnu et adoré de dix personnes", tier:1},
+  {a:"Ne plus jamais sortir le soir", b:"Ne plus jamais dormir chez toi", tier:1},
+  {a:"Oublier une personne pour toujours", b:"Qu'une personne t'oublie pour toujours", tier:2},
+  {a:"Tout recommencer à zéro ailleurs", b:"Rester exactement ici pour toujours", tier:2},
+  {a:"Ne plus jamais retrouver quelqu'un de ce groupe", b:"Ne plus jamais revoir ta famille pendant un an", tier:2},
+  {a:"Que ta pire photo devienne publique", b:"Que ta dernière recherche devienne publique", tier:2},
+  {a:"Une heure de plus par jour", b:"Un jour de plus par semaine", tier:0},
+];
+
+// --- MISSIONS SECRÈTES ---------------------------------------------------------------
+// Confiées à un seul joueur, en consultation privée sur le téléphone (voir le composant
+// `secret` dans shared-cards.js). Elles courent en arrière-plan pendant plusieurs
+// manches et sont révélées à l'échéance : le groupe doit alors dire s'il a remarqué.
+// Aucune ne demande de boire davantage — la récompense est de passer inaperçu.
+const MISSIONS = [
+  {text:"Place le mot « évidemment » dans trois phrases, sans qu'on le remarque.", tier:0},
+  {text:"Touche-toi l'oreille gauche à chaque fois que quelqu'un rit.", tier:0},
+  {text:"Réussis à faire dire « n'importe quoi » à quelqu'un d'autre.", tier:0},
+  {text:"Ne dis plus jamais « oui ». Trouve autre chose à chaque fois.", tier:0},
+  {text:"Fais en sorte que quelqu'un répète exactement une phrase que tu viens de dire.", tier:1},
+  {text:"Cite une ville étrangère dans chacune de tes trois prochaines phrases.", tier:1},
+  {text:"Convaincs quelqu'un de changer de place sans le lui demander directement.", tier:1},
+  {text:"Fais rire quelqu'un trois fois sans jamais raconter de blague.", tier:1},
+  {text:"Termine chacune de tes phrases par un mot commençant par la lettre S.", tier:1},
+  {text:"Obtiens un compliment sincère de la personne à ta droite.", tier:1},
+  {text:"Fais dire un prénom qui n'est pas dans le groupe à quelqu'un.", tier:1},
+  {text:"Copie discrètement la posture de ton voisin pendant deux manches entières.", tier:1},
+  {text:"Réussis à parler exactement deux fois moins que d'habitude.", tier:2},
+  {text:"Fais en sorte qu'on te pose une question sur ton travail ou tes études.", tier:2},
+  {text:"Amène la conversation sur un souvenir commun au groupe, sans le nommer d'abord.", tier:2},
+  {text:"Sois le premier à féliciter quelqu'un, quoi qu'il arrive.", tier:2},
+];
+
+// --- DESTINS LIÉS ----------------------------------------------------------------------
+// Deux joueurs sont attachés l'un à l'autre pour plusieurs manches. Ce qui arrive à
+// l'un arrive à l'autre. C'est une règle, mais une règle qui ne concerne que deux
+// personnes — d'où sa place à part.
+const DESTINS = [
+  // Le texte ne porte QUE la conséquence : la scène affiche déjà les deux prénoms reliés
+  // (« Marie & Tom »), et répéter « X et Y sont liés » dans la phrase la rendait
+  // bancale une fois les prénoms retirés (« Sont liés. Quand l'un boit… »).
+  {text:"Quand l'un boit, l'autre boit.", tier:0},
+  {text:"Ils ne peuvent plus se parler directement : il leur faut un intermédiaire.", tier:1},
+  {text:"Ils valident ensemble toute réponse qu'ils donnent.", tier:1},
+  {text:"Si l'un rit, l'autre boit.", tier:1},
+  {text:"Ils répondent désormais à la place l'un de l'autre.", tier:2},
+  {text:"Ils lèvent leur verre en même temps, à chaque fois.", tier:0},
+  {text:"Aucun des deux ne peut plus prononcer le prénom de l'autre.", tier:1},
+  {text:"Ils partagent un seul et même « passer » pour toute la suite.", tier:2},
+  {text:"Chaque fois que l'un est désigné par un vote, l'autre l'est aussi.", tier:1},
+  {text:"Ils doivent finir chacune de leurs phrases par le même mot.", tier:2},
+];
+
+// --- LE BARMAN ------------------------------------------------------------------------
+// Un rôle tournant, et une création collective : le groupe invente ensemble quelque
+// chose que le barman devra servir, nommer ou défendre. C'est le moment « on fabrique »
+// d'une soirée, pas le moment « on exécute ».
+const BARMAN = [
+  {text:"{p1} devient barman. Le groupe lui dicte une recette, ingrédient par ingrédient. Il doit la nommer.", tier:0},
+  {text:"{p1} est barman. Chacun donne un mot, il invente le cocktail qui va avec.", tier:0},
+  {text:"{p1} est barman. Il sert une tournée imaginaire et présente chaque verre comme un sommelier.", tier:0},
+  {text:"{p1} est barman. Il doit refuser de servir quelqu'un et justifier son refus.", tier:1},
+  {text:"{p1} est barman. Il attribue à chacun la boisson qui lui ressemble, et argumente.", tier:1},
+  {text:"{p1} est barman du bar le plus mal famé de la ville. Il présente la carte.", tier:1},
+  {text:"{p1} est barman. Le groupe invente le nom du bar, lui en invente le slogan.", tier:1},
+  {text:"{p1} est barman. Il a trente secondes pour convaincre le groupe de commander son cocktail signature.", tier:2},
+  {text:"{p1} passe le tablier à quelqu'un d'autre et lui transmet une règle de maison de son invention.", tier:2},
+];
+
+// --- TRIBUNAL ABSURDE ------------------------------------------------------------------
+// Le groupe juge quelqu'un pour une accusation qui n'a aucun sens. L'accusé plaide, le
+// groupe tranche. La peine est toujours symbolique et se passe très bien sans alcool.
+const TRIBUNAL = [
+  {text:"{p1} est accusé d'avoir le pire goût musical du groupe. Trente secondes pour plaider.", tier:0},
+  {text:"{p1} est accusé de toujours arriver en retard. La défense a la parole.", tier:0},
+  {text:"{p1} est accusé d'avoir volé l'attention de la soirée. Plaide.", tier:0},
+  {text:"{p1} est accusé de rire à ses propres blagues. Le groupe écoute, puis vote.", tier:1},
+  {text:"{p1} est accusé de ne jamais répondre aux messages. Trente secondes.", tier:1},
+  {text:"{p1} est accusé d'être trop sérieux depuis le début de la soirée. Défends-toi.", tier:1},
+  {text:"{p1} est accusé d'avoir menti au moins une fois ce soir. Plaide non coupable.", tier:1},
+  {text:"{p1} est accusé d'être secrètement le plus compétitif du groupe. La parole est à la défense.", tier:2},
+  {text:"{p1} est accusé de tout ce dont le groupe voudra l'accuser. Le groupe choisit le chef d'accusation.", tier:2},
+];
+
+// --- PRÉDICTIONS ------------------------------------------------------------------------
+// Une affirmation posée maintenant, vérifiée plus tard dans la soirée. C'est ce qui
+// donne à une soirée une mémoire : on revient sur ce qui a été dit (voir les rappels
+// dans advanceQueue).
+const PREDICTIONS = [
+  {text:"{p1} prédit qui sera le prochain à rire aux éclats.", tier:0},
+  {text:"{p1} prédit combien de fois le groupe dira « non » dans les prochaines minutes.", tier:0},
+  {text:"{p1} prédit qui perdra le prochain défi.", tier:0},
+  {text:"{p1} prédit qui va parler le plus dans les cinq prochaines minutes.", tier:1},
+  {text:"{p1} prédit qui sera désigné au prochain vote.", tier:1},
+  {text:"{p1} prédit qui va consulter son téléphone en premier.", tier:1},
+  {text:"{p1} prédit qui craquera le premier sur la prochaine règle.", tier:1},
+  {text:"{p1} prédit qui proposera de changer de musique.", tier:2},
+  {text:"{p1} prédit qui racontera une histoire de plus d'une minute.", tier:2},
+];
+
+// --- ROULETTE DES PRÉNOMS ----------------------------------------------------------------
+// Le téléphone tire un prénom au sort, en le faisant défiler. La mécanique est le
+// suspense du tirage lui-même : on ne sait pas sur qui ça va tomber.
+const ROULETTE = [
+  {text:"raconte son plus beau souvenir de soirée. Une minute.", tier:0},
+  {text:"choisit la prochaine musique. Personne ne conteste.", tier:0},
+  {text:"donne un surnom définitif à la personne à sa gauche.", tier:0},
+  {text:"répond honnêtement à une question du groupe.", tier:1},
+  {text:"invente une règle qui durera jusqu'à la fin de la soirée.", tier:1},
+  {text:"imite quelqu'un du groupe jusqu'à ce qu'on devine qui.", tier:1},
+  {text:"dit ce qu'il a pensé la première fois qu'il a vu son voisin de droite.", tier:1},
+  {text:"distribue trois gorgées comme il veut.", tier:1},
+  {text:"a trente secondes pour convaincre le groupe d'une idée absurde.", tier:2},
+  {text:"doit dire une vérité que personne ici ne connaît.", tier:2},
+  {text:"choisit quelqu'un et lui fait un compliment qu'il pense vraiment.", tier:2},
+  {text:"prend la place du téléphone : c'est lui qui mène la manche suivante.", tier:2},
+];

@@ -246,10 +246,18 @@ const DUEL_RE = /duel|affronte|contre |bras de fer|plus vite que|le premier des 
 const COOP_RE = /ensemble|\u00e0 deux|en bin\u00f4me|coop\u00e8re|tous les deux|\u00e0 tour de r\u00f4le avec/i;
 const GROUP_RE = /tout le monde|le groupe|chacun|chaque joueur|tous ceux/i;
 
+// Chaque famille ajoutée a sa propre composition : ce sont des mécaniques différentes,
+// pas des défis déguisés. L'ordre compte — le libellé tranche avant l'analyse du texte.
+const EYEBROW_TO_SCENE = {
+  'Nouvelle r\u00e8gle':'regle', 'Question':'vote', 'Moment':'surprise', 'Mini-jeu':'minijeu',
+  'Quiz':'quiz', 'Dilemme':'dilemme', 'Mission secr\u00e8te':'mission',
+  'Pr\u00e9diction':'prediction', 'Destins li\u00e9s':'destin', 'Barman':'barman',
+  'Tribunal':'tribunal', 'Roulette':'roulette', 'R\u00e8gle lev\u00e9e':'levee',
+  'Mission \u2014 verdict':'rappel', 'Pr\u00e9diction \u2014 verdict':'rappel'
+};
+
 function pickSceneKind(eyebrow, players, text){
-  if(eyebrow === 'Nouvelle r\u00e8gle') return 'regle';
-  if(eyebrow === 'Question') return 'vote';
-  if(eyebrow === 'Moment') return 'surprise';
+  if(EYEBROW_TO_SCENE[eyebrow]) return EYEBROW_TO_SCENE[eyebrow];
   const t = text || '';
   if(players && players.length === 2){
     if(DUEL_RE.test(t)) return 'duel';       // opposition r\u00e9elle
@@ -353,6 +361,151 @@ function buildSceneHTML(kind, text, players){
       '<div class="scene-vote-reveal" id="vote-reveal"></div>';
   }
 
+  const meta = state.itemMeta || {};
+
+  // MINI-JEU — une règle du jeu à appliquer ensemble, pas une consigne à exécuter.
+  // Sa composition est volontairement distincte de celle du défi : sans elle, une
+  // série de quatre manches se ressemblait trait pour trait à l'écran.
+  if(kind === 'minijeu'){
+    const who = players && players.length
+      ? '<div class="mini-players" style="--d:.06s">'+
+          players.map(p => '<span class="mini-player">'+playerChip(p)+
+            '<span class="mini-player-name">'+escapeHtml(p.name)+'</span></span>').join('')+
+        '</div>'
+      : '<div class="mini-all" style="--d:.06s">'+
+          state.players.slice(0,8).map((p,i) =>
+            '<span class="group-chip" style="--d:'+(0.06 + i*0.03)+'s">'+playerChip(p)+'</span>').join('')+
+        '</div>';
+    return ''+
+      '<div class="mini-badge" style="--d:.02s">Mini-jeu</div>'+
+      who+
+      '<div class="'+instructionClass(text)+'" style="--d:.22s">'+
+        (players && players.length ? stripNames(safe, players) : safe)+'</div>';
+  }
+
+  // QUIZ — la question d'abord, la réponse seulement après que le groupe a tranché.
+  if(kind === 'quiz'){
+    return ''+
+      '<div class="scene-kicker" style="--d:.02s">Quiz</div>'+
+      '<div class="scene-question" style="--d:.08s">'+safe+'</div>'+
+      '<div class="quiz-answer" id="quiz-answer" style="--d:.20s">'+
+        '<div class="quiz-answer-label">La r\u00e9ponse</div>'+
+        '<div class="quiz-answer-text">'+escapeHtml(soberize(meta.answer || ''))+'</div>'+
+      '</div>';
+  }
+
+  // DILEMME — deux camps, un choix, et la minorité qui s'explique.
+  if(kind === 'dilemme'){
+    return ''+
+      '<div class="scene-kicker" style="--d:.02s">Il faut choisir</div>'+
+      '<div class="dilemme" style="--d:.10s">'+
+        '<div class="dilemme-side"><span class="dilemme-letter">A</span>'+
+          '<span class="dilemme-text">'+escapeHtml(soberize(meta.optionA || safe))+'</span></div>'+
+        '<div class="dilemme-or">ou</div>'+
+        '<div class="dilemme-side"><span class="dilemme-letter">B</span>'+
+          '<span class="dilemme-text">'+escapeHtml(soberize(meta.optionB || ''))+'</span></div>'+
+      '</div>'+
+      '<div class="scene-hint" style="--d:.28s">Tout le monde choisit en m\u00eame temps. La minorit\u00e9 explique.</div>';
+  }
+
+  // MISSION SECRÈTE — consultation privée : le voisin ne doit rien pouvoir lire.
+  if(kind === 'mission'){
+    const who = players && players.length ? players[0] : null;
+    if(meta.recall){
+      return ''+
+        '<div class="scene-kicker light" style="--d:.02s">Mission termin\u00e9e</div>'+
+        (who ? '<div class="scene-who" style="--d:.06s">'+playerChip(who,'big')+
+               '<div class="scene-who-name">'+escapeHtml(who.name)+'</div></div>' : '')+
+        '<div class="'+instructionClass(text)+'" style="--d:.20s">'+safe+'</div>'+
+        '<div class="scene-hint" style="--d:.30s">Quelqu\'un avait remarqu\u00e9&nbsp;?</div>';
+    }
+    return ''+
+      '<div class="scene-kicker" style="--d:.02s">Mission secr\u00e8te</div>'+
+      (who ? '<div class="mission-who" style="--d:.06s">Pour '+escapeHtml(who.name)+' seulement</div>' : '')+
+      secretHTML('<div class="mission-text">'+safe+'</div>',
+        { id:'scene-secret', hint:'Maintiens pour lire ta mission' })+
+      '<div class="scene-hint" style="--d:.34s">Personne d\'autre ne doit la conna\u00eetre.</div>';
+  }
+
+  // PRÉDICTION — une affirmation posée maintenant, vérifiée plus tard.
+  if(kind === 'prediction'){
+    const who = players && players.length ? players[0] : null;
+    return ''+
+      '<div class="scene-kicker" style="--d:.02s">'+(meta.recall ? 'Alors, cette pr\u00e9diction\u00a0?' : 'Pr\u00e9diction')+'</div>'+
+      (who ? '<div class="scene-who" style="--d:.06s">'+playerChip(who,'big')+
+             '<div class="scene-who-name">'+escapeHtml(who.name)+'</div></div>' : '')+
+      '<div class="'+instructionClass(text)+'" style="--d:.20s">'+stripNames(safe, players || [])+'</div>'+
+      '<div class="scene-hint" style="--d:.30s">'+
+        (meta.recall ? 'Le groupe tranche\u00a0: vu juste, ou pas du tout\u00a0?'
+                     : 'On y reviendra tout \u00e0 l\'heure.')+'</div>';
+  }
+
+  // DESTINS LIÉS — deux joueurs attachés l'un à l'autre.
+  if(kind === 'destin' && players && players.length >= 2){
+    return ''+
+      '<div class="scene-kicker" style="--d:.02s">Destins li\u00e9s</div>'+
+      '<div class="scene-duel" data-link="destin">'+
+        '<div class="duel-side" style="--d:.06s">'+playerChip(players[0],'big')+
+          '<div class="duel-name">'+escapeHtml(players[0].name)+'</div></div>'+
+        '<div class="duel-vs destin-link" style="--d:.16s"><span>&amp;</span></div>'+
+        '<div class="duel-side" style="--d:.10s">'+playerChip(players[1],'big')+
+          '<div class="duel-name">'+escapeHtml(players[1].name)+'</div></div>'+
+      '</div>'+
+      '<div class="destin-bond" style="--d:.24s">Leurs destins sont li\u00e9s</div>'+
+      '<div class="'+instructionClass(text)+'" style="--d:.30s">'+safe+'</div>';
+  }
+
+  // BARMAN — une création collective, autour d'une personne.
+  if(kind === 'barman'){
+    const who = players && players.length ? players[0] : null;
+    return ''+
+      '<div class="barman-badge" style="--d:.02s">Le barman</div>'+
+      (who ? '<div class="scene-who" style="--d:.08s">'+playerChip(who,'big')+
+             '<div class="scene-who-name">'+escapeHtml(who.name)+'</div></div>' : '')+
+      '<div class="'+instructionClass(text)+'" style="--d:.22s">'+stripNames(safe, players || [])+'</div>'+
+      '<div class="scene-hint" style="--d:.32s">Le groupe fabrique, le barman assume.</div>';
+  }
+
+  // TRIBUNAL — l'accusé face au groupe.
+  if(kind === 'tribunal'){
+    const who = players && players.length ? players[0] : null;
+    const jury = state.players.filter(p => !who || p.name !== who.name).slice(0,8)
+      .map((p,i) => '<span class="group-chip" style="--d:'+(0.20 + i*0.03)+'s">'+playerChip(p)+'</span>').join('');
+    return ''+
+      '<div class="tribunal-head" style="--d:.02s">Tribunal</div>'+
+      (who ? '<div class="scene-who" style="--d:.06s">'+playerChip(who,'big')+
+             '<div class="scene-who-name accuse">'+escapeHtml(who.name)+'</div>'+
+             '<div class="tribunal-role">accus\u00e9\u00b7e</div></div>' : '')+
+      '<div class="'+instructionClass(text)+'" style="--d:.20s">'+stripNames(safe, players || [])+'</div>'+
+      '<div class="tribunal-jury" style="--d:.30s">'+jury+'</div>'+
+      '<div class="scene-hint" style="--d:.36s">Le jury \u00e9coute, puis tranche.</div>';
+  }
+
+  // ROULETTE — le prénom est tiré À L'ÉCRAN : c'est le tirage qui fait la scène.
+  if(kind === 'roulette'){
+    return ''+
+      '<div class="scene-kicker" style="--d:.02s">Roulette des pr\u00e9noms</div>'+
+      '<div class="roulette" id="roulette"><div class="roulette-name" id="roulette-name">&nbsp;</div></div>'+
+      '<div class="'+instructionClass(text)+'" style="--d:.24s" id="roulette-task">'+safe+'</div>';
+  }
+
+  // RÈGLE LEVÉE — une contrainte qui tombe se dit, elle ne disparaît pas en silence.
+  if(kind === 'levee'){
+    return ''+
+      '<div class="scene-rule">'+
+        '<div class="rule-flash lifted" style="--d:.02s">R\u00e8gle lev\u00e9e</div>'+
+        '<div class="rule-text lifted" style="--d:.14s">'+safe+'</div>'+
+        '<div class="rule-hint" style="--d:.30s">Elle ne s\'applique plus.</div>'+
+      '</div>';
+  }
+
+  // RAPPEL générique (mission arrivée à échéance sans joueur retrouvé).
+  if(kind === 'rappel'){
+    return ''+
+      '<div class="scene-kicker light" style="--d:.02s">On y revient</div>'+
+      '<div class="'+instructionClass(text)+'" style="--d:.18s">'+safe+'</div>';
+  }
+
   if(kind === 'regle'){
     // Annonce lisible à son rythme : pas de minuteur qui tourne pendant la lecture, et
     // une validation explicite qui range ensuite la règle dans le bouton « Règles ».
@@ -403,8 +556,65 @@ function renderScene(eyebrow, text, players, seconds){
   renderProgressPath();
   Trail.signal(SCENE_SIGNAL[kind] || 'defi');
 
+  // Certaines compositions ont une vie propre après leur pose.
+  if(kind === 'mission' && !(state.itemMeta && state.itemMeta.recall)){
+    // La mission ne se lit que sous le doigt, et on ne peut pas avancer avant.
+    secretBind('scene-secret', function(){
+      const b = document.getElementById('scene-main-btn');
+      if(b) b.disabled = false;
+    });
+  }
+  if(kind === 'roulette') spinRoulette();
+
   if(kind === 'duel' && navigator.vibrate) navigator.vibrate([30,40,30]);
   if(kind === 'surprise' && window.fireConfetti && !REDUCED_MOTION) setTimeout(()=> window.fireConfetti('small'), 120);
+}
+
+// --- LA ROULETTE --------------------------------------------------------------------
+// Le prénom défile puis ralentit jusqu'à s'arrêter : c'est le tirage lui-même qui fait
+// la scène, pas le résultat. Le tirage est équitable — on privilégie les joueurs les
+// moins sollicités (pickPlayers), et l'animation ne fait que montrer le nom déjà choisi.
+function spinRoulette(){
+  const el = document.getElementById('roulette-name');
+  const box = document.getElementById('roulette');
+  if(!el || !state.players.length) return;
+
+  const chosen = (typeof pickPlayers === 'function' ? pickPlayers(1)[0] : null) || state.players[0];
+  if(state.stats && state.stats.targets){
+    state.stats.targets[chosen.name] = (state.stats.targets[chosen.name] || 0) + 1;
+  }
+
+  const land = function(){
+    el.textContent = chosen.name;
+    if(box) box.classList.add('landed');
+    state.rouletteName = chosen.name;
+    const task = document.getElementById('roulette-task');
+    if(task) task.textContent = chosen.name + ' ' + task.textContent;
+    const b = document.getElementById('scene-main-btn');
+    if(b) b.disabled = false;
+    Sound.play('ding');
+    if(navigator.vibrate) navigator.vibrate([40]);
+    saveSessionSnapshot();
+  };
+
+  if(REDUCED_MOTION || state.players.length === 1){ land(); return; }
+
+  // Le défilement ralentit progressivement, comme une roue qui s'arrête.
+  clearInterval(state.rouletteInterval);
+  let i = 0, delay = 55, elapsed = 0;
+  const tick = function(){
+    el.textContent = state.players[i % state.players.length].name;
+    i++;
+    elapsed += delay;
+    Sound.play('tick');
+    if(elapsed > 1500){ clearInterval(state.rouletteInterval); land(); return; }
+    if(elapsed > 900){
+      delay = Math.min(240, delay * 1.35);
+      clearInterval(state.rouletteInterval);
+      state.rouletteInterval = setInterval(tick, delay);
+    }
+  };
+  state.rouletteInterval = setInterval(tick, delay);
 }
 
 // Vote : marque le joueur désigné, révèle le résultat, et laisse le groupe avancer.

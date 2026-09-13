@@ -262,6 +262,13 @@
 #screen-main[data-type="regle"] .scene{--scene-accent:var(--text);}
 #screen-main[data-type="mini"] .scene{--scene-accent:var(--accent);}
 #screen-main[data-type="moment"] .scene{--scene-accent:var(--clay);}
+#screen-main[data-type="quiz"] .scene{--scene-accent:#5AA0F0;}
+#screen-main[data-type="dilemme"] .scene{--scene-accent:var(--text);}
+#screen-main[data-type="mission"] .scene{--scene-accent:var(--accent);}
+#screen-main[data-type="prediction"] .scene{--scene-accent:#8FE8A8;}
+#screen-main[data-type="tribunal"] .scene{--scene-accent:var(--clay);}
+#screen-main[data-type="barman"] .scene{--scene-accent:var(--accent);}
+#screen-main[data-type="roulette"] .scene{--scene-accent:var(--accent);}
 
 /* Halo diffus derrière la scène : donne de la profondeur au fond charbon sans ajouter
    de rectangle. Sa couleur suit le type de moment. */
@@ -332,6 +339,100 @@
   .scene.entering .surprise-burst{animation:burstIn .55s ease-out both;}
   @keyframes burstIn{ from{ transform:translateX(-50%) scale(0.4); opacity:0; } to{ transform:translateX(-50%) scale(1); opacity:0.20; } }
 }
+
+/* --- LES FAMILLES AJOUTÉES ---------------------------------------------------------
+   Chacune a sa mécanique, donc sa composition : savoir (quiz), trancher (dilemme),
+   garder un secret (mission), être jugé (tribunal), promettre (prédiction), fabriquer
+   ensemble (barman), être tiré au sort (roulette). Ce ne sont pas des défis déguisés,
+   et elles ne doivent pas se ressembler à l'écran. */
+
+.scene-hint{font-size:12.5px; color:var(--text-faint); line-height:1.45; max-width:300px;}
+
+/* MINI-JEU — une règle du jeu, annoncée comme telle. */
+.mini-badge{font-family:'Anton',sans-serif; font-size:12px; letter-spacing:4px;
+  text-transform:uppercase; color:var(--ink-on-light); background:var(--accent);
+  padding:7px 15px; border-radius:8px;}
+.mini-players{display:flex; gap:16px; justify-content:center; flex-wrap:wrap;}
+.mini-player{display:flex; flex-direction:column; align-items:center; gap:7px;}
+.mini-player-name{font-family:'Anton',sans-serif; font-size:17px; color:var(--text);
+  overflow-wrap:anywhere; max-width:120px;}
+.mini-all{display:flex; flex-wrap:wrap; gap:7px; justify-content:center; max-width:300px;}
+
+/* QUIZ — la réponse reste hors champ jusqu'à la révélation. */
+.quiz-answer{display:none; flex-direction:column; align-items:center; gap:5px;
+  padding:15px 18px; border-radius:15px; max-width:320px;
+  border:1px solid var(--line); background:rgba(255,255,255,0.04);}
+.quiz-answer.shown{display:flex;}
+.quiz-answer-label{font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
+.quiz-answer-text{font-size:15px; line-height:1.5; color:var(--text);}
+@media (prefers-reduced-motion: no-preference){
+  .quiz-answer.shown{animation:sceneIn .3s cubic-bezier(.22,1,.36,1) both;}
+}
+
+/* DILEMME — deux blocs de même poids : aucun des deux ne doit paraître le bon choix. */
+.dilemme{display:flex; flex-direction:column; align-items:stretch; gap:8px; width:100%; max-width:330px;}
+.dilemme-side{display:flex; align-items:center; gap:11px; text-align:left;
+  padding:15px 15px; border-radius:15px; border:1px solid var(--line);
+  background:var(--surface-2); box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;}
+.dilemme-letter{flex-shrink:0; width:28px; height:28px; border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Anton',sans-serif; font-size:14px;
+  background:var(--accent); color:var(--ink-on-light);}
+.dilemme-side:last-of-type .dilemme-letter{background:var(--text); color:var(--bg);}
+.dilemme-text{font-family:'Anton',sans-serif; font-weight:400; font-size:17px; line-height:1.2;
+  color:var(--text); overflow-wrap:anywhere;}
+.dilemme-or{font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--text-faint);
+  text-align:center;}
+
+/* MISSION SECRÈTE */
+.mission-who{font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:var(--accent);}
+.mission-text{font-family:'Anton',sans-serif; font-weight:400; font-size:21px; line-height:1.25;
+  color:var(--text); max-width:250px;}
+
+/* DESTINS LIÉS — le lien remplace le VS de l'affrontement. */
+.destin-bond{font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--accent);}
+.destin-link{background:var(--accent) !important; color:var(--ink-on-light) !important;
+  transform:rotate(0deg) !important;}
+
+/* BARMAN */
+.barman-badge{font-family:'Anton',sans-serif; font-size:12px; letter-spacing:4px;
+  text-transform:uppercase; color:var(--bg); background:var(--accent);
+  padding:7px 15px; border-radius:8px;}
+
+/* TRIBUNAL — l'accusé d'un côté, le jury de l'autre. */
+.tribunal-head{font-family:'Anton',sans-serif; font-size:12px; letter-spacing:4px;
+  text-transform:uppercase; color:var(--clay); border:1px solid rgba(255,59,92,0.35);
+  background:rgba(255,59,92,0.08); padding:7px 15px; border-radius:8px;}
+.scene-who-name.accuse{color:var(--clay);}
+.tribunal-role{font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint);}
+.tribunal-jury{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; max-width:300px;
+  padding-top:10px; border-top:1px solid var(--line);}
+
+/* ROULETTE — le prénom défile, puis se pose. */
+.roulette{display:flex; align-items:center; justify-content:center; min-height:74px;
+  width:100%; max-width:320px; border-radius:16px; padding:10px 16px;
+  border:1px solid var(--line); background:rgba(255,255,255,0.035);
+  transition:border-color .3s ease, background .3s ease;}
+.roulette.landed{border-color:var(--accent); background:rgba(232,255,61,0.08);}
+.roulette-name{font-family:'Anton',sans-serif; font-size:34px; line-height:1;
+  color:var(--text-dim); overflow-wrap:anywhere; transition:color .3s ease;}
+.roulette.landed .roulette-name{color:var(--accent);}
+@media (prefers-reduced-motion: no-preference){
+  .roulette.landed .roulette-name{animation:pofVerdict .34s cubic-bezier(.22,1,.36,1) both;}
+}
+
+/* RÈGLE LEVÉE — l'inverse visuel d'une règle qui tombe. */
+.rule-flash.lifted{background:var(--surface-2); color:var(--text-dim); border:1px solid var(--line);}
+.rule-text.lifted{color:var(--text-dim); border-left-color:var(--text-faint);
+  border-right-color:var(--text-faint); text-decoration:line-through;
+  text-decoration-color:rgba(255,248,237,0.35);}
+
+/* Le panneau des règles indique combien de manches il reste à chacune. */
+.rules-sheet-left{display:block; font-style:normal; font-size:11px; color:var(--text-faint); margin-top:3px;}
+
+/* Le bloc secret, quand il est posé dans une scène du before. */
+#screen-main .secret{max-width:310px; min-height:170px;}
+#screen-main .secret-content{min-height:170px;}
 
 /* --- CHEMIN DE PROGRESSION (décor d'arrière-plan) ----------------------------------
    Un tracé vertical sinueux qui monte pendant toute la soirée. Trois choses distinctes,
