@@ -2,7 +2,11 @@ const palm = {
   players:[], currentIdx:0, deck:[], palmHeight:0, maxHeight:0,
   kingsDrawn:0, questionMaster:null, freezeMaster:null,
   currentCard:null, collapseCount:0,
-  drawnCards:[], balInterval:null,
+  // `stack` = les cartes RÉELLEMENT posées sur la bouteille en ce moment. Elle se vide
+  // à chaque effondrement. `drawnCards` garde l'historique complet de la partie, pour
+  // le récapitulatif de fin. Les confondre faisait que le palmier ne s'effondrait
+  // jamais à l'écran : il continuait de grandir alors que la tour venait de tomber.
+  stack:[], drawnCards:[], balInterval:null, collapsing:false,
 };
 
 function palmMakeDeck(){
@@ -39,6 +43,8 @@ function palmierStartGame(){
   palm.currentCard = null;
   palm.collapseCount = 0;
   palm.drawnCards = [];
+  palm.stack = [];
+  palm.collapsing = false;
   goTo('palmier');
   palmUpdateHeader();
   palmNextTurn();
@@ -57,23 +63,34 @@ function palmUpdateHeader(){
 }
 function palmPlayer(){ return palm.players[palm.currentIdx % palm.players.length]; }
 
-/* --- Palm tree visual (fanning cards on bottle) --- */
-function palmTreeHTML(){
-  if(palm.drawnCards.length===0) return '<div class="palmier-visual"><div class="palmier-bottle"></div></div>';
-  let h='<div class="palmier-visual"><div class="palmier-bottle"></div>';
-  const cards = palm.drawnCards;
-  const n = cards.length;
-  cards.forEach((c,i)=>{
-    const red = palmIsRed(c.suit);
-    const idx = i - Math.floor(n/2);
-    const baseAngle = idx * (14 + n * 1.2);
-    const jitter = ((c.value.charCodeAt(0) * 7 + c.suit.charCodeAt(0) * 13 + i * 17) % 11 - 5) * 1.2;
-    const angle = baseAngle + jitter;
-    const lift = Math.abs(idx) * 3 + ((c.value.charCodeAt(0) * 3 + i * 11) % 5 - 2);
-    const cls = red ? 'r' : 'b';
-    h+='<div class="pm-card '+cls+'" style="transform:translateX(-50%) rotate('+angle.toFixed(1)+'deg) translateY(-'+lift.toFixed(0)+'px);">'+c.value+'<br>'+c.suit+'</div>';
+/* --- LE PALMIER --------------------------------------------------------------------
+   Une bouteille en verre fumé, et les cartes RÉELLEMENT posées dessus. Chaque carte
+   s'appuie sur la précédente, un peu plus penchée, un peu plus haut : la tour grandit
+   vraiment sous les yeux, et son inclinaison dit à elle seule qu'elle devient
+   instable. La classe `falling` la fait s'écrouler.                                   */
+function palmTreeHTML(falling){
+  const cards = palm.stack;
+  let h = '<div class="palm-scene'+(falling ? ' falling' : '')+'">'+
+      '<div class="palm-bottle">'+
+        '<div class="palm-bottle-neck"></div>'+
+        '<div class="palm-bottle-body"><span class="palm-bottle-shine"></span></div>'+
+      '</div>';
+  cards.forEach((c, i) => {
+    // Les cartes RAYONNENT depuis le goulot, comme les palmes d'un palmier : elles
+    // s'ouvrent alternativement à gauche et à droite, de plus en plus inclinées. Avec
+    // un empilement vertical serré, elles se superposaient en un simple tas illisible.
+    const side = i % 2 === 0 ? 1 : -1;
+    const rank = Math.floor(i / 2);
+    const angle = side * Math.min(74, 9 + rank * 15);
+    const lift = 2 + i * 2.5;
+    const shift = side * Math.min(rank * 2.5, 14);
+    h += '<div class="palm-stack-card '+(palmIsRed(c.suit) ? 'red' : 'black')+'" '+
+         'style="--k:'+i+'; transform:translateX(calc(-50% + '+shift.toFixed(1)+'px)) '+
+         'translateY(-'+lift+'px) rotate('+angle.toFixed(1)+'deg);">'+
+        '<span class="psc-val">'+c.value+'</span><span class="psc-suit">'+c.suit+'</span>'+
+      '</div>';
   });
-  h+='</div>';
+  h += '<div class="palm-height">'+cards.length+'</div></div>';
   return h;
 }
 
@@ -168,6 +185,7 @@ function palmShowBalance(){
   const body = document.getElementById('palm-body');
   const footer = document.getElementById('palm-footer');
   if(palm.balInterval) clearInterval(palm.balInterval);
+  palm.collapsing = false;
 
   const card = palm.currentCard;
   const red = palmIsRed(card.suit);
@@ -179,15 +197,13 @@ function palmShowBalance(){
   const zoneLeft = (100 - zoneWidth) / 2;
 
   body.innerHTML =
-    '<div class="palm-card '+(red?'red':'black')+' balance-card-float" id="palm-float-card" style="width:80px;height:112px;font-size:30px;">'+
-      '<div class="card-val">'+card.value+'</div>'+
-      '<div class="card-suit" style="font-size:16px;">'+card.suit+'</div>'+
-    '</div>'+
+    '<div class="palm-balance-hint">Relâche dans la zone verte</div>'+
+    '<div class="palm-float" id="palm-float-card">'+cardHTML(card, { width:72, revealed:true })+'</div>'+
     '<div class="balance-track" id="palm-track">'+
       '<div class="balance-zone" style="left:'+zoneLeft+'%;width:'+zoneWidth+'%;"></div>'+
       '<div class="balance-cursor" id="palm-cursor"></div>'+
     '</div>'+
-    palmTreeHTML();
+    palmTreeHTML(false);
 
   footer.innerHTML = '<button class="btn btn-primary" id="palm-tap-btn">Poser !</button>';
 
@@ -242,16 +258,18 @@ function palmShowBalance(){
 /* --- Card placed / collapse --- */
 function palmCardPlaced(){
   palm.palmHeight++;
+  palm.stack.push(palm.currentCard);
   palm.maxHeight = Math.max(palm.maxHeight, palm.palmHeight);
   const body = document.getElementById('palm-body');
   const footer = document.getElementById('palm-footer');
 
   body.innerHTML =
-    '<div style="color:var(--sage); font-size:18px; font-family:Unbounded,sans-serif;">✓ Posée</div>'+
-    palmTreeHTML();
+    '<div class="palm-verdict win">Posée</div>'+
+    '<div class="palm-height-line">'+palm.palmHeight+' carte'+(palm.palmHeight > 1 ? 's' : '')+' en équilibre</div>'+
+    palmTreeHTML(false);
 
   palm.currentIdx++;
-  footer.innerHTML = '<button class="btn btn-primary" onclick="palmNextTurn()">Joueur suivant</button>';
+  footer.innerHTML = '<button class="btn btn-primary" onclick="palmNextTurn()">Suivant</button>';
 }
 
 function palmCollapse(){
@@ -263,13 +281,16 @@ function palmCollapse(){
   const n = Math.max(1,Math.ceil(palm.palmHeight/3));
   const penalty = palm.palmHeight >= 15 ? 'Cul sec !' : (n+' gorgée'+(n>1?'s':''));
 
+  // La tour s'écroule à l'écran AVANT d'être vidée : on montre la chute, puis on
+  // repart de la bouteille nue.
   body.innerHTML =
-    '<div class="palm-collapse">💥</div>'+
-    '<div style="font-family:Unbounded,sans-serif; font-size:22px; color:var(--clay);">Effondrement !</div>'+
-    '<div class="palm-rule-line">'+palmPlayer()+' boit '+penalty+'</div>'+
-    '<div class="palm-kings-left">'+palm.collapseCount+'/5 chutes</div>';
+    '<div class="palm-verdict lose">Ça s\'écroule</div>'+
+    '<div class="palm-height-line">'+escapeHtml(palmPlayer())+' boit '+penalty+' — '+
+      palm.collapseCount+' chute'+(palm.collapseCount > 1 ? 's' : '')+' sur 5</div>'+
+    palmTreeHTML(true);
 
   palm.palmHeight = 0;
+  palm.stack = [];
   palm.currentIdx++;
   palmUpdateHeader();
 
@@ -295,18 +316,18 @@ function palmEndGame(){
   }
 
   body.innerHTML =
-    '<div style="font-family:Unbounded,sans-serif; font-size:24px; color:var(--text);">'+(won?'Bravo !':'Perdu !')+'</div>'+
-    '<div class="palm-rule-line" style="font-size:13px; line-height:2;">'+
-      palm.drawnCards.length+' cartes · '+palm.kingsDrawn+' Rois<br>'+
-      palm.collapseCount+' effondrement'+(palm.collapseCount!==1?'s':'')+'<br>'+
-      'Record : '+palm.maxHeight+' cartes empilées'+
+    '<div class="palm-end-title">'+(won ? 'Le palmier tient' : 'Le palmier est tombé')+'</div>'+
+    '<div class="palm-end-stats">'+
+      '<span><b>'+palm.maxHeight+'</b>record</span>'+
+      '<span><b>'+palm.drawnCards.length+'</b>cartes</span>'+
+      '<span><b>'+palm.collapseCount+'</b>chute'+(palm.collapseCount !== 1 ? 's' : '')+'</span>'+
     '</div>'+
-    palmTreeHTML()+
+    palmTreeHTML(false)+
     creatorsHTML;
 
   footer.innerHTML =
-    '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>'+
-    '<button class="btn btn-primary" onclick="palmierStartGame()" style="flex:1;">Rejouer</button>';
+    '<button class="btn btn-primary" onclick="palmierStartGame()">Rejouer</button>'+
+    '<button class="btn btn-ghost" onclick="palmierQuit()">Quitter</button>';
 }
 
 function palmierQuit(){

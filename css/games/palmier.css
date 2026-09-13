@@ -1,20 +1,106 @@
-#screen-palmier-setup{padding-top:20px;}
-#palm-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
-#palm-chips .chip{display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:13px; color:var(--text);}
-#palm-chips .chip .x{cursor:pointer; margin-left:4px; color:var(--text-faint);}
+/* ===================================================================================
+   LE PALMIER — signature : L'ÉQUILIBRE
+   -----------------------------------------------------------------------------------
+   Une bouteille en verre fumé, et les cartes réellement posées dessus. Chaque carte
+   s'appuie sur la précédente, un peu plus penchée, un peu plus haut : la tour grandit
+   sous les yeux et son inclinaison dit à elle seule qu'elle devient précaire.
+
+   L'ancienne version dessinait le palmier à partir de TOUTES les cartes tirées depuis
+   le début, jamais à partir de la pile réellement posée : après un effondrement, le
+   palmier continuait de grandir alors que la tour venait de tomber.
+   =================================================================================== */
+
 #screen-palmier{padding:0;}
-.palmier-visual{position:relative; width:100%; height:300px; display:flex; align-items:flex-end; justify-content:center; flex-shrink:0; overflow:visible;}
-.palmier-bottle{width:28px; height:56px; background:linear-gradient(to top, var(--text-faint), var(--surface)); border-radius:3px 3px 6px 6px; position:absolute; bottom:0; left:50%; transform:translateX(-50%); opacity:0.4;}
-.palmier-bottle::before{content:''; position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:14px; height:8px; background:var(--text-faint); border-radius:2px 2px 0 0; opacity:0.6;}
-.pm-card{position:absolute; width:80px; height:112px; border:1.5px solid var(--line); border-radius:6px; bottom:54px; left:50%; transform-origin:bottom center; font-size:14px; display:flex; align-items:center; justify-content:center; font-weight:700; line-height:1;}
-.pm-card.r{background:#f6f1e7; color:#a82020; border-color:rgba(0,0,0,0.12); box-shadow:0 3px 8px rgba(0,0,0,0.35);}
-.pm-card.b{background:#f6f1e7; color:#1a1a1a; border-color:rgba(0,0,0,0.12); box-shadow:0 3px 8px rgba(0,0,0,0.35);}
-.creators-counter{text-align:center; font-size:11px; color:var(--text-faint); margin-top:12px; font-style:italic;}
-.balance-track{width:100%; max-width:240px; height:24px; background:var(--surface); border-radius:12px; border:1px solid var(--line); position:relative; overflow:hidden;}
-.balance-zone{position:absolute; top:0; bottom:0; background:rgba(138,154,126,0.25); border-left:2px solid var(--sage); border-right:2px solid var(--sage);}
-.balance-cursor{position:absolute; top:2px; bottom:2px; width:6px; background:var(--accent); border-radius:3px;}
-.balance-cursor.hit{background:var(--sage);}
-.balance-cursor.miss{background:var(--clay);}
-.balance-card-float{transition:transform 0.05s linear;}
-.palm-collapse{font-family:'Anton',sans-serif; font-size:32px; color:var(--clay); animation:shake 0.4s ease-in-out;}
-@keyframes shake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}}
+
+.palm-scene{position:relative; width:100%; height:220px; flex-shrink:0;
+  display:flex; align-items:flex-end; justify-content:center;}
+
+/* La bouteille : verre fumé, une arête de lumière sur le flanc gauche. */
+.palm-bottle{position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; filter:drop-shadow(0 8px 14px rgba(0,0,0,0.6));}
+.palm-bottle-neck{width:15px; height:36px; border-radius:4px 4px 0 0;
+  background:linear-gradient(100deg, #2C3A2E, #16211A 40%, #0C120E);}
+.palm-bottle-body{position:relative; width:40px; height:74px; border-radius:5px 5px 8px 8px;
+  background:linear-gradient(100deg, #33422F, #1A251B 42%, #0D130E);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,0.10);}
+.palm-bottle-shine{position:absolute; top:8px; left:7px; width:6px; bottom:10px; border-radius:3px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.30), rgba(255,255,255,0.04));}
+
+/* Une carte posée sur la tour. */
+.palm-stack-card{position:absolute; bottom:104px; left:50%;
+  width:44px; height:62px; border-radius:5px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+  background:radial-gradient(ellipse at 30% 20%, #FFFFFF, #F4EFE2 68%, #E2DAC7);
+  box-shadow:0 3px 8px rgba(0,0,0,0.5); transform-origin:bottom center;
+  transition:transform .3s cubic-bezier(.22,1,.36,1);}
+.palm-stack-card.red{color:#B3202A;}
+.palm-stack-card.black{color:#15130E;}
+.psc-val{font-family:'Work Sans',sans-serif; font-weight:700; font-size:15px; line-height:1;}
+.psc-suit{font-size:13px; line-height:1;}
+
+/* Le compteur de hauteur, posé dans la scène. */
+.palm-height{position:absolute; top:2px; right:6px; font-family:'Anton',sans-serif;
+  font-size:34px; line-height:1; color:rgba(255,248,237,0.13);}
+
+/* L'effondrement : les cartes partent en vrille, une fois, puis disparaissent. */
+@media (prefers-reduced-motion: no-preference){
+  .palm-scene.falling .palm-stack-card{animation:palmFall .62s cubic-bezier(.4,.05,.6,1) both;
+    animation-delay:calc(var(--k, 0) * .028s);}
+  @keyframes palmFall{
+    to{ transform:translateX(calc(-50% + var(--k, 0) * 7px - 30px)) translateY(120px) rotate(-85deg); opacity:0; }
+  }
+  .palm-stack-card{animation:palmPlace .32s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes palmPlace{ from{opacity:0;} to{opacity:1;} }
+}
+@media (prefers-reduced-motion: reduce){
+  /* Sans animation, la chute reste lisible : la tour disparaît d'un coup. */
+  .palm-scene.falling .palm-stack-card{opacity:0.15;}
+}
+
+/* --- La jauge d'équilibre ------------------------------------------------------------
+   C'est le seul vrai geste d'adresse de toute l'app : la zone sûre doit être
+   parfaitement lisible, et le curseur assez net pour qu'un échec ne semble jamais
+   injuste. */
+.palm-balance-hint{font-size:12.5px; color:var(--text-dim);}
+.palm-float{display:flex; justify-content:center;
+  transition:transform .1s linear, opacity .4s ease;}
+.balance-track{position:relative; width:100%; max-width:300px; height:26px; flex-shrink:0;
+  border-radius:13px; background:rgba(0,0,0,0.45);
+  border:1px solid rgba(255,255,255,0.07); overflow:hidden;}
+.balance-zone{position:absolute; top:0; bottom:0;
+  background:linear-gradient(180deg, rgba(143,232,168,0.30), rgba(143,232,168,0.14));
+  border-left:2px solid var(--sage); border-right:2px solid var(--sage);}
+.balance-cursor{position:absolute; top:3px; bottom:3px; width:6px; margin-left:-3px;
+  border-radius:3px; background:var(--text);
+  box-shadow:0 0 10px rgba(255,248,237,0.5);}
+.balance-cursor.hit{background:var(--sage); box-shadow:0 0 14px rgba(143,232,168,0.8);}
+.balance-cursor.miss{background:var(--clay); box-shadow:0 0 14px rgba(255,59,92,0.8);}
+
+/* --- Manche et fin ------------------------------------------------------------------- */
+.palm-verdict{font-family:'Anton',sans-serif; font-size:26px; line-height:1;}
+.palm-verdict.win{color:var(--accent);}
+.palm-verdict.lose{color:var(--clay);}
+.palm-height-line{font-size:13px; color:var(--text-dim); line-height:1.4; max-width:300px;}
+
+.palm-end-title{font-family:'Anton',sans-serif; font-size:27px; color:var(--text); line-height:1.15;
+  max-width:300px;}
+.palm-end-stats{display:flex; gap:20px; justify-content:center; margin:4px 0 2px;}
+.palm-end-stats span{display:flex; flex-direction:column; gap:2px; font-size:10px;
+  letter-spacing:1.8px; text-transform:uppercase; color:var(--text-faint);}
+.palm-end-stats b{font-family:'Anton',sans-serif; font-weight:400; font-size:25px;
+  letter-spacing:0; color:var(--text);}
+
+.creators-counter{text-align:center; font-size:11.5px; color:var(--text-faint); margin-top:10px;}
+
+/* Indicateurs de rôle (Maître de la question, Maître du freeze). */
+.master-pill{background:rgba(232,255,61,0.13); border:1px solid rgba(232,255,61,0.25);
+  border-radius:9px; padding:5px 10px; font-size:11px; color:var(--accent-bright);
+  display:inline-flex; gap:5px; align-items:center;}
+.master-pill .mn{color:var(--accent-bright); font-weight:600;}
+
+@media (max-height:720px){
+  .palm-scene{height:180px;}
+  .palm-stack-card{width:38px; height:54px; bottom:92px;}
+  .palm-verdict{font-size:22px;}
+  .palm-end-title{font-size:22px;}
+}
