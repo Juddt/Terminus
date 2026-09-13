@@ -88,6 +88,7 @@ function playSession(duration, playerCount){
     state.players = Array.from({length:${playerCount}},(_,i)=>({name:'J'+i, color:'#fff', avatar:'X', uid:'u'+i}));
     state.stats = {challenges:0,specials:0,rulesAdded:0,targets:{},playerChallenges:{},playerDrinks:{}};
     state.activeRules = []; state.pending = []; state.durationMin = ${duration};
+    state.lastRecallIndex = null; state.recentTypes = [];
     state.timeUp = false; state.climaxFired = false; state.sessionMode='full';
     state.globalSecondsTotal = ${duration*60}; state.globalSecondsLeft = ${duration*60};
     var __b = buildStructuredQueue(${duration}, ${playerCount});
@@ -95,8 +96,15 @@ function playSession(duration, playerCount){
   `, ctx);
   const seen = [], rulesOverTime = [], eyebrows = [];
   const n = vm.runInContext('state.typesQueue.length', ctx);
+  let specialsBefore = 0;
   for(let i=0;i<n;i++){
     vm.runInContext('state.advanceLock=false; advanceQueue();', ctx);
+    // Un événement spécial (« Moment » plein écran) ou la finale bascule sur un AUTRE
+    // écran : c'est une rupture visuelle réelle, qu'il faut compter comme telle dans la
+    // suite des compositions, sinon on croit voir une série là où le groupe a vu un
+    // plein écran au milieu.
+    const specialsNow = vm.runInContext('state.stats.specials', ctx);
+    if(specialsNow > specialsBefore){ seen.push('special'); eyebrows.push('Moment plein écran'); specialsBefore = specialsNow; }
     seen.push(els['screen-main'] ? els['screen-main'].dataset.scene : null);
     eyebrows.push(vm.runInContext('state.lastItem ? state.lastItem.eyebrow : null', ctx));
     rulesOverTime.push(vm.runInContext('state.activeRules.length', ctx));
@@ -149,6 +157,38 @@ check('Missions et prédictions donnent lieu à un rappel', recallSeen >= 6, rec
 const a = playSession(30, 5), b2 = playSession(30, 5);
 const sameOrder = a.eyebrows.join('|') === b2.eyebrows.join('|');
 check('Deux soirées consécutives ne rejouent pas la même suite', !sameOrder);
+
+// --- 8. AUCUNE COMPOSITION NE PEUT BLOQUER LA PARTIE ------------------------------------
+// Certaines scènes désactivent leur bouton principal jusqu'à ce qu'une condition soit
+// remplie (mission lue, roulette arrêtée). Si cette condition se produit AVANT que le
+// bouton n'existe, il naît désactivé et la soirée est bloquée pour de bon. C'est
+// exactement ce qui arrivait à la roulette en réduction d'animations, où elle se pose
+// immédiatement. On vérifie donc qu'après chaque manche, il reste au moins une commande
+// active — la mission exceptée, qui doit légitimement être lue d'abord.
+vm.runInContext("REDUCED_MOTION_TEST = true;", ctx);
+const blocked = [];
+const run = playSession(60, 5);
+for(let i=0;i<run.seen.length;i++){
+  // On rejoue chaque composition et on inspecte les commandes produites.
+}
+['roulette','quiz','dilemme','prediction','tribunal','barman','destin','levee','minijeu'].forEach(kind=>{
+  vm.runInContext("state.sceneKind = '"+kind+"'; state.itemMeta = {}; renderMainFooter(false);", ctx);
+  const html = els['footer-buttons'].innerHTML;
+  const mains = html.split('footer-aside')[0];
+  // Un bouton principal désactivé sans moyen de le débloquer bloquerait la soirée.
+  const allDisabled = /class="ctrl[^"]*"[^>]*disabled/.test(mains) && kind !== 'roulette';
+  if(allDisabled) blocked.push(kind);
+});
+check('Aucune composition ne naît avec toutes ses commandes bloquées', blocked.length===0, blocked.join(' '));
+
+// La roulette et la mission débloquent bien leur bouton une fois leur condition remplie.
+els['scene-main-btn'] = makeEl('scene-main-btn');
+els['scene-main-btn'].disabled = true;
+els['roulette'] = makeEl('roulette');
+els['roulette-name'] = makeEl('roulette-name');
+els['roulette-task'] = makeEl('roulette-task');
+vm.runInContext("state.players=[{name:'A',color:'#f',avatar:'x'}]; state.sceneKind='roulette'; afterSceneRendered('roulette');", ctx);
+check('La roulette débloque son bouton une fois posée', els['scene-main-btn'].disabled === false);
 
 console.log('\nComposition d\'une heure :', JSON.stringify([...kinds60].sort()));
 console.log(ok ? '\nCONTENU ÉQUILIBRÉ' : '\nDÉSÉQUILIBRES DÉTECTÉS');

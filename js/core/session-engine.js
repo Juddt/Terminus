@@ -55,22 +55,66 @@ function applyPlayerCountBias(weights, playerCount){
   return w;
 }
 
-// Casse les séries de 3 activités identiques consécutives (ex. 3 votes d'affilée) en
-// échangeant l'une d'elles avec la première occurrence différente trouvée plus loin
-// (ou, à défaut, plus tôt) dans la même phase. Opère phase par phase plutôt que sur la
-// file entière : un échange entre deux phases ferait fuiter la fenêtre de tiers d'une
-// phase dans une autre (ex. du contenu Chaos de la finale qui atterrit à l'ouverture).
-function breakUpRuns(tokens){
-  const arr = [...tokens];
-  for(let i=2;i<arr.length;i++){
-    if(arr[i]===arr[i-1] && arr[i]===arr[i-2]){
-      let swapIdx = -1;
-      for(let j=i+1;j<arr.length;j++){ if(arr[j]!==arr[i]){ swapIdx=j; break; } }
-      if(swapIdx===-1){ for(let j=i-3;j>=0;j--){ if(arr[j]!==arr[i]){ swapIdx=j; break; } } }
-      if(swapIdx!==-1){ const tmp=arr[i]; arr[i]=arr[swapIdx]; arr[swapIdx]=tmp; }
+// --- ÉVITER LES SÉRIES -----------------------------------------------------------------
+// Trois manches identiques d'affilée (trois votes, trois « moments »…) donnent
+// l'impression que l'application tourne en rond. Plutôt que de mélanger puis de
+// rapiécer, on CONSTRUIT directement une file sans série : c'est plus simple, et surtout
+// c'est correct.
+//
+// La version précédente permutait les items après coup. Elle tombait dans un cycle : ne
+// trouvant aucun candidat après une série, elle permutait avec un item situé juste avant
+// — celui-là même qu'elle venait d'y déplacer — et remettait la série en place. Répéter
+// la passe ne servait à rien, l'échange s'annulait à chaque tour, et l'on pouvait voir
+// cinq « moments » de suite en fin de soirée.
+//
+// L'algorithme : on avance position par position et, à chaque fois, on sert le type
+// qu'il reste le plus à placer, en écartant celui qui formerait une troisième
+// répétition. Cela garantit au plus deux items identiques d'affilée dès que la
+// composition le permet (autrement dit, tant qu'aucun type ne dépasse le double du
+// nombre des autres plus un).
+//
+// La contrainte à respecter n'est pas la phase mais la FENÊTRE DE TIERS de chaque
+// position : c'est elle qui garantit qu'on ne verra pas de contenu de fin de soirée à
+// l'ouverture. Chaque position ne peut donc recevoir qu'un type provenant du stock de sa
+// propre fenêtre — mais la file est parcourue d'un bout à l'autre, ce qui élimine aussi
+// les séries à cheval sur deux phases.
+function tierKey(w){ return w.min + '-' + w.max; }
+
+function buildQueueWithoutRuns(slots){
+  // slots : [{ type, window }] dans l'ordre des phases. On regroupe les types par
+  // fenêtre, puis on réémet dans les mêmes positions.
+  const stock = {};
+  slots.forEach(s=>{
+    const k = tierKey(s.window);
+    stock[k] = stock[k] || {};
+    stock[k][s.type] = (stock[k][s.type] || 0) + 1;
+  });
+
+  const out = [];
+  for(let i = 0; i < slots.length; i++){
+    const pool = stock[tierKey(slots[i].window)];
+    const prev1 = out[i-1], prev2 = out[i-2];
+    const forbidden = (prev1 !== undefined && prev1 === prev2) ? prev1 : null;
+
+    let best = null, bestCount = -1;
+    Object.keys(pool).forEach(type=>{
+      if(pool[type] <= 0 || type === forbidden) return;
+      // À égalité de stock restant, on tranche au hasard : deux soirées avec la même
+      // trame ne doivent pas produire exactement le même ordre.
+      if(pool[type] > bestCount || (pool[type] === bestCount && Math.random() < 0.5)){
+        best = type; bestCount = pool[type];
+      }
+    });
+    // Aucun autre type disponible dans cette fenêtre : la série est inévitable, on sert
+    // quand même plutôt que de laisser un trou dans la soirée.
+    if(best === null){
+      best = Object.keys(pool).find(t=> pool[t] > 0);
+      if(best === undefined) best = slots[i].type;
     }
+    if(pool[best] > 0) pool[best]--;
+    out.push(best);
   }
-  return arr;
+  return out;
 }
 
 // Mémorise la dernière trame utilisée PAR DURÉE (10/30/60 ont chacune leur propre
@@ -131,6 +175,7 @@ function buildStructuredQueue(durationMin, playerCount){
   const totalItems = Math.max(1, (TOTAL_ITEMS_BY_DURATION[durationMin] || 30) - 1); // -1 : le climax est ajouté à part, hors de ce total
   const queue = [];
   const tierWindows = [];
+  const slots = [];          // { type, window } dans l'ordre des phases
   let remaining = totalItems;
   profile.phases.forEach((phase, i)=>{
     const isLast = i === profile.phases.length - 1;
@@ -140,10 +185,16 @@ function buildStructuredQueue(durationMin, playerCount){
     const phaseCount = isLast ? remaining : Math.min(remaining, Math.max(1, Math.round(totalItems * phase.share)));
     remaining -= phaseCount;
     const counts = distributeCounts(phaseCount, weights);
-    let tokens = [];
-    Object.keys(counts).forEach(type=>{ for(let i=0;i<counts[type];i++) tokens.push(type); });
-    tokens = breakUpRuns(shuffleArr(tokens));
-    tokens.forEach(t=>{ queue.push(t); tierWindows.push(phase.tier); });
+    Object.keys(counts).forEach(type=>{
+      for(let k = 0; k < counts[type]; k++) slots.push({ type, window: phase.tier });
+    });
+  });
+
+  // La file est composée d'un seul tenant, sans série de trois items identiques (voir
+  // buildQueueWithoutRuns), en respectant la fenêtre de tiers de chaque position.
+  buildQueueWithoutRuns(slots).forEach((t, i)=>{
+    queue.push(t);
+    tierWindows.push(slots[i].window);
   });
   // Climax garanti tout à la fin, quel que soit le contenu déjà généré pour la finale —
   // on ne dépend plus d'un tirage qui pourrait placer le "special" ailleurs.
@@ -192,6 +243,8 @@ function launchSession(){
   if(typeof collectPlayers === 'function') state.players = collectPlayers();
   state.activeRules = [];
   state.pending = [];
+  state.lastRecallIndex = null;
+  state.recentTypes = [];
   state.itemMeta = {};
   state.climaxFired = false;
   state.timeUp = false;
@@ -436,8 +489,12 @@ function advanceQueue(){
   if(state.queueIndex < state.typesQueue.length){
     type = state.typesQueue[state.queueIndex];
   } else {
-    // file épuisée avant la fin du minuteur global : contenu de secours léger
-    type = Math.random() < 0.5 ? 'vote' : 'light';
+    // File épuisée avant la fin du minuteur : cela arrive dès qu'un groupe avance plus
+    // vite que prévu. L'ancien repli tirait à pile ou face entre « vote » et « moment »,
+    // ce qui produisait régulièrement six ou sept manches identiques d'affilée en fin de
+    // soirée — exactement au moment où l'attention retombe. On puise désormais dans un
+    // vrai éventail, en écartant les deux dernières familles servies.
+    type = pickFallbackType();
   }
   const isClimax = (state.queueIndex === state.climaxQueueIndex);
   updateIntensityForIndex(state.queueIndex);
@@ -550,6 +607,18 @@ function advanceQueue(){
   }
 }
 
+// Contenu de secours quand la file est épuisée : un éventail, et jamais deux fois de
+// suite la même famille. `state.recentTypes` garde les dernières servies.
+const FALLBACK_TYPES = ['challenge','vote','minigame','light','quiz','dilemme','roulette','tribunal'];
+
+function pickFallbackType(){
+  const recent = state.recentTypes || [];
+  const pool = FALLBACK_TYPES.filter(t => recent.indexOf(t) < 0);
+  const chosen = pick(pool.length ? pool : FALLBACK_TYPES);
+  state.recentTypes = [chosen].concat(recent).slice(0, 2);
+  return chosen;
+}
+
 // --- RAPPELS DIFFÉRÉS ---------------------------------------------------------------
 // Une mission secrète ou une prédiction n'a de sens que si l'on y revient. On note donc
 // l'échéance au moment où elle est posée, et le moteur intercale le rappel quand elle
@@ -565,10 +634,22 @@ function schedulePending(kind, text, player, delay){
 }
 
 // Renvoie le rappel arrivé à échéance, s'il y en a un.
+//
+// Un seul à la fois, et jamais deux manches de suite : plusieurs missions posées coup
+// sur coup arrivent à échéance ensemble, et l'on enchaînait alors trois verdicts
+// d'affilée — ce qui vide le procédé de son effet de surprise. Les rappels en trop
+// attendent simplement le tour suivant.
+const RECALL_GAP = 2;
+
 function takeDuePending(){
   if(!state.pending || !state.pending.length) return null;
+  // Un repère resté d'une soirée précédente serait supérieur à l'index courant : il
+  // bloquerait alors TOUS les rappels de la nouvelle partie. On le considère périmé.
+  if(state.lastRecallIndex != null && state.lastRecallIndex > state.queueIndex) state.lastRecallIndex = null;
+  if(state.lastRecallIndex != null && state.queueIndex - state.lastRecallIndex < RECALL_GAP) return null;
   const i = state.pending.findIndex(p => state.queueIndex >= p.dueIndex);
   if(i < 0) return null;
+  state.lastRecallIndex = state.queueIndex;
   return state.pending.splice(i, 1)[0];
 }
 
@@ -590,6 +671,9 @@ function renderItem(eyebrow, text, players, seconds, meta){
   renderScene(eyebrow, text, players, seconds);
   state.lastItem = { eyebrow, text, players, meta: state.itemMeta };
   renderMainFooter(eyebrow === 'D\u00e9fi');
+  // Après la scène ET ses commandes : certaines compositions activent ou débloquent
+  // leur bouton principal, qui doit donc déjà exister (voir afterSceneRendered).
+  if(typeof afterSceneRendered === 'function') afterSceneRendered(state.sceneKind);
   // Le compte \u00e0 rebours de manche n'appara\u00eet que si la consigne impose r\u00e9ellement un
   // temps limite ("en 20 secondes", "avant la fin du minuteur", "chrono"). Ailleurs il
   // \u00e9tait purement d\u00e9coratif \u2014 et pire, il pressait la lecture d'une r\u00e8gle ou d'une

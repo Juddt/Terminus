@@ -9,7 +9,7 @@ const SESSION_SNAPSHOT_KEY = 'soiree_session_snapshot_v1';
 // handles d'intervalle (non sérialisables et de toute façon invalides après reload).
 const SNAPSHOT_FIELDS = [
   'playerCount','players','durationMin','intensityValue','sessionMode',
-  'globalSecondsTotal','globalSecondsLeft','activeRules','pending',
+  'globalSecondsTotal','globalSecondsLeft','activeRules','pending','lastRecallIndex','recentTypes',
   'ringTotal','ringLeft','climaxElapsedTarget','climaxFired',
   'climaxQueueIndex','stats','typesQueue','queueTierWindows','currentTierWindow',
   'queueIndex','lastItem','paused','timeUp','timeUpGrace'

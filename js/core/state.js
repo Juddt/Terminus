@@ -7,6 +7,8 @@ let state = {
   ringInterval:null, activeRules:[],
   // Missions et prédictions en attente de leur rappel (voir schedulePending).
   pending:[], itemMeta:{}, rouletteInterval:null,
+  // Dernières familles servies par le contenu de secours, pour ne pas les répéter.
+  recentTypes:[], lastRecallIndex:null,
   ringTotal:10, ringLeft:10,
   paused:false, timeUp:false, timeUpGrace:0,
   climaxElapsedTarget:0, climaxFired:false,

@@ -556,7 +556,20 @@ function renderScene(eyebrow, text, players, seconds){
   renderProgressPath();
   Trail.signal(SCENE_SIGNAL[kind] || 'defi');
 
-  // Certaines compositions ont une vie propre après leur pose.
+  if(kind === 'duel' && navigator.vibrate) navigator.vibrate([30,40,30]);
+  if(kind === 'surprise' && window.fireConfetti && !REDUCED_MOTION) setTimeout(()=> window.fireConfetti('small'), 120);
+}
+
+// Ce qui doit se produire APRÈS que la scène ET ses commandes sont posées.
+//
+// L'ordre compte, et il a déjà piégé une fois : appelées depuis renderScene, ces
+// fonctions s'exécutaient avant que renderMainFooter n'ait créé le bouton. En rythme
+// normal la roulette met une seconde et demie à s'arrêter, donc le bouton existait à
+// temps ; mais avec la réduction des animations elle se pose IMMÉDIATEMENT, cherchait
+// un bouton pas encore né, et le bouton naissait ensuite désactivé — bloquant
+// définitivement toute personne ayant activé cette préférence système.
+// Elles sont donc appelées depuis renderItem, une fois les commandes en place.
+function afterSceneRendered(kind){
   if(kind === 'mission' && !(state.itemMeta && state.itemMeta.recall)){
     // La mission ne se lit que sous le doigt, et on ne peut pas avancer avant.
     secretBind('scene-secret', function(){
@@ -565,9 +578,6 @@ function renderScene(eyebrow, text, players, seconds){
     });
   }
   if(kind === 'roulette') spinRoulette();
-
-  if(kind === 'duel' && navigator.vibrate) navigator.vibrate([30,40,30]);
-  if(kind === 'surprise' && window.fireConfetti && !REDUCED_MOTION) setTimeout(()=> window.fireConfetti('small'), 120);
 }
 
 // --- LA ROULETTE --------------------------------------------------------------------
