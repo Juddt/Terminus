@@ -13,39 +13,19 @@ function palmMakeDeck(){
 }
 
 /* --- Setup --- */
+// Saisie des prénoms : page de configuration unique, bornée par le champ `joueurs`
+// du catalogue (voir playerBounds). L'écran de saisie propre à ce jeu a été retiré —
+// il faisait doublon, avec ses propres bornes et ses propres règles de validation.
 function palmierSetup(){
-  palm.players=[];
-  document.getElementById('palm-chips').innerHTML='';
-  document.getElementById('palm-name-field').value='';
-  document.getElementById('palm-start-btn').disabled=true;
-  goTo('palmier-setup');
-  setTimeout(()=> document.getElementById('palm-name-field').focus(), 100);
+  openSetupFor({ type:'game', game: GAMES.find(g => g.id === 'palmier') });
 }
 
-document.getElementById('palm-name-field').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter'){
-    const val=e.target.value.trim();
-    if(val && palm.players.length<10){
-      palm.players.push(val);
-      e.target.value='';
-      Sound.play('tick');
-      palmRenderSetupChips();
-    }
-  }
-});
-
-function palmRenderSetupChips(){
-  const wrap=document.getElementById('palm-chips');
-  wrap.innerHTML='';
-  palm.players.forEach((name,i)=>{
-    const chip=document.createElement('div');
-    chip.className='chip';
-    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="palmRemovePlayer('+i+')">×</span>';
-    wrap.appendChild(chip);
-  });
-  document.getElementById('palm-start-btn').disabled = palm.players.length < 2;
+// Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
+// ce jeu ne manipule que des prénoms.
+function palmStart(players){
+  palm.players = (players || []).map(p => p.name);
+  palmierStartGame();
 }
-function palmRemovePlayer(i){ palm.players.splice(i,1); palmRenderSetupChips(); }
 
 function palmierStartGame(){
   if(palm.players.length<2) return;

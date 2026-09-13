@@ -2,39 +2,19 @@ const cible = {
   players:[], currentIdx:0, cards:[], selectedIdx:null, direction:1, sipPot:0
 };
 
+// Saisie des prénoms : page de configuration unique, bornée par le champ `joueurs`
+// du catalogue (voir playerBounds). L'écran de saisie propre à ce jeu a été retiré —
+// il faisait doublon, avec ses propres bornes et ses propres règles de validation.
 function cibleSetup(){
-  cible.players=[];
-  document.getElementById('cible-chips').innerHTML='';
-  document.getElementById('cible-name-field').value='';
-  document.getElementById('cible-start-btn').disabled=true;
-  goTo('cible-setup');
-  setTimeout(()=> document.getElementById('cible-name-field').focus(), 100);
+  openSetupFor({ type:'game', game: GAMES.find(g => g.id === 'cible') });
 }
 
-document.getElementById('cible-name-field').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter'){
-    const val=e.target.value.trim();
-    if(val && cible.players.length<10){
-      cible.players.push(val);
-      e.target.value='';
-      Sound.play('tick');
-      cibleRenderChips();
-    }
-  }
-});
-
-function cibleRenderChips(){
-  const wrap=document.getElementById('cible-chips');
-  wrap.innerHTML='';
-  cible.players.forEach((name,i)=>{
-    const chip=document.createElement('div');
-    chip.className='chip';
-    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="cibleRemovePlayer('+i+')">×</span>';
-    wrap.appendChild(chip);
-  });
-  document.getElementById('cible-start-btn').disabled = cible.players.length < 2;
+// Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
+// ce jeu ne manipule que des prénoms.
+function cibleStart(players){
+  cible.players = (players || []).map(p => p.name);
+  cibleStartGame();
 }
-function cibleRemovePlayer(i){ cible.players.splice(i,1); cibleRenderChips(); }
 
 function cibleStartGame(){
   if(cible.players.length<2) return;

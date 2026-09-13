@@ -13,8 +13,12 @@
    montre le résultat déjà calculé.
    =================================================================================== */
 
-#screen-des{padding:0; display:flex; flex-direction:column; background:
+/* ATTENTION : ne JAMAIS poser `display` sur un écran par son id sans le scoper à
+   .active. Un sélecteur d'id bat `.screen{display:none}`, et l'écran reste alors
+   affiché en permanence par-dessus tous les autres (voir tests/test-screens.js). */
+#screen-des{padding:0; background:
   radial-gradient(ellipse 120% 60% at 50% 50%, #171717 0%, var(--bg) 72%);}
+#screen-des.active{display:flex; flex-direction:column;}
 
 /* Barre de jeu : même famille de boutons que le before. */
 .game-topbar{display:flex; align-items:center; justify-content:space-between; gap:10px;

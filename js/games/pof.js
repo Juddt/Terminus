@@ -3,39 +3,19 @@ const pof = {
   round:0, maxRounds:5, currentBet:1, playerChoice:null
 };
 
+// Saisie des prénoms : page de configuration unique, bornée par le champ `joueurs`
+// du catalogue (voir playerBounds). L'écran de saisie propre à ce jeu a été retiré —
+// il faisait doublon, avec ses propres bornes et ses propres règles de validation.
 function pofSetup(){
-  pof.players=[];
-  document.getElementById('pof-chips').innerHTML='';
-  document.getElementById('pof-name-field').value='';
-  document.getElementById('pof-start-btn').disabled=true;
-  goTo('pof-setup');
-  setTimeout(()=> document.getElementById('pof-name-field').focus(), 100);
+  openSetupFor({ type:'game', game: GAMES.find(g => g.id === 'pof') });
 }
 
-document.getElementById('pof-name-field').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter'){
-    const val=e.target.value.trim();
-    if(val && pof.players.length<10){
-      pof.players.push(val);
-      e.target.value='';
-      Sound.play('tick');
-      pofRenderChips();
-    }
-  }
-});
-
-function pofRenderChips(){
-  const wrap=document.getElementById('pof-chips');
-  wrap.innerHTML='';
-  pof.players.forEach((name,i)=>{
-    const chip=document.createElement('div');
-    chip.className='chip';
-    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="pofRemovePlayer('+i+')">×</span>';
-    wrap.appendChild(chip);
-  });
-  document.getElementById('pof-start-btn').disabled = pof.players.length < 2;
+// Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
+// ce jeu ne manipule que des prénoms.
+function pofStartFromSetup(players){
+  pof.players = (players || []).map(p => p.name);
+  pofChooseMode();
 }
-function pofRemovePlayer(i){ pof.players.splice(i,1); pofRenderChips(); }
 
 function pofChooseMode(){
   goTo('pof-mode');

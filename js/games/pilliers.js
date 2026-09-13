@@ -53,21 +53,10 @@ const pil = {
 const PIL_MIN_PLAYERS = 3;
 const PIL_MAX_PLAYERS = 20;
 
-function pilSetup(){
-  pil.players=[]; pil.count=8;
-  document.getElementById('pil-chips').innerHTML='';
-  document.getElementById('pil-name-field').value='';
-  document.getElementById('pil-start-btn').disabled=true;
-  pilRenderCountChoices();
-  goTo('pilliers-setup');
-  setTimeout(()=> document.getElementById('pil-name-field').focus(), 100);
-}
-
 function pilSetCount(n){
   pil.count = Math.max(PIL_MIN_PLAYERS, Math.min(PIL_MAX_PLAYERS, n));
   pil.players = pil.players.slice(0, pil.count);
   pilRenderCountChoices();
-  pilRenderChips();
 }
 
 function pilRenderCountChoices(){
@@ -81,30 +70,6 @@ function pilRenderCountChoices(){
     '<div class="pil-count-hint">de '+PIL_MIN_PLAYERS+' à '+PIL_MAX_PLAYERS+' joueurs</div>';
 }
 
-document.getElementById('pil-name-field').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter'){
-    const val=e.target.value.trim();
-    if(val && pil.players.length<pil.count){
-      pil.players.push(val);
-      e.target.value='';
-      Sound.play('tick');
-      pilRenderChips();
-    }
-  }
-});
-
-function pilRenderChips(){
-  const wrap=document.getElementById('pil-chips');
-  wrap.innerHTML='';
-  pil.players.forEach((name,i)=>{
-    const chip=document.createElement('div');
-    chip.className='chip';
-    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="pilRemovePlayer('+i+')">×</span>';
-    wrap.appendChild(chip);
-  });
-  document.getElementById('pil-start-btn').disabled = pil.players.length !== pil.count;
-}
-function pilRemovePlayer(i){ pil.players.splice(i,1); pilRenderChips(); }
 
 function pilRandomOther(excludeIdx){
   const options = pil.roles.map((_,i)=>i).filter(i=>i!==excludeIdx);
@@ -112,6 +77,24 @@ function pilRandomOther(excludeIdx){
 }
 
 /* --- Game start / role assignment --- */
+// Saisie des prénoms : page de configuration unique, bornée par le champ `joueurs`
+// du catalogue (voir playerBounds). L'écran de saisie propre à ce jeu a été retiré —
+// il faisait doublon, avec ses propres bornes et ses propres règles de validation.
+function pilSetup(){
+  openSetupFor({ type:'game', game: GAMES.find(g => g.id === 'pilliers') });
+}
+
+// Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
+// ce jeu ne manipule que des prénoms.
+function pilStart(players){
+  pil.players = (players || []).map(p => p.name);
+  // pil.count était réglé par le compteur de l'ancien écran de saisie. C'est maintenant
+  // la page de configuration unique qui fixe l'effectif ; sans cette ligne, le garde-fou
+  // de pilStartGame (players.length === count) refusait silencieusement de démarrer.
+  pil.count = pil.players.length;
+  pilStartGame();
+}
+
 function pilStartGame(){
   if(pil.players.length !== pil.count) return;
   const roleKeys = shuffleArr(ROLE_SETS[pil.count]);

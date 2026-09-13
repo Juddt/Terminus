@@ -34,40 +34,6 @@ function undFeedback(sound, pattern){
 
 /* ---------- Setup ---------- */
 
-function underdicateurSetup(){
-  und.players = [];
-  document.getElementById('und-chips').innerHTML = '';
-  document.getElementById('und-name-field').value = '';
-  document.getElementById('und-start-btn').disabled = true;
-  goTo('und-setup');
-  setTimeout(function(){ document.getElementById('und-name-field').focus(); }, 100);
-}
-
-document.getElementById('und-name-field').addEventListener('keydown', function(e){
-  if(e.key === 'Enter'){
-    const val = e.target.value.trim();
-    if(val && und.players.length < 12){
-      und.players.push({ name:val, role:'citoyen', word:'', alive:true, dict:false });
-      e.target.value = '';
-      undRenderChips();
-      Sound.play('tick');
-    }
-  }
-});
-
-function undRenderChips(){
-  const wrap = document.getElementById('und-chips');
-  wrap.innerHTML = '';
-  und.players.forEach(function(p,i){
-    const chip = document.createElement('div');
-    chip.className = 'chip';
-    chip.innerHTML = escapeHtml(p.name) + '<span class="x" onclick="undRemovePlayer('+i+')">&times;</span>';
-    wrap.appendChild(chip);
-  });
-  document.getElementById('und-start-btn').disabled = und.players.length < 4;
-}
-function undRemovePlayer(i){ und.players.splice(i,1); undRenderChips(); }
-
 // Répartition des rôles selon l'effectif. On garantit toujours une majorité citoyenne
 // au départ, sinon les Undercover gagneraient dès la première manche.
 function undComposition(){
@@ -76,6 +42,20 @@ function undComposition(){
   const w = (und.config.white && n >= 5) ? 1 : 0;
   while(n - uc - w <= uc && uc > 1) uc--;
   return { uc:uc, w:w, cit:n - uc - w };
+}
+
+// Saisie des prénoms : page de configuration unique, bornée par le champ `joueurs`
+// du catalogue (voir playerBounds). L'écran de saisie propre à ce jeu a été retiré —
+// il faisait doublon, avec ses propres bornes et ses propres règles de validation.
+function underdicateurSetup(){
+  openSetupFor({ type:'game', game: GAMES.find(g => g.id === 'underdicateur') });
+}
+
+// Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
+// ce jeu ne manipule que des prénoms.
+function undStart(players){
+  und.players = (players || []).map(p => p.name);
+  undShowConfig();
 }
 
 function undShowConfig(){

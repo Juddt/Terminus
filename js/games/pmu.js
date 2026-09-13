@@ -8,41 +8,21 @@ const pmu = {
 
 const PMU_SUITS = ['♥','♦','♣','♠'];
 
-function pmuSetup(){
-  pmu.players=[];
-  document.getElementById('pmu-chips').innerHTML='';
-  document.getElementById('pmu-name-field').value='';
-  document.getElementById('pmu-start-btn').disabled=true;
-  goTo('pmu-setup');
-  setTimeout(()=> document.getElementById('pmu-name-field').focus(), 100);
-}
-
-document.getElementById('pmu-name-field').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter'){
-    const val=e.target.value.trim();
-    if(val && pmu.players.length<8){
-      pmu.players.push({name:val, horse:null, bet:1});
-      e.target.value='';
-      Sound.play('tick');
-      pmuRenderChips();
-    }
-  }
-});
-
-function pmuRenderChips(){
-  const wrap=document.getElementById('pmu-chips');
-  wrap.innerHTML='';
-  pmu.players.forEach((p,i)=>{
-    const chip=document.createElement('div');
-    chip.className='chip';
-    chip.innerHTML=escapeHtml(p.name)+'<span class="x" onclick="pmuRemovePlayer('+i+')">×</span>';
-    wrap.appendChild(chip);
-  });
-  document.getElementById('pmu-start-btn').disabled = pmu.players.length < 2;
-}
-function pmuRemovePlayer(i){ pmu.players.splice(i,1); pmuRenderChips(); }
-
 /* --- Betting phase --- */
+// Saisie des prénoms : page de configuration unique, bornée par le champ `joueurs`
+// du catalogue (voir playerBounds). L'écran de saisie propre à ce jeu a été retiré —
+// il faisait doublon, avec ses propres bornes et ses propres règles de validation.
+function pmuSetup(){
+  openSetupFor({ type:'game', game: GAMES.find(g => g.id === 'pmu') });
+}
+
+// Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
+// ce jeu ne manipule que des prénoms.
+function pmuStartFromSetup(players){
+  pmu.players = (players || []).map(p => p.name);
+  pmuBettingPhase();
+}
+
 function pmuBettingPhase(){
   if(pmu.players.length<2) return;
   pmu.betPlayerIdx = 0;

@@ -204,18 +204,6 @@
   </div>
 
   <!-- Palmier Setup -->
-  <div class="screen" id="screen-palmier-setup">
-    <div class="topnav"><div class="back-link" onclick="goTo('game-detail')">← Le Palmier</div></div>
-    <h2 style="font-size:22px;">Qui joue ?</h2>
-    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 à 10 joueurs)</div>
-    <div class="field-row" style="margin-bottom:12px;">
-      <input type="text" id="palm-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
-    </div>
-    <div id="palm-chips" class="chips-wrap"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary" id="palm-start-btn" disabled onclick="palmierStartGame()">Lancer la partie</button>
-  </div>
-
   <!-- Palmier Game -->
   <div class="screen" id="screen-palmier">
     <div class="palm-header">
@@ -238,18 +226,6 @@
   </div>
 
   <!-- Bus Setup -->
-  <div class="screen" id="screen-bus-setup">
-    <div class="topnav"><div class="back-link" onclick="goTo('game-detail')">← Le Bus</div></div>
-    <h2 style="font-size:22px;">Qui joue ?</h2>
-    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 à 10 joueurs)</div>
-    <div class="field-row" style="margin-bottom:12px;">
-      <input type="text" id="bus-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
-    </div>
-    <div id="bus-chips" class="chips-wrap"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary" id="bus-start-btn" disabled onclick="busStartGame()">Lancer la partie</button>
-  </div>
-
   <!-- Bus Game -->
   <div class="screen" id="screen-bus">
     <div class="palm-header">
@@ -267,18 +243,6 @@
   </div>
 
   <!-- Cible Setup -->
-  <div class="screen" id="screen-cible-setup">
-    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
-    <h2 style="font-size:22px;">Qui joue ?</h2>
-    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 à 10 joueurs)</div>
-    <div class="field-row" style="margin-bottom:12px;">
-      <input type="text" id="cible-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
-    </div>
-    <div id="cible-chips" class="chips-wrap"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary" id="cible-start-btn" disabled onclick="cibleStartGame()">Lancer la partie</button>
-  </div>
-
   <!-- Cible Game -->
   <div class="screen" id="screen-cible">
     <div class="palm-header">
@@ -296,18 +260,6 @@
   </div>
 
   <!-- Purple Setup -->
-  <div class="screen" id="screen-purple-setup">
-    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
-    <h2 style="font-size:22px;">Qui joue ?</h2>
-    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 à 10 joueurs)</div>
-    <div class="field-row" style="margin-bottom:12px;">
-      <input type="text" id="purple-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
-    </div>
-    <div id="purple-chips" class="chips-wrap"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary" id="purple-start-btn" disabled onclick="purpleStartGame()">Lancer la partie</button>
-  </div>
-
   <!-- Purple Game -->
   <div class="screen" id="screen-purple">
     <div class="palm-header">
@@ -325,22 +277,10 @@
   </div>
 
   <!-- PMU Setup -->
-  <div class="screen" id="screen-pmu-setup">
-    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
-    <h2 style="font-size:22px;">Qui joue ?</h2>
-    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 à 8 joueurs)</div>
-    <div class="field-row" style="margin-bottom:12px;">
-      <input type="text" id="pmu-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
-    </div>
-    <div id="pmu-chips" class="chips-wrap"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary" id="pmu-start-btn" disabled onclick="pmuBettingPhase()">Passer aux paris</button>
-  </div>
-
   <!-- PMU Betting -->
   <div class="screen" id="screen-pmu-bet">
     <div class="palm-header">
-      <div class="back-link" onclick="goTo('pmu-setup')" style="font-size:13px;">← Retour</div>
+      <div class="back-link" onclick="pmuSetup()" style="font-size:13px;">← Retour</div>
       <div></div>
     </div>
     <div class="palm-body" id="pmu-bet-body"></div>
@@ -363,22 +303,9 @@
     <div class="palm-footer" id="pmu-footer"></div>
   </div>
 
-  <!-- Pile ou Face Setup -->
-  <div class="screen" id="screen-pof-setup">
-    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
-    <h2 style="font-size:22px;">Qui joue ?</h2>
-    <div class="step-sub" style="margin-bottom:16px;">Entrez les prénoms (2 joueurs minimum)</div>
-    <div class="field-row" style="margin-bottom:12px;">
-      <input type="text" id="pof-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
-    </div>
-    <div id="pof-chips" class="chips-wrap"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary" id="pof-start-btn" disabled onclick="pofChooseMode()">Choisir le mode</button>
-  </div>
-
   <!-- Pile ou Face Mode Selection -->
   <div class="screen" id="screen-pof-mode">
-    <div class="topnav"><div class="back-link" onclick="goTo('pof-setup')">← Retour</div></div>
+    <div class="topnav"><div class="back-link" onclick="pofSetup()">← Retour</div></div>
     <div class="palm-body" id="pof-mode-body"></div>
     <div class="palm-footer" id="pof-mode-footer"></div>
   </div>
@@ -414,18 +341,6 @@
   </div>
 
   <!-- UnderDicateur Setup -->
-  <div class="screen" id="screen-und-setup">
-    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">&larr; Les classiques</div></div>
-    <h2 style="font-size:22px;">Qui joue ?</h2>
-    <div class="step-sub" style="margin-bottom:16px;">Entrez les pr&eacute;noms (4 &agrave; 12 joueurs)</div>
-    <div class="field-row" style="margin-bottom:12px;">
-      <input type="text" id="und-name-field" class="name-input" placeholder="Pr&eacute;nom + Entr&eacute;e &crarr;" autocomplete="off" style="flex:1;">
-    </div>
-    <div id="und-chips" class="chips-wrap"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary" id="und-start-btn" disabled onclick="undShowConfig()">Continuer</button>
-  </div>
-
   <!-- UnderDicateur -->
   <div class="screen" id="screen-und">
     <div class="palm-header">
@@ -443,20 +358,6 @@
   </div>
 
   <!-- Les Pilliers Setup -->
-  <div class="screen" id="screen-pilliers-setup">
-    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
-    <h2 style="font-size:22px;">Combien êtes-vous ?</h2>
-    <div class="step-sub" style="margin-bottom:16px;">De 3 à 20 joueurs — un seul téléphone au centre</div>
-    <div id="pil-count-choices" class="pil-count-row"></div>
-    <div class="step-sub" id="pil-names-title" style="margin:20px 0 12px;">Qui joue ?</div>
-    <div class="field-row" style="margin-bottom:12px;">
-      <input type="text" id="pil-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
-    </div>
-    <div id="pil-chips" class="chips-wrap"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary" id="pil-start-btn" disabled onclick="pilStartGame()">Distribuer les rôles</button>
-  </div>
-
   <!-- Les Pilliers Game -->
   <div class="screen" id="screen-pilliers">
     <div class="palm-header">

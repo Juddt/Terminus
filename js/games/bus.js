@@ -28,39 +28,19 @@ function busCardHTML(card, hidden){
 }
 
 /* --- Setup --- */
+// Saisie des prénoms : page de configuration unique, bornée par le champ `joueurs`
+// du catalogue (voir playerBounds). L'écran de saisie propre à ce jeu a été retiré —
+// il faisait doublon, avec ses propres bornes et ses propres règles de validation.
 function busSetup(){
-  bus.players=[];
-  document.getElementById('bus-chips').innerHTML='';
-  document.getElementById('bus-name-field').value='';
-  document.getElementById('bus-start-btn').disabled=true;
-  goTo('bus-setup');
-  setTimeout(()=> document.getElementById('bus-name-field').focus(), 100);
+  openSetupFor({ type:'game', game: GAMES.find(g => g.id === 'bus') });
 }
 
-document.getElementById('bus-name-field').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter'){
-    const val=e.target.value.trim();
-    if(val && bus.players.length<10){
-      bus.players.push(val);
-      e.target.value='';
-      Sound.play('tick');
-      busRenderChips();
-    }
-  }
-});
-
-function busRenderChips(){
-  const wrap=document.getElementById('bus-chips');
-  wrap.innerHTML='';
-  bus.players.forEach((name,i)=>{
-    const chip=document.createElement('div');
-    chip.className='chip';
-    chip.innerHTML=escapeHtml(name)+'<span class="x" onclick="busRemovePlayer('+i+')">×</span>';
-    wrap.appendChild(chip);
-  });
-  document.getElementById('bus-start-btn').disabled = bus.players.length < 2;
+// Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
+// ce jeu ne manipule que des prénoms.
+function busStartFromSetup(players){
+  bus.players = (players || []).map(p => p.name);
+  busStartGame();
 }
-function busRemovePlayer(i){ bus.players.splice(i,1); busRenderChips(); }
 
 function busStartGame(){
   if(bus.players.length<2) return;
