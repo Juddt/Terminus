@@ -55,13 +55,25 @@
 .pof-opp{font-family:'Anton',sans-serif; font-size:18px; color:var(--text-dim); line-height:1;
   overflow-wrap:anywhere;}
 
-/* L'enjeu, énoncé avant le lancer : c'est lui qui met la tension, pas la pièce. */
-.pof-stake{display:flex; flex-direction:column; align-items:center; gap:3px;}
-.pof-stake-label{font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
-.pof-stake-value{font-family:'Anton',sans-serif; font-size:27px; line-height:1; color:var(--text);}
-.pof-stake-value.hot{color:var(--clay);}
+/* --- LES DEUX RÔLES ----------------------------------------------------------------
+   « Joueur 1 contre Joueur 2 » ne disait pas qui fait quoi. Chaque camp porte donc son
+   rôle sous son prénom, et seul celui qui décide est éclairé. */
+.pof-roles{display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;}
+.pof-role{display:flex; flex-direction:column; align-items:center; gap:3px; max-width:132px;}
+.pof-role-name{font-family:'Anton',sans-serif; font-size:21px; line-height:1;
+  color:var(--text-dim); overflow-wrap:anywhere; text-align:center;}
+.pof-role-what{font-size:10.5px; letter-spacing:0.3px; color:var(--text-faint); text-align:center;
+  line-height:1.25;}
+.pof-role.caller .pof-role-name{font-size:26px; color:var(--accent);}
+.pof-role.caller .pof-role-what{color:var(--text-dim);}
+.pof-role-vs{font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
 
-.pof-bets{display:flex; gap:9px;}
+/* Enjeu imposé (mode Prison) ou rappel pendant le lancer : une ligne, pas un bloc. */
+.pof-forced{font-size:12.5px; letter-spacing:0.3px; color:var(--text-dim);}
+
+.pof-bets{display:flex; gap:9px; align-items:center;}
+.pof-bets-label{font-size:11px; letter-spacing:1.6px; text-transform:uppercase;
+  color:var(--text-faint); margin-right:2px;}
 .pof-bet-btn{width:52px; height:48px; border-radius:13px; display:flex; align-items:center;
   justify-content:center; font-family:'Anton',sans-serif; font-size:19px; cursor:pointer;
   border:1px solid var(--line); background:var(--surface-2); color:var(--text-dim);
@@ -77,8 +89,24 @@
 .pof-outcome.lose{color:var(--clay);}
 .pof-drinks{font-size:15px; color:var(--text); line-height:1.35; max-width:290px;}
 
-.pof-round-badge{font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint);
-  background:rgba(255,255,255,0.05); border:1px solid var(--line); border-radius:9px; padding:5px 11px;}
+/* --- L'APPEL -----------------------------------------------------------------------
+   Pile et Face sont strictement équivalents : aucun des deux ne peut porter le jaune de
+   l'action principale, qui laisserait croire à une bonne réponse. Deux boutons
+   identiques, chacun frappé de sa face. */
+.pof-calls{display:flex; gap:11px; width:100%;}
+.pof-call{flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:9px;
+  padding:17px 12px; border-radius:16px; cursor:pointer;
+  font-family:'Anton',sans-serif; font-size:19px; letter-spacing:0.5px; color:var(--text);
+  border:1px solid rgba(255,255,255,0.14);
+  background:linear-gradient(158deg, rgba(255,255,255,0.075), rgba(255,255,255,0.02));
+  box-shadow:0 1px 0 rgba(255,255,255,0.09) inset, 0 8px 20px rgba(0,0,0,0.45);
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), border-color .15s ease;}
+.pof-call:active{transform:scale(0.96); border-color:rgba(255,255,255,0.3);}
+/* Une petite pièce frappée, pour que le bouton porte l'objet du jeu. */
+.pof-call-coin{width:26px; height:26px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:12px; color:#5A4A1E;
+  background:linear-gradient(150deg, #F2DFA0, #D8B45E 34%, #B8903F 68%, #8C6B2A);
+  box-shadow:0 1px 2px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.22) inset;}
 
 /* Choix du mode : deux propositions, pas deux cartes génériques. */
 .pof-mode-card{width:100%; padding:20px; border-radius:16px; background:var(--surface-2);

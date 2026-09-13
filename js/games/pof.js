@@ -75,9 +75,32 @@ function pofStakeText(stake){
 function pofUpdateHeader(){
   const el = document.getElementById('pof-header');
   if(!el) return;
-  el.innerHTML = pof.mode === 'prison'
-    ? '<div class="badge">Prison <span class="bv">'+Math.min(pof.round+1, 5)+'</span>/5</div>'
-    : '<div class="badge">Mode Fun</div>';
+  el.innerHTML = '<div class="badge">'+pofRoundLabel()+'</div>';
+}
+
+// « Manche 3 / 5 · 4 gorgées en jeu » : la position dans la partie, puis l'enjeu.
+function pofRoundLabel(){
+  const n = pof.round + 1;
+  const manche = pof.mode === 'prison'
+    ? 'Manche <span class="bv">'+Math.min(n, 5)+'</span>/5'
+    : 'Manche <span class="bv">'+n+'</span>';
+  return manche + ' &middot; ' + pofStakeText(pofGetStake()).toLowerCase() + ' en jeu';
+}
+
+// Les deux rôles de la manche, dits explicitement : l'un appelle et mise, l'autre
+// encaisse. Sans ça, « Joueur 1 contre Joueur 2 » ne disait pas qui fait quoi.
+function pofRolesHTML(){
+  return '<div class="pof-roles">'+
+      '<div class="pof-role caller">'+
+        '<span class="pof-role-name">'+escapeHtml(pofPlayer())+'</span>'+
+        '<span class="pof-role-what">appelle et mise</span>'+
+      '</div>'+
+      '<span class="pof-role-vs">contre</span>'+
+      '<div class="pof-role">'+
+        '<span class="pof-role-name">'+escapeHtml(pofOpponent())+'</span>'+
+        '<span class="pof-role-what">encaisse si c\'est juste</span>'+
+      '</div>'+
+    '</div>';
 }
 
 // --- LA PIÈCE ----------------------------------------------------------------------
@@ -118,28 +141,25 @@ function pofShowTurn(){
   const stake = pofGetStake();
 
   body.innerHTML =
-    (pof.mode === 'prison' ? '<div class="pof-round-badge">Manche '+(pof.round+1)+' sur 5</div>' : '')+
-    '<div class="pof-duel">'+
-      '<div class="pof-name">'+escapeHtml(pofPlayer())+'</div>'+
-      '<div class="pof-vs">contre</div>'+
-      '<div class="pof-opp">'+escapeHtml(pofOpponent())+'</div>'+
-    '</div>'+
-    pofCoinHTML(-14)+
-    // L'enjeu est annoncé AVANT le lancer : c'est lui qui fait la tension, pas la pièce.
-    '<div class="pof-stake">'+
-      '<div class="pof-stake-label">'+(pof.mode === 'prison' ? 'Enjeu imposé' : 'Ta mise')+'</div>'+
-      '<div class="pof-stake-value'+(stake === 'cul sec' ? ' hot' : '')+'">'+pofStakeText(stake)+'</div>'+
-    '</div>'+
+    pofRolesHTML()+
+    pofCoinHTML(-68)+
     (pof.mode === 'fun'
-      ? '<div class="pof-bets">'+[1,2,3].map(n =>
-          '<div class="pof-bet-btn'+(pof.currentBet === n ? ' selected' : '')+'" '+
-               'onclick="pofSetBet('+n+')">'+n+'</div>').join('')+'</div>'
-      : '');
+      ? '<div class="pof-bets">'+
+          '<span class="pof-bets-label">Tu mises</span>'+
+          [1,2,3].map(n =>
+            '<div class="pof-bet-btn'+(pof.currentBet === n ? ' selected' : '')+'" '+
+                 'onclick="pofSetBet('+n+')">'+n+'</div>').join('')+
+        '</div>'
+      : '<div class="pof-forced">Enjeu imposé &middot; '+pofStakeText(stake)+'</div>');
 
-  // Deux boutons de même taille : appeler Pile ou Face n'est pas un choix hiérarchisé.
+  // Appeler Pile ou Face n'est pas un choix hiérarchisé : deux boutons strictement
+  // identiques, chacun portant sa face. Le jaune sur l'un des deux laissait croire
+  // qu'il y avait une bonne réponse.
   footer.innerHTML =
-    '<button class="btn btn-primary" onclick="pofFlip(\'pile\')">Pile</button>'+
-    '<button class="btn btn-ghost" onclick="pofFlip(\'face\')">Face</button>';
+    '<div class="pof-calls">'+
+      '<button class="pof-call" onclick="pofFlip(\'pile\')"><span class="pof-call-coin">P</span>Pile</button>'+
+      '<button class="pof-call" onclick="pofFlip(\'face\')"><span class="pof-call-coin">F</span>Face</button>'+
+    '</div>';
 }
 
 function pofSetBet(n){
@@ -166,15 +186,13 @@ function pofFlip(choice){
   const footer = document.getElementById('pof-footer');
 
   body.innerHTML =
-    (pof.mode === 'prison' ? '<div class="pof-round-badge">Manche '+(pof.round+1)+' sur 5</div>' : '')+
     '<div class="pof-duel">'+
       '<div class="pof-name">'+escapeHtml(pofPlayer())+'</div>'+
       '<div class="pof-vs">appelle</div>'+
       '<div class="pof-opp">'+(choice === 'pile' ? 'Pile' : 'Face')+'</div>'+
     '</div>'+
     pofCoinHTML(-14)+
-    '<div class="pof-stake"><div class="pof-stake-label">Enjeu</div>'+
-      '<div class="pof-stake-value'+(stake === 'cul sec' ? ' hot' : '')+'">'+pofStakeText(stake)+'</div></div>';
+    '<div class="pof-forced">'+pofStakeText(stake)+' en jeu</div>';
   footer.innerHTML = '<div class="duel-hint">La pièce est en l\'air…</div>';
 
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -210,7 +228,6 @@ function pofResolve(result, won, stake, spin){
   if(navigator.vibrate) navigator.vibrate(won ? [60] : [90,50,90]);
 
   body.innerHTML =
-    (pof.mode === 'prison' ? '<div class="pof-round-badge">Manche '+(pof.round+1)+' sur 5</div>' : '')+
     pofCoinHTML(spin)+
     '<div class="pof-verdict">'+
       '<div class="pof-landed">Elle tombe sur '+result+'</div>'+
@@ -231,9 +248,10 @@ function pofResolve(result, won, stake, spin){
     pof.currentIdx++;
     footer.innerHTML = '<button class="btn btn-primary" onclick="pofShowTurn()">Manche suivante</button>';
   } else {
+    pof.round++;
     pof.currentIdx++;
     footer.innerHTML =
-      '<button class="btn btn-primary" onclick="pofShowTurn()">Suivant</button>'+
+      '<button class="btn btn-primary" onclick="pofShowTurn()">Manche suivante</button>'+
       '<button class="btn btn-ghost" onclick="pofQuit()">Quitter</button>';
   }
   pof.busy = false;
