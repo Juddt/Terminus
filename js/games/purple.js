@@ -1,35 +1,53 @@
+// ===================================================================================
+// PURPLE — signature : LE TIRAGE
+// -----------------------------------------------------------------------------------
+// Règles (inchangées, voir GAMES['purple'] dans games-catalog.js) :
+//   Rouge         — les 2 prochaines cartes sont rouges
+//   Noir          — les 2 prochaines sont noires
+//   Purple        — 1 rouge + 1 noire, ordre libre
+//   Double Purple — 2 rouges + 2 noires (4 cartes)
+//   Triple Purple — 3 rouges + 3 noires (6 cartes)
+//   Réussi : les gorgées tirées s'ajoutent à la cagnotte, qui reste en jeu.
+//   Raté   : le joueur boit la cagnotte PLUS les cartes de ce tirage, et la cagnotte
+//            repart à zéro.
+//   La partie s'arrête quand le paquet ne permet plus le plus gros tirage.
+//
+// Toute la tension du jeu est dans l'instant où les cartes se retournent : elles sont
+// donc retournées UNE PAR UNE, pas toutes d'un coup. Le résultat est déterminé dès le
+// tirage ; la révélation ne fait que le dévoiler.
+// ===================================================================================
+
 const purple = {
-  players:[], currentIdx:0, deck:[], sipPot:0, drawnCards:[], cardsLeft:52
+  players:[], currentIdx:0, deck:[], sipPot:0, potCards:[],
+  busy:false, token:0, timers:[]
 };
 
-function purpleMakeDeck(){
-  const d=[];
-  PALM_SUITS.forEach(s=> PALM_VALUES.forEach(v=> d.push({suit:s, value:v})));
-  for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
-  return d;
-}
+// Ce que chaque annonce demande : combien de cartes, et quelle répartition.
+const PURPLE_CALLS = {
+  rouge:  { cards:2, reds:2, label:'Rouge',         hint:'2 rouges' },
+  noir:   { cards:2, reds:0, label:'Noir',          hint:'2 noires' },
+  purple: { cards:2, reds:1, label:'Purple',        hint:'1 rouge + 1 noire' },
+  double: { cards:4, reds:2, label:'Double Purple', hint:'2 rouges + 2 noires' },
+  triple: { cards:6, reds:3, label:'Triple Purple', hint:'3 rouges + 3 noires' }
+};
+const PURPLE_MAX_DRAW = 6;   // le plus gros tirage possible (Triple Purple)
 
-// Saisie des prénoms : page de configuration unique, bornée par le champ `joueurs`
-// du catalogue (voir playerBounds). L'écran de saisie propre à ce jeu a été retiré —
-// il faisait doublon, avec ses propres bornes et ses propres règles de validation.
 function purpleSetup(){
   openSetupFor({ type:'game', game: GAMES.find(g => g.id === 'purple') });
 }
-
-// Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
-// ce jeu ne manipule que des prénoms.
 function purpleStart(players){
   purple.players = (players || []).map(p => p.name);
   purpleStartGame();
 }
 
 function purpleStartGame(){
-  if(purple.players.length<2) return;
-  purple.deck = purpleMakeDeck();
+  if(purple.players.length < 2) return;
+  purpleClearTimers();
+  purple.deck = makeShuffledDeck();
   purple.currentIdx = 0;
   purple.sipPot = 0;
-  purple.drawnCards = [];
-  purple.cardsLeft = 52;
+  purple.potCards = [];
+  purple.busy = false;
   goTo('purple');
   purpleShowTurn();
 }
@@ -37,129 +55,188 @@ function purpleStartGame(){
 function purplePlayer(){ return purple.players[purple.currentIdx % purple.players.length]; }
 
 function purpleUpdateHeader(){
-  document.getElementById('purple-header').innerHTML =
-    '<div class="badge"><span class="bv">'+purple.deck.length+'</span> cartes</div>';
+  const el = document.getElementById('purple-header');
+  if(!el) return;
+  el.innerHTML = '<div class="badge"><span class="bv">'+purple.deck.length+'</span> cartes</div>'+
+    (purple.sipPot > 0 ? '<div class="badge">Cagnotte <span class="bv">'+purple.sipPot+'</span></div>' : '');
 }
 
-function purpleCardHTML(card){
-  const red = palmIsRed(card.suit);
-  return '<div style="width:52px;height:74px;background:#f6f1e7;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">'+
-    '<div style="font-family:Unbounded,sans-serif;font-weight:600;font-size:18px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.value+'</div>'+
-    '<div style="font-size:14px;color:'+(red?'#a82020':'#1a1a1a')+';">'+card.suit+'</div>'+
-  '</div>';
-}
-
+// --- Le tour ------------------------------------------------------------------------
 function purpleShowTurn(){
+  purple.busy = false;
   purpleUpdateHeader();
-  if(purple.deck.length < 6){
+  if(purple.deck.length < PURPLE_MAX_DRAW){
     purpleEndGame();
     return;
   }
   const body = document.getElementById('purple-body');
   const footer = document.getElementById('purple-footer');
 
-  let potHTML = '';
-  if(purple.sipPot > 0){
-    potHTML = '<div class="sip-pot">'+purple.sipPot+'</div><div class="sip-pot-label">gorgée'+(purple.sipPot>1?'s':'')+' en jeu</div>';
-  }
-
-  // Show last drawn cards if any
-  let lastCardsHTML = '';
-  if(purple.drawnCards.length > 0){
-    lastCardsHTML = '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;justify-content:center;">';
-    purple.drawnCards.forEach(c => lastCardsHTML += purpleCardHTML(c));
-    lastCardsHTML += '</div>';
-  }
-
   body.innerHTML =
-    potHTML+
-    '<div class="palm-player-big" style="font-size:26px;">'+purplePlayer()+'</div>'+
-    '<div style="font-size:14px;color:var(--text-dim);margin-top:4px;">Fais ta prédiction</div>'+
-    lastCardsHTML;
+    '<div class="pur-table">'+
+      // Le paquet, avec son épaisseur : c'est de là que vient le danger.
+      deckHTML(purple.deck.length, { width:74, label:false })+
+      // La cagnotte en jeu, matérialisée par les cartes déjà gagnées.
+      purplePotHTML()+
+    '</div>'+
+    '<div class="pur-who">'+escapeHtml(purplePlayer())+'</div>'+
+    '<div class="pur-prompt">Annonce les deux prochaines cartes</div>';
 
+  // Les cinq annonces, du plus sûr au plus risqué, avec ce qu'elles demandent.
   footer.innerHTML =
-    '<div style="display:flex;flex-direction:column;gap:8px;width:100%;">'+
-      '<div style="display:flex;gap:8px;">'+
-        '<button class="btn btn-primary" onclick="purpleGuess(\'rouge\')" style="flex:1;background:#a82020;color:#fff;padding:16px;">Rouge</button>'+
-        '<button class="btn btn-primary" onclick="purpleGuess(\'noir\')" style="flex:1;background:#1a1a1a;color:#fff;padding:16px;border:1px solid rgba(244,236,226,0.2);">Noir</button>'+
-        '<button class="btn btn-primary" onclick="purpleGuess(\'purple\')" style="flex:1;background:#7B2D8E;color:#fff;padding:16px;">Purple</button>'+
-      '</div>'+
-      '<div style="display:flex;gap:8px;">'+
-        '<button class="btn btn-ghost" onclick="purpleGuess(\'double\')" style="flex:1;padding:14px;font-size:13px;">Double Purple</button>'+
-        '<button class="btn btn-ghost" onclick="purpleGuess(\'triple\')" style="flex:1;padding:14px;font-size:13px;">Triple Purple</button>'+
-      '</div>'+
+    '<div class="pur-calls">'+
+      ['rouge','noir','purple'].map(k => purpleCallBtn(k)).join('')+
+    '</div>'+
+    '<div class="pur-calls">'+
+      ['double','triple'].map(k => purpleCallBtn(k)).join('')+
     '</div>';
 }
 
-function purpleGuess(choice){
-  let numCards = 2;
-  if(choice === 'double') numCards = 4;
-  if(choice === 'triple') numCards = 6;
+function purpleCallBtn(key){
+  const c = PURPLE_CALLS[key];
+  return '<button class="pur-call pur-call-'+key+'" onclick="purpleGuess(\''+key+'\')">'+
+      '<span class="pur-call-name">'+c.label+'</span>'+
+      '<span class="pur-call-hint">'+c.hint+'</span>'+
+    '</button>';
+}
 
-  if(purple.deck.length < numCards){
-    purpleEndGame();
-    return;
+// La cagnotte n'est pas qu'un nombre : ce sont les cartes déjà arrachées au paquet,
+// posées en éventail. Plus elle grossit, plus on hésite à relancer.
+function purplePotHTML(){
+  if(purple.sipPot <= 0){
+    return '<div class="pur-pot pur-pot-empty">'+
+        '<div class="pur-pot-value">0</div>'+
+        '<div class="pur-pot-label">cagnotte</div>'+
+      '</div>';
   }
+  const fan = purple.potCards.slice(-6).map((c, i) =>
+    '<span class="pur-fan-card" style="--k:'+i+'">'+cardHTML(c, { width:34, revealed:true })+'</span>').join('');
+  return '<div class="pur-pot">'+
+      '<div class="pur-fan">'+fan+'</div>'+
+      '<div class="pur-pot-value">'+purple.sipPot+'</div>'+
+      '<div class="pur-pot-label">gorgée'+(purple.sipPot > 1 ? 's' : '')+' en jeu</div>'+
+    '</div>';
+}
 
-  // Draw cards
-  Sound.play('cardFlip');
+// --- Le tirage ----------------------------------------------------------------------
+function purpleGuess(choice){
+  if(purple.busy) return;                    // verrou anti-double-appui
+  const call = PURPLE_CALLS[choice];
+  if(!call) return;
+  if(purple.deck.length < call.cards){ purpleEndGame(); return; }
+  purple.busy = true;
+
+  // Tirage et verdict calculés MAINTENANT. La révélation ne fait que les montrer.
   const drawn = [];
-  for(let i=0;i<numCards;i++) drawn.push(purple.deck.pop());
-
+  for(let i = 0; i < call.cards; i++) drawn.push(purple.deck.pop());
   const reds = drawn.filter(c => palmIsRed(c.suit)).length;
-  const blacks = numCards - reds;
+  const correct = reds === call.reds;
 
-  let correct = false;
-  if(choice === 'rouge') correct = (reds === 2 && blacks === 0);
-  else if(choice === 'noir') correct = (blacks === 2 && reds === 0);
-  else if(choice === 'purple') correct = (reds === 1 && blacks === 1);
-  else if(choice === 'double') correct = (reds === 2 && blacks === 2);
-  else if(choice === 'triple') correct = (reds === 3 && blacks === 3);
-
-  // Show result
   const body = document.getElementById('purple-body');
   const footer = document.getElementById('purple-footer');
 
-  let cardsHTML = '<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:center;">';
-  drawn.forEach(c => cardsHTML += purpleCardHTML(c));
-  cardsHTML += '</div>';
-
-  let resultTitle, resultSub;
-  if(correct){
-    purple.sipPot += numCards;
-    purple.drawnCards = purple.drawnCards.concat(drawn);
-    resultTitle = 'Gagné';
-    resultSub = '+'+numCards+' gorgée'+(numCards>1?'s':'')+' au compteur';
-    Sound.play('success');
-  } else {
-    const total = purple.sipPot + numCards;
-    resultTitle = 'Perdu';
-    resultSub = purplePlayer()+' boit '+total+' gorgée'+(total>1?'s':'');
-    purple.sipPot = 0;
-    purple.drawnCards = [];
-    Sound.play('fail');
-  }
+  // La largeur des cartes suit leur nombre : six cartes à 60 px déborderaient de
+  // l'écran et les deux cartes des extrémités seraient rognées.
+  const cardW = call.cards >= 6 ? 44 : (call.cards >= 4 ? 58 : 70);
 
   body.innerHTML =
-    cardsHTML+
-    '<div style="font-family:Unbounded,sans-serif;font-size:30px;color:'+(correct?'var(--sage)':'var(--clay)')+';margin-top:16px;">'+resultTitle+'</div>'+
-    '<div style="font-size:15px;color:var(--text-dim);margin-top:6px;">'+resultSub+'</div>';
+    '<div class="pur-announce">'+escapeHtml(purplePlayer())+' annonce <b>'+call.label+'</b></div>'+
+    '<div class="pc-row" id="pur-draw">'+
+      drawn.map((c, i) => cardHTML(c, { width:cardW, index:i, deal:true, id:'pur-card-'+i })).join('')+
+    '</div>'+
+    '<div class="pur-verdict" id="pur-verdict"></div>';
+  footer.innerHTML = '<div class="duel-hint">On retourne…</div>';
+
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const step = reduced ? 0 : 320;            // une carte toutes les 320 ms
+
+  // Retournement une par une : c'est là que se joue le suspense, surtout sur un
+  // Triple Purple où les six cartes tombent l'une après l'autre.
+  drawn.forEach((c, i) => {
+    purpleLater(()=>{
+      const el = document.getElementById('pur-card-'+i);
+      if(el) el.classList.add('revealed');
+      Sound.play('cardFlip');
+      if(navigator.vibrate) navigator.vibrate([18]);
+    }, reduced ? 0 : 240 + i * step);
+  });
+
+  purpleLater(()=> purpleResolve(choice, drawn, correct),
+    reduced ? 120 : 240 + drawn.length * step + 340);
+}
+
+function purpleResolve(choice, drawn, correct){
+  const call = PURPLE_CALLS[choice];
+  const verdict = document.getElementById('pur-verdict');
+  const footer = document.getElementById('purple-footer');
+  let main, sub;
+
+  if(correct){
+    purple.sipPot += call.cards;
+    purple.potCards = purple.potCards.concat(drawn);
+    main = 'Gagné';
+    sub = '+'+call.cards+' gorgée'+(call.cards > 1 ? 's' : '')+' dans la cagnotte — elle reste en jeu';
+    Sound.play('success');
+    if(window.fireConfetti && choice === 'triple') window.fireConfetti('small');
+  } else {
+    const total = purple.sipPot + call.cards;
+    main = 'Perdu';
+    sub = escapeHtml(purplePlayer())+' boit '+total+' gorgée'+(total > 1 ? 's' : '');
+    purple.sipPot = 0;
+    purple.potCards = [];
+    Sound.play('fail');
+    if(navigator.vibrate) navigator.vibrate([90,50,90]);
+  }
+
+  if(verdict){
+    verdict.innerHTML =
+      '<div class="pur-verdict-main '+(correct ? 'win' : 'lose')+'">'+main+'</div>'+
+      '<div class="pur-verdict-sub">'+sub+'</div>';
+    verdict.classList.add('shown');
+  }
 
   purple.currentIdx++;
   purpleUpdateHeader();
-
-  footer.innerHTML = '<button class="btn btn-primary" onclick="purpleShowTurn()">Joueur suivant</button>';
+  purple.busy = false;
+  if(footer) footer.innerHTML = '<button class="btn btn-primary" onclick="purpleShowTurn()">Suivant</button>';
 }
 
 function purpleEndGame(){
   const body = document.getElementById('purple-body');
   const footer = document.getElementById('purple-footer');
-
   body.innerHTML =
-    '<div style="font-family:Unbounded,sans-serif;font-size:26px;color:var(--text);">Partie terminée</div>'+
-    '<div style="font-size:14px;color:var(--text-dim);margin-top:8px;">Plus assez de cartes dans le paquet</div>';
-
+    '<div class="pur-end">'+
+      '<div class="pur-end-title">Paquet épuisé</div>'+
+      '<div class="pur-end-sub">Il ne reste plus assez de cartes pour une annonce.</div>'+
+      (purple.sipPot > 0
+        ? '<div class="pur-end-pot">'+purple.sipPot+' gorgée'+(purple.sipPot > 1 ? 's' : '')+' restaient en jeu</div>'
+        : '')+
+    '</div>';
   footer.innerHTML =
-    '<button class="btn btn-ghost" onclick="goTo(\'games-list\')" style="flex:1;">Quitter</button>'+
-    '<button class="btn btn-primary" onclick="purpleStartGame()" style="flex:1;">Rejouer</button>';
+    '<button class="btn btn-primary" onclick="purpleStartGame()">Rejouer</button>'+
+    '<button class="btn btn-ghost" onclick="purpleQuit()">Quitter</button>';
 }
+
+// --- Cycle de vie -------------------------------------------------------------------
+// Les retournements sont programmés à l'avance : quitter en plein tirage doit les
+// annuler, sinon ils continuent d'écrire dans un écran déjà quitté.
+function purpleClearTimers(){
+  purple.token++;
+  purple.timers.forEach(t => clearTimeout(t));
+  purple.timers = [];
+}
+function purpleLater(fn, ms){
+  const token = purple.token;
+  const t = setTimeout(()=>{ if(purple.token === token) fn(); }, ms);
+  purple.timers.push(t);
+  return t;
+}
+function purpleQuit(){
+  purpleClearTimers();
+  purple.busy = false;
+  goTo('games-list');
+}
+registerScreenCleanup('purple', function(){
+  purpleClearTimers();
+  purple.busy = false;
+});

@@ -4,7 +4,7 @@
 // bloqués sur une vieille version jusqu'à un rechargement supplémentaire après chaque
 // mise à jour — gênant tant que l'app change encore souvent. Bumper CACHE_NAME force
 // quand même le remplacement complet du cache au prochain déploiement.
-const CACHE_NAME = 'soiree-cache-v25';
+const CACHE_NAME = 'soiree-cache-v26';
 
 const PRECACHE_URLS = [
   './',
@@ -25,6 +25,7 @@ const PRECACHE_URLS = [
   './css/games/palmier.css',
   './css/games/bus.css',
   './css/games/cible.css',
+  './css/games/purple.css',
   './css/games/pmu.css',
   './css/games/dice.css',
   './css/games/pof.css',

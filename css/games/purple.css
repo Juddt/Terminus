@@ -1,0 +1,80 @@
+/* ===================================================================================
+   PURPLE — signature : LE TIRAGE
+   -----------------------------------------------------------------------------------
+   Deux objets se font face sur la table : le PAQUET (d'où vient le danger) et la
+   CAGNOTTE (ce qu'on a déjà arraché et qu'on risque de reperdre). C'est la tension
+   entre les deux qui fait le jeu — pas un compteur de gorgées posé dans un coin.
+
+   Le violet ne fait pas partie de la charte de l'app : il n'apparaît QUE sur les
+   annonces « Purple », là où il nomme littéralement le coup à jouer.
+   =================================================================================== */
+
+.pur-table{display:flex; align-items:center; justify-content:center; gap:20px; margin:6px 0 18px; max-width:100%;}
+
+/* La cagnotte : les cartes déjà gagnées, posées en éventail derrière le compte. */
+.pur-pot{position:relative; display:flex; flex-direction:column; align-items:center; gap:1px;
+  padding-top:34px;}
+.pur-fan{position:absolute; top:-16px; left:50%; transform:translateX(-50%); height:56px;
+  display:flex; align-items:flex-start; pointer-events:none;}
+.pur-fan-card{display:block; margin-left:-19px;
+  transform:rotate(calc((var(--k) - 2.5) * 7deg)) translateY(calc(var(--k) * -1px));
+  transform-origin:bottom center; opacity:0.85;}
+.pur-fan-card:first-child{margin-left:0;}
+.pur-pot-value{font-family:'Anton',sans-serif; font-size:38px; line-height:1; color:var(--accent);}
+.pur-pot-label{font-size:10px; letter-spacing:1.6px; text-transform:uppercase; color:var(--text-faint); white-space:nowrap;}
+.pur-pot-empty .pur-pot-value{color:var(--text-faint); opacity:0.5;}
+
+.pur-who{font-family:'Anton',sans-serif; font-size:29px; line-height:1; color:var(--text);
+  overflow-wrap:anywhere; max-width:300px;}
+.pur-prompt{font-size:13.5px; color:var(--text-dim);}
+.pur-announce{font-size:15px; color:var(--text-dim); line-height:1.4; max-width:300px;}
+.pur-announce b{font-family:'Anton',sans-serif; font-weight:400; font-size:19px; color:var(--text);}
+
+/* --- Les cinq annonces -------------------------------------------------------------
+   Chacune dit ce qu'elle demande : personne ne devrait avoir à se souvenir que
+   « Triple Purple » veut dire 3 rouges et 3 noires. Même gabarit que les commandes de
+   l'app, avec la couleur de l'annonce comme seule différence. */
+.pur-calls{display:flex; gap:9px;}
+.pur-call{flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:2px; min-height:58px; padding:8px 6px; cursor:pointer;
+  border:1px solid var(--line); border-radius:15px; background:var(--surface-2);
+  box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 6px 16px rgba(0,0,0,0.4);
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.pur-call:active{transform:scale(0.97);}
+.pur-call-name{font-family:'Anton',sans-serif; font-size:16px; line-height:1; color:var(--text);}
+.pur-call-hint{font-size:10px; letter-spacing:0.2px; color:var(--text-faint); line-height:1.2;}
+
+.pur-call-rouge{background:linear-gradient(178deg, #C8303A, #92202A); border-color:transparent;}
+.pur-call-rouge .pur-call-name{color:#FFF3EE;}
+.pur-call-rouge .pur-call-hint{color:rgba(255,243,238,0.72);}
+.pur-call-noir{background:linear-gradient(178deg, #2A2A2A, #121212); border-color:rgba(255,255,255,0.18);}
+.pur-call-purple{background:linear-gradient(178deg, #9B4FC0, #6B2A8C); border-color:transparent;}
+.pur-call-purple .pur-call-name{color:#FBF0FF;}
+.pur-call-purple .pur-call-hint{color:rgba(251,240,255,0.74);}
+.pur-call-double .pur-call-name, .pur-call-triple .pur-call-name{color:#D9A6F0;}
+
+/* --- Verdict ------------------------------------------------------------------------ */
+.pur-verdict{display:flex; flex-direction:column; align-items:center; gap:5px;
+  min-height:62px; opacity:0; transition:opacity .26s ease;}
+.pur-verdict.shown{opacity:1;}
+.pur-verdict-main{font-family:'Anton',sans-serif; font-size:33px; line-height:1;}
+.pur-verdict-main.win{color:var(--accent);}
+.pur-verdict-main.lose{color:var(--clay);}
+.pur-verdict-sub{font-size:13.5px; color:var(--text-dim); line-height:1.4; max-width:300px;}
+
+.pur-end{display:flex; flex-direction:column; align-items:center; gap:8px;}
+.pur-end-title{font-family:'Anton',sans-serif; font-size:28px; color:var(--text);}
+.pur-end-sub{font-size:13.5px; color:var(--text-dim); max-width:280px; line-height:1.45;}
+.pur-end-pot{margin-top:6px; font-size:13px; color:var(--text-faint);}
+
+@media (prefers-reduced-motion: no-preference){
+  .pur-verdict.shown .pur-verdict-main{animation:pofVerdict .34s cubic-bezier(.22,1,.36,1) both;}
+}
+
+@media (max-height:720px){
+  .pur-table{gap:20px; margin:2px 0 12px;}
+  .pur-who{font-size:24px;}
+  .pur-pot-value{font-size:31px;}
+  .pur-verdict-main{font-size:27px;}
+  .pur-call{min-height:52px;}
+}

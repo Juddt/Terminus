@@ -22,7 +22,7 @@ const ctx={console,
   escapeHtml:v=>String(v), goTo(){}, openSetupFor(){}, registerScreenCleanup(){}};
 ctx.window.matchMedia=()=>({matches:false});
 vm.createContext(ctx);
-['js/data/games-catalog.js','js/games/des.js'].forEach(f=>vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f}));
+['js/data/games-catalog.js','js/games/shared-cards.js','js/games/des.js','js/games/pof.js','js/games/purple.js'].forEach(f=>vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f}));
 
 let ok=true;
 function check(label, cond, detail){
@@ -74,6 +74,69 @@ check('Chaque valeur a sa propre orientation de cube', rots.size===6, rots.size+
 const g = vm.runInContext("GAMES.find(x=>x.id==='des')", ctx);
 check('Le catalogue borne le Duel de Dés à 2 joueurs', g.joueurs==='2', g.joueurs);
 check('Le catalogue pointe vers la fonction de démarrage', g.startFn==='desStart', g.startFn);
+
+
+// --- PILE OU FACE -------------------------------------------------------------------
+// Règle : Fun = la mise choisie (1 à 3) ; Prison = 5 manches imposées, 2 → 4 → 8 → 16
+// → cul sec. La pièce est à 50/50.
+vm.runInContext("pof.players=['A','B']; pof.mode='prison';", ctx);
+const stakes = [0,1,2,3,4].map(r => vm.runInContext('pof.round='+r+'; String(pofGetStake())', ctx));
+check('Prison : enjeux 2/4/8/16/cul sec', JSON.stringify(stakes)===JSON.stringify(['2','4','8','16','cul sec']), stakes.join(' · '));
+vm.runInContext("pof.mode='fun';", ctx);
+const funStakes = [1,2,3].map(n => vm.runInContext('pof.currentBet='+n+'; String(pofGetStake())', ctx));
+check('Fun : l\'enjeu est la mise choisie', JSON.stringify(funStakes)===JSON.stringify(['1','2','3']), funStakes.join(' · '));
+check('Pluriel correct sur les gorgées',
+  vm.runInContext("pofStakeText(1)", ctx)==='1 gorgée' && vm.runInContext("pofStakeText(3)", ctx)==='3 gorgées'
+  && vm.runInContext("pofStakeText('cul sec')", ctx)==='Cul sec');
+// La tranche doit faire le tour complet, sans trou ni recouvrement.
+const edge = vm.runInContext('pofEdgeHTML()', ctx);
+const angles = [...edge.matchAll(/rotateZ\(([\d.]+)deg\)/g)].map(m=>parseFloat(m[1]));
+check('La tranche de la pièce fait le tour complet',
+  angles.length===36 && Math.abs(angles[angles.length-1] - 350) < 0.01, angles.length+' segments');
+
+// --- PURPLE -------------------------------------------------------------------------
+// Règle : chaque annonce demande un nombre de cartes et une répartition rouge/noire
+// précise. Les probabilités doivent rester celles d'un paquet de 52 cartes.
+const calls = vm.runInContext('JSON.stringify(PURPLE_CALLS)', ctx);
+const CALLS = JSON.parse(calls);
+check('Rouge = 2 cartes, 2 rouges', CALLS.rouge.cards===2 && CALLS.rouge.reds===2);
+check('Noir = 2 cartes, 0 rouge', CALLS.noir.cards===2 && CALLS.noir.reds===0);
+check('Purple = 2 cartes, 1 rouge', CALLS.purple.cards===2 && CALLS.purple.reds===1);
+check('Double Purple = 4 cartes, 2 rouges', CALLS.double.cards===4 && CALLS.double.reds===2);
+check('Triple Purple = 6 cartes, 3 rouges', CALLS.triple.cards===6 && CALLS.triple.reds===3);
+
+// Un paquet neuf : 52 cartes, toutes distinctes, 26 rouges.
+const deckOk = vm.runInContext(`(function(){
+  for(var t=0;t<200;t++){
+    var d = makeShuffledDeck();
+    if(d.length !== 52) return 'taille '+d.length;
+    var seen = {};
+    for(var i=0;i<52;i++){ var k=d[i].value+d[i].suit; if(seen[k]) return 'doublon '+k; seen[k]=1; }
+    var reds = d.filter(function(c){return palmIsRed(c.suit)}).length;
+    if(reds !== 26) return 'rouges '+reds;
+  }
+  return 'ok';
+})()`, ctx);
+check('Paquet de 52 cartes distinctes, 26 rouges', deckOk==='ok', deckOk);
+
+// Probabilités théoriques (tirage sans remise dans 52 cartes) :
+//   Rouge/Noir C(26,2)/C(52,2)=0.245 · Purple 26²/C(52,2)=0.510
+//   Double C(26,2)²/C(52,4)=0.390 · Triple C(26,3)²/C(52,6)=0.332
+const THEORIE = { rouge:0.2451, noir:0.2451, purple:0.5098, double:0.3901, triple:0.3320 };
+Object.keys(THEORIE).forEach(key=>{
+  const c = CALLS[key];
+  const rate = vm.runInContext(`(function(){
+    var wins=0, N=40000;
+    for(var i=0;i<N;i++){
+      var d = makeShuffledDeck().slice(0, ${c.cards});
+      var reds = d.filter(function(x){return palmIsRed(x.suit)}).length;
+      if(reds === ${c.reds}) wins++;
+    }
+    return wins/N;
+  })()`, ctx);
+  check('Probabilité « '+c.label+' » conforme au paquet',
+    Math.abs(rate - THEORIE[key]) < 0.012, rate.toFixed(4)+' (théorie '+THEORIE[key]+')');
+});
 
 console.log(ok?'\nMINI-JEUX CONFORMES':'\nDES ÉCARTS SUBSISTENT');
 process.exit(ok?0:1);
