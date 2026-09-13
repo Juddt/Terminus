@@ -81,7 +81,7 @@ const GAMES = [
   {
     id:"des", icon:"🎲", cardGrad:"linear-gradient(135deg,#FF6B9E,#FF3D77)", tagline:'Un dé chacun. Le plus bas boit. Brutal.', name:"Le Duel de Dés", joueurs:"2", duree:"5-10 min",
     difficulty:"Intense", category:"Rapide",
-    interactive: true, launchFn: 'desSetup',
+    interactive: true, launchFn: 'desSetup', startFn: 'desStart',
     desc:"Chacun lance un dé. Le plus bas boit la multiplication des deux. Simple, brutal, rapide.",
     rules:[
       {card:'🎲', text:'Chaque joueur lance un dé'},

@@ -59,6 +59,17 @@ function openSetupFor(context){
   goTo('setup');
 }
 
+// « à » + un titre qui commence par un article : « Jouer à Le Duel de Dés » n'est pas
+// français. On contracte comme il se doit, et on laisse « à » seul devant les titres
+// sans article (Purple, UnderDicateur…).
+function aTitre(name){
+  if(/^Le /.test(name))  return 'au ' + name.slice(3);
+  if(/^Les /.test(name)) return 'aux ' + name.slice(4);
+  if(/^La /.test(name))  return 'à la ' + name.slice(3);
+  if(/^L'/.test(name))   return "à l'" + name.slice(2);
+  return 'à ' + name;
+}
+
 function renderSetupPage(){
   const isBefore = setupContext.type === 'before';
   const game = setupContext.game;
@@ -69,7 +80,7 @@ function renderSetupPage(){
   // Un seul libellé de lancement : l'ambiance n'est plus un choix du joueur (voir
   // setSessionMode), donc le bouton ne la mentionne plus.
   const launchBtn = document.getElementById('setup-launch-btn');
-  launchBtn.textContent = isBefore ? 'Lancer le before' : 'Jouer à ' + game.name;
+  launchBtn.textContent = isBefore ? 'Lancer le before' : 'Jouer ' + aTitre(game.name);
 
   if(isBefore) renderDurationChoices();
   renderCounter();
@@ -203,6 +214,23 @@ function loadLastPlayers(){
     const raw = localStorage.getItem(LAST_PLAYERS_KEY);
     return raw ? JSON.parse(raw) : null;
   }catch(e){ return null; }
+}
+
+// Action principale de la page de configuration. Un jeu de la bibliothèque et le before
+// partagent désormais le MÊME écran de réglages : c'était déjà le cas pour les bornes de
+// joueurs (playerBounds lit le champ `joueurs` du catalogue), mais la bibliothèque
+// lançait encore les jeux par leur propre écran de saisie, en doublon. Un jeu qui déclare
+// `startFn` reçoit ici les joueurs collectés et démarre ; les autres gardent leur écran
+// dédié le temps d'être repris.
+function launchFromSetup(){
+  if(setupContext.type === 'game' && setupContext.game && setupContext.game.startFn){
+    const players = collectPlayers();
+    state.players = players;
+    saveLastPlayers();
+    window[setupContext.game.startFn](players);
+    return;
+  }
+  launchSession();
 }
 
 // Depuis l'écran de fin : revenir changer la durée en gardant le groupe.

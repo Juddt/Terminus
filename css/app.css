@@ -1,8 +1,9 @@
 /* Sound toggle */
 #sound-toggle-btn{position:absolute; top:14px; right:14px; z-index:999; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:rgba(30,24,48,0.72); color:var(--text-dim); font-size:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(4px);}
 #sound-toggle-btn:active{transform:scale(0.92);}
-/* Pas de doublon : la barre du before a sa propre commande audio (#sound-inline-btn). */
-#frame[data-screen="main"] #sound-toggle-btn{display:none;}
+/* Pas de doublon : un écran qui porte sa propre barre (le before, un mini-jeu repris)
+   a déjà ses accès Accueil/son — voir la classe posée par goTo(). */
+#frame.has-own-topbar #sound-toggle-btn{display:none;}
 
 /* Home */
 #screen-home{padding:0; overflow:hidden;}

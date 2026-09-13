@@ -107,7 +107,7 @@
 
     <!-- 5. Action principale -->
     <div class="setup-cta">
-      <button class="btn btn-primary" id="setup-launch-btn" onclick="launchSession()">Lancer le before</button>
+      <button class="btn btn-primary" id="setup-launch-btn" onclick="launchFromSetup()">Lancer le before</button>
     </div>
   </div>
 
@@ -399,31 +399,18 @@
     <div class="palm-footer" id="pof-footer"></div>
   </div>
 
-  <!-- Duel de Dés -->
-  <div class="screen" id="screen-des-setup">
-    <div class="topnav"><div class="back-link" onclick="goTo('games-list')">← Les classiques</div></div>
-    <h2 style="font-size:22px;">Qui s'affronte ?</h2>
-    <div class="step-sub" style="margin-bottom:16px;">Deux joueurs</div>
-    <div class="field-row" style="margin-bottom:12px;">
-      <input type="text" id="des-name-field" class="name-input" placeholder="Prénom + Entrée ↵" autocomplete="off" style="flex:1;">
-    </div>
-    <div id="des-chips" class="chips-wrap"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary" id="des-start-btn" disabled onclick="desStartGame()">Lancer le duel</button>
-  </div>
-
+  <!-- Duel de Dés — la saisie passe par la page de configuration unique (bornes 2-2
+       lues dans le catalogue), il n'y a donc plus d'écran de prénoms dédié ici. -->
   <div class="screen" id="screen-des">
-    <div class="palm-header">
-      <div>
-        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">✕ Quitter</div>
-        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
-      </div>
-      <div style="display:flex;gap:4px;align-items:center;">
-        <div class="badge" onclick="showRulesOverlay('des')" style="cursor:pointer;">?</div>
+    <div class="game-topbar">
+      <button class="top-btn" onclick="desQuit()">Quitter</button>
+      <div class="game-topbar-right">
+        <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        <button class="top-btn icon-only" onclick="showRulesOverlay('des')" aria-label="Règles">?</button>
       </div>
     </div>
-    <div class="palm-body" id="des-body"></div>
-    <div class="palm-footer" id="des-footer"></div>
+    <div class="duel" id="des-body"></div>
+    <div class="duel-footer" id="des-footer"></div>
   </div>
 
   <!-- UnderDicateur Setup -->

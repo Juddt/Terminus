@@ -1,20 +1,162 @@
-.die{width:80px; height:80px; background:#f6f1e7; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.45); display:grid; grid-template:repeat(3,1fr)/repeat(3,1fr); padding:12px; gap:4px;}
-.die .pip{width:100%; height:100%; border-radius:50%; background:transparent;}
-.die .pip.on{background:#1a1a1a;}
-.die-wrap{display:flex; flex-direction:column; align-items:center; gap:8px;}
-.die-name{font-family:'Anton',sans-serif; font-size:18px; color:var(--text);}
-.die-vs{font-family:'Anton',sans-serif; font-size:24px; color:rgba(255,255,255,0.35); margin:0 16px;}
-@keyframes dieRoll{
-  0%{transform:rotate(0deg) scale(1)}
-  10%{transform:rotate(20deg) scale(0.85)}
-  20%{transform:rotate(-15deg) scale(1.1)}
-  30%{transform:rotate(25deg) scale(0.9)}
-  40%{transform:rotate(-20deg) scale(1.05)}
-  50%{transform:rotate(15deg) scale(0.88)}
-  60%{transform:rotate(-10deg) scale(1.08)}
-  70%{transform:rotate(12deg) scale(0.92)}
-  80%{transform:rotate(-5deg) scale(1.02)}
-  90%{transform:rotate(3deg) scale(0.98)}
-  100%{transform:rotate(0deg) scale(1)}
+/* ===================================================================================
+   LE DUEL DE DÉS
+   -----------------------------------------------------------------------------------
+   Face-à-face sur l'axe vertical : un joueur en haut, l'autre en bas, séparés par une
+   ligne centrale qui porte le signe de la multiplication — la mécanique du jeu est un
+   produit, autant que le signe le dise. Chaque moitié annonce SON propre verdict, pour
+   que les deux joueurs lisent leur résultat sans décoder un message commun.
+
+   Les dés ne sont pas des carrés à pastilles : ce sont de vrais cubes en 3D (six faces,
+   transform-style: preserve-3d), éclairés depuis le haut-gauche, avec des creux pour les
+   points et une ombre de contact au sol. Le lancer est un tumble continu qui se termine
+   EXACTEMENT sur la valeur tirée par le moteur — l'animation ne décide de rien, elle
+   montre le résultat déjà calculé.
+   =================================================================================== */
+
+#screen-des{padding:0; display:flex; flex-direction:column; background:
+  radial-gradient(ellipse 120% 60% at 50% 50%, #171717 0%, var(--bg) 72%);}
+
+/* Barre de jeu : même famille de boutons que le before. */
+.game-topbar{display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:calc(14px + env(safe-area-inset-top)) 18px 8px; flex-shrink:0;}
+.game-topbar-right{display:flex; align-items:center; gap:8px;}
+
+.duel{flex:1; min-height:0; display:flex; flex-direction:column; padding:4px 18px 0;}
+
+/* Une moitié par joueur. Elles sont strictement symétriques : même hauteur, même
+   composition — aucun des deux camps n'est avantagé visuellement. */
+.duel-half{flex:1 1 0; min-height:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:14px; position:relative;}
+.duel-half-a{justify-content:flex-end; padding-bottom:6px;}
+.duel-half-b{justify-content:flex-start; padding-top:6px;}
+
+.duel-name{flex-shrink:0; font-family:'Anton',sans-serif; font-size:20px; letter-spacing:0.5px;
+  color:var(--text-dim); line-height:1; max-width:280px; overflow-wrap:anywhere;
+  text-align:center; transition:color .3s ease;}
+.duel-half.is-winner .duel-name{color:var(--accent);}
+.duel-half.is-loser .duel-name{color:var(--clay);}
+
+/* Verdict propre à chaque moitié, révélé après le lancer. Une hauteur réservée en
+   permanence : la ligne centrale ne se déplace pas au moment du résultat. */
+.duel-verdict{flex-shrink:0; min-height:34px; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:2px; opacity:0; transition:opacity .28s ease;}
+.duel-verdict.shown{opacity:1;}
+.duel-verdict-main{font-family:'Anton',sans-serif; font-size:23px; line-height:1; letter-spacing:0.4px;}
+.duel-verdict-sub{font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint);}
+.is-loser .duel-verdict-main{color:var(--clay);}
+.is-winner .duel-verdict-main{color:var(--accent);}
+
+/* --- La ligne centrale --------------------------------------------------------------
+   Un filet qui s'éclaire au centre, avec le signe × posé dessus. Symétrique : elle se
+   lit pareil des deux côtés de la table. */
+.duel-seam{flex-shrink:0; display:flex; align-items:center; gap:12px; padding:2px 0;}
+.duel-seam-line{flex:1; height:1px; background:linear-gradient(to right, transparent, var(--line) 35%, var(--line) 65%, transparent);}
+.duel-seam-mark{width:38px; height:38px; flex-shrink:0; border-radius:12px;
+  border:1px solid var(--line); background:var(--surface);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Anton',sans-serif; font-size:17px; color:var(--text-dim);
+  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 6px 16px rgba(0,0,0,0.45);
+  transition:color .3s ease, border-color .3s ease, background .3s ease;}
+.duel.is-result .duel-seam-mark{color:var(--ink-on-light); background:var(--accent); border-color:transparent;}
+.duel.is-tie .duel-seam-mark{color:var(--text); background:var(--surface-2);}
+
+/* --- LE DÉ ---------------------------------------------------------------------------
+   Cube de 104 px d'arête. La scène porte la perspective ; le cube porte la rotation ;
+   les six faces sont posées à ±52 px du centre. */
+.die-stage{position:relative; width:104px; height:104px; margin-bottom:14px; flex-shrink:0;
+  perspective:560px; perspective-origin:50% 42%;
+  /* Hauteur du saut : elle doit rester inférieure à l'espace libéré au-dessus du dé,
+     sinon le cube vient recouvrir le prénom au sommet de sa trajectoire. */
+  --hop:12px;}
+.die-3d{position:absolute; inset:0; transform-style:preserve-3d;
+  transform:rotateX(-13deg) rotateY(17deg);}
+
+/* Ombre de contact : elle rétrécit et s'éclaircit quand le dé s'élève, ce qui donne sa
+   hauteur au saut bien mieux qu'un simple déplacement vertical. */
+.die-shadow{position:absolute; left:50%; bottom:-16px; width:88px; height:15px;
+  transform:translateX(-50%); border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(0,0,0,0.72), rgba(0,0,0,0) 70%);
+  transition:transform .28s ease, opacity .28s ease;}
+
+.die-face{position:absolute; inset:0; border-radius:17px;
+  display:grid; grid-template:repeat(3,1fr)/repeat(3,1fr); padding:13px; gap:5px;
+  /* Ivoire satiné : un dégradé doux, un liseré clair sur l'arête haute, une arête
+     basse assombrie. C'est ce contraste qui fait lire une matière plutôt qu'un aplat. */
+  background:linear-gradient(157deg, #FFFDF7 0%, #F4EFE2 46%, #DCD4C2 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,0.95),
+             inset 0 -3px 6px rgba(120,110,90,0.42),
+             inset 0 0 0 1px rgba(255,255,255,0.35);
+  backface-visibility:hidden;}
+
+/* Reflet spéculaire : une source de lumière haut-gauche, fixe, la même sur chaque face. */
+.die-face::after{content:''; position:absolute; inset:0; border-radius:17px; pointer-events:none;
+  background:radial-gradient(ellipse 62% 48% at 26% 16%, rgba(255,255,255,0.85), rgba(255,255,255,0) 68%);}
+
+.die-face-1{transform:translateZ(52px);}
+.die-face-6{transform:rotateY(180deg) translateZ(52px);}
+.die-face-3{transform:rotateY(90deg)  translateZ(52px);}
+.die-face-4{transform:rotateY(-90deg) translateZ(52px);}
+.die-face-5{transform:rotateX(90deg)  translateZ(52px);}
+.die-face-2{transform:rotateX(-90deg) translateZ(52px);}
+/* Les faces latérales reçoivent moins de lumière : sans cela, le cube s'aplatit. */
+.die-face-3, .die-face-4{filter:brightness(0.80);}
+.die-face-2, .die-face-5{filter:brightness(0.90);}
+.die-face-6{filter:brightness(0.70);}
+
+/* Points creusés : un trou, pas une pastille posée. L'ombre interne vient du haut, le
+   rebond de lumière du bas. */
+.die-pip{border-radius:50%; background:transparent;}
+.die-pip.on{background:radial-gradient(circle at 36% 30%, #4A443A, #17150F 72%);
+  box-shadow:inset 0 1.5px 2.5px rgba(0,0,0,0.85), 0 1px 0 rgba(255,255,255,0.62);}
+
+/* Valeur en chiffres sous le dé : le nombre de points se compte mal à deux dans le noir,
+   et c'est ce chiffre qui fait comprendre le produit annoncé. */
+.duel-value{flex-shrink:0; font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:500;
+  letter-spacing:0.12em; color:var(--text-faint); min-height:19px;
+  opacity:0; transition:opacity .25s ease;}
+.duel-value.shown{opacity:1;}
+.is-loser .duel-value{color:var(--clay);}
+.is-winner .duel-value{color:var(--accent);}
+
+/* --- Commandes : la même famille que partout ailleurs dans l'app -------------------- */
+.duel-footer{flex-shrink:0; display:flex; flex-direction:column; gap:9px;
+  padding:10px 18px calc(14px + env(safe-area-inset-bottom));}
+.duel-footer .footer-main{display:flex; gap:9px;}
+.duel-hint{text-align:center; font-size:12px; color:var(--text-faint); min-height:16px;}
+
+@media (prefers-reduced-motion: no-preference){
+  .die-3d{transition:transform .72s cubic-bezier(.17,.72,.2,1);}
+  .die-stage.tossing .die-shadow{transform:translateX(-50%) scale(0.6); opacity:0.45;}
+  .die-stage.tossing{animation:dieHop .72s cubic-bezier(.3,.05,.3,1);}
+  @keyframes dieHop{ 0%{transform:translateY(0)} 38%{transform:translateY(calc(-1 * var(--hop,12px)))} 100%{transform:translateY(0)} }
+  /* Révélation du verdict : une seule fois, sans clignotement. */
+  .duel-verdict.shown .duel-verdict-main{animation:verdictIn .34s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes verdictIn{ from{opacity:0; transform:translateY(7px) scale(0.94);} to{opacity:1; transform:none;} }
 }
-.die.rolling{animation:dieRoll 0.7s ease-out;}
+/* Réduction des animations : le dé se pose directement sur sa valeur. Le jeu reste
+   entièrement jouable et lisible — c'est le résultat qui compte, pas le tumble. */
+@media (prefers-reduced-motion: reduce){
+  .die-3d{transition:none;}
+}
+
+/* Petits écrans : le cube et les textes se resserrent pour que les deux moitiés et les
+   commandes tiennent sans jamais rogner le bas de l'écran. */
+@media (max-height:720px){
+  .duel-half{gap:10px;}
+  .die-stage{width:74px; height:74px; margin-bottom:10px; perspective:420px; --hop:8px;}
+  .die-face{border-radius:12px; padding:9px; gap:3px;}
+  .die-face::after{border-radius:12px;}
+  .die-face-1{transform:translateZ(37px);}
+  .die-face-6{transform:rotateY(180deg) translateZ(37px);}
+  .die-face-3{transform:rotateY(90deg)  translateZ(37px);}
+  .die-face-4{transform:rotateY(-90deg) translateZ(37px);}
+  .die-face-5{transform:rotateX(90deg)  translateZ(37px);}
+  .die-face-2{transform:rotateX(-90deg) translateZ(37px);}
+  .die-shadow{width:64px; height:11px; bottom:-11px;}
+  .duel-name{font-size:17px;}
+  .duel-value{font-size:13px; min-height:16px;}
+  .duel-verdict{min-height:28px;}
+  .duel-verdict-main{font-size:19px;}
+  .duel-seam-mark{width:32px; height:32px; font-size:15px;}
+  .duel-footer .ctrl{height:50px;}
+}

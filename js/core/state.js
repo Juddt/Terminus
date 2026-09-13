@@ -47,5 +47,11 @@ function goTo(name){
   // global là où l'écran propose déjà le sien (ex. le bouton son flottant pendant le
   // before, dont la barre supérieure porte déjà sa propre commande audio).
   const frame = document.getElementById('frame');
-  if(frame) frame.dataset.screen = name;
+  if(frame){
+    frame.dataset.screen = name;
+    // Un écran qui porte sa propre barre de commandes (le before, un mini-jeu) a déjà
+    // ses accès Accueil/son : le bouton flottant global y ferait doublon.
+    const own = document.querySelector('#screen-'+name+' .topbar, #screen-'+name+' .game-topbar');
+    frame.classList.toggle('has-own-topbar', !!own);
+  }
 }
