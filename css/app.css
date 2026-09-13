@@ -844,18 +844,12 @@
 .counter-value{flex:1; text-align:center; font-family:'Anton',sans-serif; font-size:29px; color:var(--text);}
 .counter-unit{font-family:'Work Sans',sans-serif; font-size:14px; font-weight:500; color:var(--text-dim);}
 
-/* Prénoms : une ligne par joueur, grande zone tactile, repère discret */
-.name-rows{display:flex; flex-direction:column; gap:8px;}
-.name-row{display:flex; align-items:center; gap:12px; background:var(--surface);
-  border:1px solid var(--line); border-radius:14px; padding:0 14px; min-height:54px;}
-.name-row:focus-within{border-color:var(--accent);}
-.name-row-dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
-.name-row-input{flex:1; min-width:0; background:none; border:none; outline:none;
-  color:var(--text); font-family:'Work Sans',sans-serif; font-size:16px; padding:15px 0;}
-.name-row-input::placeholder{color:var(--text-faint);}
+/* Pastille de couleur du joueur, réutilisée par le récapitulatif de fin de partie. */
+.name-row-dot{width:9px; height:9px; border-radius:50%; flex-shrink:0; display:inline-block;
+  margin-right:7px;}
 @media (prefers-reduced-motion: no-preference){
-  .name-row{animation:nameRowIn .22s cubic-bezier(.22,1,.36,1) both;}
-  @keyframes nameRowIn{ from{ opacity:0; transform:translateY(-6px);} to{ opacity:1; transform:none;} }
+  .pchip{animation:nameRowIn .22s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes nameRowIn{ from{ opacity:0; transform:scale(0.92);} to{ opacity:1; transform:none;} }
 }
 
 /* Action principale : fixée en bas, avec sa propre place réservée (jamais par-dessus
@@ -936,7 +930,32 @@
   white-space:nowrap;}
 .reuse-group:active{transform:scale(0.98);}
 
-/* Repère de saisie plus visible : le champ vide doit appeler à écrire */
-.name-row-input::placeholder{color:var(--text-faint); opacity:1;}
-.name-row{border-style:dashed;}
-.name-row:focus-within{border-style:solid;}
+/* --- LE GROUPE, EN PASTILLES -------------------------------------------------------
+   Une pile de champs pleine largeur, c'était un formulaire : on devait le lire ligne à
+   ligne. Les joueurs deviennent des pastilles côte à côte — avatar, couleur, prénom —
+   qu'on embrasse d'un regard. Le champ reste un vrai <input> (clavier, « Suivant »,
+   autocapitalisation), il a juste perdu sa boîte. */
+.name-rows{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
+.pchip{display:flex; align-items:center; gap:9px; min-width:0;
+  padding:7px 13px 7px 7px; border-radius:999px;
+  background:linear-gradient(150deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
+  border:1px solid var(--line); cursor:text;
+  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 4px 12px rgba(0,0,0,0.35);
+  transition:border-color .15s ease, box-shadow .15s ease;}
+/* Le focus allume la pastille dans la couleur du joueur : on sait qui on est en train
+   de nommer sans relire l'ordre des champs. */
+.pchip:focus-within{border-color:var(--pc);
+  box-shadow:0 1px 0 rgba(255,255,255,0.08) inset, 0 0 0 3px color-mix(in srgb, var(--pc) 22%, transparent);}
+.pchip-av{flex:0 0 auto; width:30px; height:30px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:15px; line-height:1;
+  background:color-mix(in srgb, var(--pc) 26%, #14140F);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--pc) 45%, transparent) inset;}
+.name-row-input{flex:1 1 auto; min-width:0; width:100%; background:none; border:none; outline:none;
+  padding:0; color:var(--text); font-family:'Work Sans',sans-serif; font-size:14.5px;
+  font-weight:600; letter-spacing:0.2px;}
+/* Repère de saisie : il annonce le prénom par défaut que le joueur aura vraiment
+   s'il laisse le champ vide — pas un « Prénom 1 » qui ne sert nulle part ensuite. */
+.name-row-input::placeholder{color:var(--text-faint); opacity:1; font-weight:500;}
+
+/* Au-delà de 8 joueurs les pastilles se resserrent plutôt que de déborder. */
+@media (max-width: 340px){ .name-rows{grid-template-columns:1fr;} }

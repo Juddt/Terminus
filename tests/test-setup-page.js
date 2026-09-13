@@ -80,7 +80,7 @@ store['soiree_last_players_v1']=JSON.stringify([{name:'Alice'},{name:'Bob'}]);
 vm.runInContext("nameDraft=[]; openSetupFor({type:'before',game:null})",ctx);
 const draftVide=vm.runInContext('JSON.stringify(nameDraft)',ctx);
 check('Aucun prénom prérempli', draftVide==='[]', draftVide);
-check('Repère "Prénom 1" présent', /placeholder="Prénom 1"/.test(els['name-rows'].innerHTML));
+check('Repère du prénom par défaut présent', /placeholder="Joueur 1"/.test(els['name-rows'].innerHTML));
 
 // 10. Reprise du groupe précédent sur demande explicite
 vm.runInContext('reusePreviousGroup()',ctx);

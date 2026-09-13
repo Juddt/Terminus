@@ -159,16 +159,20 @@ function renderNameRows(){
   let html = '';
   for(let i = 0; i < n; i++){
     const last = (i === n - 1);
+    // Une pastille par joueur plutôt qu'une pile de champs : on lit le groupe d'un coup
+    // d'œil au lieu de parcourir un formulaire. L'avatar et la couleur sont exactement
+    // ceux que collectPlayers() attribuera, donc ce qu'on voit ici est ce qu'on aura
+    // en jeu. Le repère du champ vide annonce le prénom par défaut réellement utilisé.
     html +=
-      '<div class="name-row">'+
-        '<span class="name-row-dot" style="background:'+PLAYER_COLORS[i % PLAYER_COLORS.length]+'"></span>'+
+      '<label class="pchip" style="--pc:'+PLAYER_COLORS[i % PLAYER_COLORS.length]+'">'+
+        '<span class="pchip-av">'+PLAYER_AVATARS[i % PLAYER_AVATARS.length]+'</span>'+
         '<input class="name-row-input" data-index="'+i+'" type="text" maxlength="16" '+
-          'value="'+escapeHtml(nameDraft[i] || '')+'" placeholder="Prénom '+(i+1)+'" '+
+          'value="'+escapeHtml(nameDraft[i] || '')+'" placeholder="Joueur '+(i+1)+'" '+
           'autocomplete="off" autocapitalize="words" '+
           // « Suivant » du clavier passe au champ suivant ; le dernier ferme le clavier.
           'enterkeyhint="'+(last ? 'done' : 'next')+'" '+
           'oninput="onNameInput(this)" onkeydown="onNameKey(event, this)">'+
-      '</div>';
+      '</label>';
   }
   wrap.innerHTML = html;
 }
