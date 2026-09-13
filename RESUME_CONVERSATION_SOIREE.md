@@ -1,561 +1,242 @@
-# Résumé conversation Soirée — Pour Claude Code
+# Soirée — état du projet
 
-> ⚠️ **CE DOCUMENT EST DÉPASSÉ.** Il a été écrit avant une refonte complète du before, de
-> la bibliothèque de jeux, de la page de réglages et de la direction artistique (palette
-> "carnet/ticket" puis thème sombre néon, toutes deux abandonnées depuis).
->
-> **Lis `HANDOFF_CLAUDE_CODE.md` à la place** — c'est le document de transition à jour.
-> Celui-ci est conservé uniquement comme trace historique de l'architecture d'origine
-> (moteur de contenu, système de tickets, principe des sacs mélangés) ; certains
-> mécanismes de bas niveau qu'il décrit existent encore, mais toute la partie
-> présentation/interface qu'il documente a été remplacée.
+Application web (PWA) de jeux de soirée, pensée pour **un seul téléphone posé au milieu
+de la table** pendant un before. Deux usages, deux entrées, pas plus :
 
-## Le projet
+- **Lancer le before** — l'app enchaîne toute seule des activités pendant 10, 30 ou 60 min.
+- **Choisir un jeu** — un des neuf mini-jeux, lancé directement.
 
-**Soirée** est une app mobile de jeux de soirée/alcool. Un seul téléphone posé au centre de la table agit comme maître du jeu. L'objectif est de devenir le leader premium en France face à des concurrents cheap (Picolo, TOZ, Chopine).
+Public : jeunes adultes. Univers : before électrique, nocturne, adulte.
 
-## Architecture actuelle
+---
 
-**Mono-fichier → Arborescence** : le projet est passé d'un `app-soiree-prototype-v2.html` (~3400 lignes) à une structure modulaire.
+## 1. Lancer et tester
 
-```
-index.html (532 lignes, structure HTML)
-├── css/
-│   ├── base.css (variable et resets)
-│   ├── app.css (screens, layout)
-│   ├── games-shared.css (styles jeux)
-│   └── games/ (CSS par jeu)
-│       ├── palmier.css, bus.css, cible.css, pmu.css, pof.css, dice.css
-│       ├── underdicateur.css, pilliers.css
-├── js/
-│   ├── core/
-│   │   ├── state.js, navigation.js, setup-wizard.js, session-engine.js
-│   │   ├── persistence.js (snapshot & reprise), history.js (Hall of Fame)
-│   │   ├── custom-content.js (mode perso), audio.js (module Sound synthétisé)
-│   │   ├── sober-mode.js (mode sans alcool), display-mode.js (mode TV)
-│   │   ├── share.js (lien + QR), recap-card.js (carte-souvenir)
-│   ├── data/
-│   │   ├── content.js (règles, défis, votes, moments, etc.)
-│   │   ├── games-catalog.js (métadonnées jeux)
-│   │   ├── underdicateur-words.js (200 paires de mots)
-│   ├── games/ (moteur par jeu)
-│   │   ├── shared-cards.js, palmier.js, bus.js, cible.js, purple.js, pmu.js, pof.js, des.js
-│   │   ├── underdicateur.js, pilliers.js
-│   ├── lib/
-│   │   └── qrcode.js (vendorisé, MIT)
-├── manifest.json (PWA)
-├── sw.js (service worker, network-first)
-├── icons/ (192×512 PNG)
+Aucun build, aucune dépendance pour l'app elle-même :
+
+```bash
+python3 -m http.server 8000      # puis http://localhost:8000
 ```
 
-## Architecture
+**Neuf suites de tests** (Node pur, aucune dépendance) :
 
-### Deux modes
-
-1. **Mode Rapide** — L'app pilote toute la soirée automatiquement
-   - Setup : nombre de joueurs → prénoms → durée (10/20/30/45/60 min) → intensité (Soft/Fun/Chaos)
-   - Enchaîne automatiquement : règles, défis, mini-jeux, votes, moments, événements spéciaux
-   - Timer global avec barre de progression
-   - Système anti-répétition par shuffle-bag
-   - Climax surprise (cul sec collectif) déclenché par timer caché
-   - Timer par item indicatif (ring ✓ quand fini), le joueur avance manuellement avec "Suivant"
-   - Boutons Pause et Suivant toujours visibles
-   - Recettes de contenu par durée (ex: 45min = 12 mini-jeux, 18 votes, 12 défis, etc.)
-
-2. **Mode Jeux** — Bibliothèque de 9 jeux interactifs + catalogue filtrable
-   - Chaque jeu : bouton "Jouer" (lance direct) + bouton "Règles" (fiche condensée)
-   - Bouton "?" en jeu pour voir les règles sans quitter la partie
-   - Bouton "Accueil" discret sur tous les écrans
-   - Filtre par catégorie (Adresse, Devinette, Bluff, Rapide)
-   - Tags difficulté (Facile, Modéré, Intense)
-
-### Les 7 jeux implémentés et testés
-
-#### 1. Le Palmier
-- 52 cartes, pioche + applique la règle + pose la carte en équilibre
-- **Règles** : As (cul sec/distribue), 2-3 (bois/donne), 4 (Floor), 5 (Sky), 6 (Valise), 7 (Maître Question persistant), 8 (distribue 8), 9 (J'ai jamais), 10 (Maître Freeze persistant), Valet (thème), Dame (tournée), Roi (invente règle, 4ème = cul sec)
-- **Jauge d'équilibre** : curseur oscillant, taper quand il est dans la zone verte. Vitesse constante par tour, augmente entre les tours. Zone rétrécit avec la difficulté. Départ gauche/droite aléatoire.
-- **Palmier visuel** : mini-cartes crème en éventail au-dessus d'une bouteille, avec jitter organique seeded. Toutes les cartes jouées restent visibles.
-- **Fin** : 5 chutes = perdu, ou toutes les cartes piochées = gagné (verre créateurs)
-- Header : badges [X cartes] [X/4 Rois] [X/5 chutes], pills Maître Question/Freeze
-
-#### 2. Le Bus
-- Phase 1 : 4 rounds par joueur (Rouge/Noir → Plus haut/Plus bas → Dedans/Dehors → Devine ♥♦♣♠)
-- Erreurs croissantes : 1, 2, 3, 4 gorgées
-- Phase 2 : le pire joueur monte dans le bus, 5 cartes face cachée, figure = boit et recommence
-
-#### 3. La Cible
-- 21 cartes en 4 cercles concentriques (10 + 6 + 4 + 1)
-- Extérieur : Rouge/Noir (1 gorgée), Cercle 2 : Pair/Impair (2), Cercle 3 : Symbole (3), Centre : Valeur exacte (5)
-- **Compteur cumulatif** : gagné = s'additionne, perdu = boit tout le compteur + la carte
-- Cartes spéciales (As, Roi, Dame, Valet, 7, 10) avec effets bonus
-- Layout circulaire CSS avec angles staggerés entre cercles
-
-#### 4. Purple
-- Prédire les couleurs des prochaines cartes : Rouge (2 rouges), Noir (2 noires), Purple (1+1), Double Purple (2+2), Triple Purple (3+3)
-- Compteur cumulatif comme La Cible
-
-#### 5. Le PMU (Course des As)
-- Phase paris : chaque joueur choisit un As (♥♦♣♠) et mise 1-5 gorgées
-- Course : on retourne des cartes, le symbole avance son As
-- 7 obstacles face cachée, se révèlent quand tous les As les dépassent → reculent un cheval
-- Premier As à la ligne d'arrivée gagne. Gagnants distribuent double, perdants boivent leur mise.
-
-#### 6. Duel de Dés
-- 2 joueurs, chacun lance un dé (vrais dés CSS avec points)
-- Le plus bas boit la multiplication des deux
-- Animation : faces aléatoires pendant 700ms puis résultat
-- Égalité = relance automatique (pas de gorgées)
-
-#### 7. Pile ou Face
-- **Mode Fun** : mise 1-3 gorgées, choisis Pile ou Face
-- **Mode Prison** : 5 manches obligatoires, 2 → 4 → 8 → 16 → cul sec
-- Pièce dorée 3D avec animation rotateY
-- Le perdant boit, le gagnant regarde
-
-#### 8. UnderDicateur
-`js/games/underdicateur.js` · `js/data/underdicateur-words.js` · `css/games/underdicateur.css`
-- 4 à 12 joueurs. Jeu social à rôles cachés (Undercover + un Dictateur aux pouvoirs secrets)
-- **Rôles** : Citoyens (le mot), Undercover (un mot très proche), Mister White (aucun mot)
-- **Dictateur** : tiré au hasard parmi *tous* les joueurs — il peut donc être un Citoyen
-  comme un imposteur. Pas de condition de victoire propre : il sert son camp d'origine
-- **Composition auto** selon l'effectif, toujours avec majorité citoyenne au départ :
-  4j → 3/1/0 · 6j → 4/1/1 · 8j → 5/2/1 · 12j → 8/3/1 (cit/UC/MW)
-- **Distribution** : le téléphone passe de main en main, chacun voit son rôle en secret
-- **Tour de table** : l'app affiche l'ordre, chacun dit un seul mot à l'oral.
-  Le premier à parler n'est jamais Mister White (il n'aurait aucun indice)
-- **Phase du Dictateur** : le téléphone refait un tour complet — tous les joueurs voient
-  exactement le même écran neutre, seul le Dictateur voit ses pouvoirs. L'effet n'est
-  annoncé qu'une fois le passage terminé, pour ne jamais trahir son identité
-- **Pouvoirs** (usage unique chacun) : Exécution (élimine, saute le vote) · Protection
-  (annule le vote sur une cible) · Distribution (3 gorgées) · Passer · Renoncer
-- **Vote** : le groupe pointe du doigt, on touche le nom de l'éliminé, son rôle est révélé
-- **Mister White éliminé** : dernière chance de deviner le mot des Citoyens
-  (comparaison tolérante : accents, casse et ponctuation ignorés)
-- **200 paires de mots** dans un sac persistant (`soiree_und_wordbag_v1`) : les 200 paires
-  défilent avant la moindre répétition, et le côté "mot des Citoyens" est tiré à pile ou
-  face à chaque partie, ce qui double la variété perçue
-- **Victoire** : Citoyens si tous UC+MW éliminés | Undercover si majoritaires | Mister
-  White s'il devine le mot
-
-### Compteur créateurs
-- Incrémenter à chaque fin de partie réussie (fin de jeu, fin de session Mode Rapide)
-- Affichage : "🥂 X verre(s) pour les créateurs du jeu"
-- Sauvegardé dans `creatorsGlasses` (global persistent)
-
-## Identité visuelle — « Le Confetti » (phase 4.1)
-
-Refonte complète : le fond sombre bois/cuir façon bar à cocktails (`#17120f`) lisait comme
-un template IA générique (voir revue plus bas). Nouvelle direction : un carnet de tickets
-papier — fond crème clair, chaque type de contenu (défi/vote/règle/mini-jeu/moment) a sa
-propre couleur de "ticket", perforations façon billet déchiré.
-
-### Palette actuelle (`css/base.css`, propagée via les mêmes variables CSS qu'avant — seules
-les valeurs changent, ~290 usages touchés sans renommage)
-```css
---bg: #F3EAD6            /* papier crème clair */
---surface: #ECDFC4
---surface-2: #E4D4B4
---accent: #E1502F        /* corail — CTA, éléments actifs */
---accent-bright: #EB6B4A
---accent-deep: #B23E22
---sage: #2E7D57          /* succès */
---clay: #C4342B           /* erreur + alarme Mode Chaos */
---text: #1E1A14           /* encre foncée */
---type-defi: #E1502F | --type-vote: #1D6E86 | --type-regle: #DA9A1F
---type-mini: #6A4A82 | --type-moment: #8A6DA8
---ink-on-light: #1E1A14 | --ink-on-dark: #FBF4E7
+```bash
+cd tests
+node test-full-boot.js            # charge les 31 scripts dans l'ORDRE RÉEL du HTML et
+                                  # joue une soirée entière sur les 3 durées
+node test-balance.js              # DOSAGE du contenu : vagues, variété, séries,
+                                  # plafond des règles, répartition, rappels
+node test-games.js                # conformité des mini-jeux à leurs règles et
+                                  # probabilités (120 000 lancers de dés, etc.)
+node test-scenes-and-progress.js  # scènes, chemin, commandes, prénoms, joueurs
+node test-content-engine.js       # moteur de contenu, trames, anti-répétition
+node test-setup-page.js           # page de réglages unique
+node test-screens.js              # convention des écrans (voir le piège n° 1)
+node test-navigation.js           # toute cible de goTo existe, tout onclick est déclaré
+node test-assets-and-cache.js     # cohérence index.html / disque / PRECACHE_URLS
 ```
-Couleur de texte du bouton primaire choisie après calcul de contraste WCAG réel (encre
-foncée sur corail ≈4.44:1, contre crème sur corail ≈3.56:1) — ni l'un ni l'autre ne passe
-un AA propre en petit texte, l'encre foncée est le compromis le moins pire.
-
-### Cartes à jouer / pièce / palette gold — restées intentionnellement inchangées
-Couleurs "réalistes" indépendantes du thème, comme avant : cartes crème `#f6f1e7`/rouge
-`#a82020`/noir `#1a1a1a`, dégradé de la pièce dorée `#d4a44a→#967034`. Ce sont des objets
-physiques réels, pas des éléments de thème.
-
-### Typographie
-- Display : **Unbounded** (700-800, sans display)
-- Body : **Work Sans**
-- Utilitaire/mono : **IBM Plex Mono** (numéros de ticket, labels)
-- (Fraunces/Inter entièrement retirés — voir bug ci-dessous)
-
-### Signature : le ticket
-- `#screen-main[data-type]` pilote la couleur de fond/texte du ticket principal selon le
-  type de contenu en cours (`EYEBROW_TO_TYPE` dans `session-engine.js`)
-- Perforations (`::before`/`::after` ronds couleur fond) en haut/bas du ticket
-- Numéro de ticket réel tiré de l'état de session : `N° 0XX / YYY` (`state.queueIndex` /
-  `state.typesQueue.length`)
-
-### Confetti (`js/core/confetti.js`, nouveau)
-Canvas vanilla, particules = rectangles colorés (un ticket miniature par couleur de type),
-gravité + rotation + fade. Trois déclencheurs réels : `markChallengeResult(true)` (petit),
-`fireClimax()` (grand), `endSession()` (énorme). Respecte `prefers-reduced-motion` (aucune
-particule si l'utilisateur l'a demandé).
-
-### Mode Chaos plus agressif (`intensityValue >= 85`)
-Classe `chaos-mode` sur `#frame` (posée dans `launchSession`/`resumeSession`, retirée dans
-le handler Accueil et `endSession`) :
-- Liseré marquee zébré alarme haut/bas de l'écran (`hazardMarch`, désactivé si
-  `prefers-reduced-motion`)
-- Ticket "Défi" forcé en rouge alarme `--clay`, texte en capitales, pulsation de
-  box-shadow (`chaosPulse`)
-- Anneau de progression (`ring-fg`) forcé en `--clay`
-- Vibration plus insistante sur les défis
-
-### Boutons et surfaces
-- Boutons : border-radius 16px · Game cards : 18px · Mode cards : 10px (ticket)
-- Mode card primaire : fond `--accent` plein
-- Ticket principal : coins arrondis 16px, perforations 22px
-
-### Bug trouvé en QA après la refonte : styles inline JS oubliés
-Le premier passage de refonte n'a couvert que les fichiers `.css` (sed sur `Fraunces`/
-`Inter`/couleurs crème hardcodées). Les templates `innerHTML` de 8 jeux (`des.js`, `pmu.js`,
-`pof.js`, `purple.js`, `bus.js`, `cible.js`, `palmier.js`, `pilliers.js`) et
-`recap-card.js` (canvas) contenaient encore des styles inline en dur (`font-family:
-Fraunces,serif`, `color:rgba(244,236,226,0.5)` etc.) — invisibles ou quasi sur le nouveau
-fond clair, police retombant silencieusement sur le fallback système. Corrigé (police →
-Unbounded/Work Sans, couleurs crème → `var(--text-dim)`/`var(--text-faint)`/équivalents
-encre foncée), sauf les couleurs volontairement réalistes (pièce dorée, bouton noir/rouge
-du jeu Purple). `CACHE_NAME` du service worker bumpé en conséquence (`v13`).
-
-## Navigation
-
-- `goTo(name)` → active `screen-{name}`
-- Chaque jeu : `screen-{id}-setup` → `screen-{id}`
-- Overlay de règles : `showRulesOverlay(gameId)` / `closeRulesOverlay()`
-- Bouton Accueil discret sur tous les écrans de jeu
-- Le back des setups ramène à la liste des jeux
-
-## Nouvelles features (branche `feature/soiree-plus`)
-
-### PWA & Offline
-- `manifest.json` : app installable sur home screen, thème dark
-- `sw.js` : service worker network-first (mise à jour dès que connecté)
-- Icônes 192×512 PNG
-- Fonctionnement hors-ligne complet
-
-### Persistance & Reprise
-- `persistence.js` : snapshot localStorage (sauvegarde auto pendant une soirée)
-- Banner "Soirée en cours · X joueurs · ~Y min restantes" sur l'accueil
-- Boutons "Reprendre" / "Ignorer"
-- Timeout 3h (abandon auto si vieille session)
-
-### Historique cross-session
-- `history.js` : records persistés (nb joueurs, durée, gagnants, total verres)
-- Hall of Fame : classement cumulatif par joueur
-- Écran Historique (accueil) → récap global + leaderboard
-- Effacer l'historique (confirmation)
-
-### Avatars & Identité visuelle
-- `setup-wizard.js` : emoji avatar par joueur, cliquable pour cycler (🍹 🎲 🃏 🥂, etc.)
-- Avatar badge affiché partout (setup, jeu, recap, historique)
-- Couleur propre par joueur (hsl séquentiel)
-
-### Carte-souvenir partageable
-- `recap-card.js` : canvas avec logo + joueurs + gagnants + stats
-- Télécharger en PNG
-- Partager via `navigator.share()` (WhatsApp, etc.)
-- Écran dédié après fin de soirée
-
-### Partage de configuration
-- `share.js` : générer un lien avec préremplissage (joueurs, durée, intensité)
-- QR code (qrcode.js vendorisé)
-- Copier le lien ou scannez le QR
-
-### Confort utilisateur
-- `feedback.js` : toggles Son/Vibration, persistés en localStorage
-- `sober-mode.js` : affichage "Verre" → "Point" (même mécanique, pas d'alcool)
-- `display-mode.js` : Mode TV/Grand écran (titre +25% size, lisible à 5m)
-- Boutons toggles sur accueil
 
-### Contenu personnalisé (mode solo)
-- `custom-content.js` : ajouter ses propres règles/défis (tiered Soft/Fun/Chaos)
-- Accueil → "Mes ajouts"
-- Sauvegardé localement, inclus dans les sessions futures
-
-### Tracking par joueur (fin de session)
-- Stats par joueur : défi(s) réussi(s), verres bus
-- Podium MVP (plus challenge) / Plus tranquille (0 challenge)
-- Affichage "Par joueur" : défi ✓, verres 🍷
-
-## Contenu Mode Rapide
-
-447 items, tous tiered 0/1/2 (Soft / Fun / Chaos) :
-
-| Type | Total | Soft (t0) | Fun (t1) | Chaos (t2) |
-|---|---|---|---|---|
-| Règles | 89 | 30 | 39 | 20 |
-| Défis | 94 | 28 | 32 | 34 |
-| Votes | 100 | 36 | 24 | 40 |
-| Mini-jeux | 65 | 20 | 19 | 26 |
-| Moments légers | 49 | 14 | 19 | 16 |
-| Événements spéciaux | 38 | 10 | 14 | 14 |
-| Climax | 12 | — | — | — |
-
-### Le curseur d'intensité choisit une fenêtre, pas un plafond
-
-`filterByTier()` gardait `tier <= limite`. En Chaos, le sac contenait donc **aussi tout
-le tier 0** : l'app servait encore « trinquez avant chaque gorgée » entre deux
-confessions, et l'intensité ne montait jamais vraiment. Chaque cran exclut maintenant ce
-qui est devenu trop tiède (`tierWindow()` dans `session-engine.js`) :
-
-| Curseur | Tiers servis | Registre |
-|---|---|---|
-| 0-29 % | 0 | Soft seul |
-| 30-59 % | 0-1 | Soft + Fun |
-| 60-84 % | 1-2 | Fun + Chaos |
-| 85-100 % | **2 seul** | Chaos pur |
-
-Repli automatique sur le plafond seul si un stock personnalisé est trop maigre pour tenir
-la soirée dans la fenêtre — mieux vaut du hors-registre qu'une répétition toutes les cinq
-minutes.
-
-### Dimensionnement
-
-Une session de 60 min tire 80 items. Chaque fenêtre est calibrée pour l'absorber **sans
-une seule répétition** — vérifié en rejouant les quatre intensités par le vrai moteur.
-Avant la phase 1.4, une session Soft tirait 24 votes dans un stock de 10.
-
-### Registre du tier 2
-
-Aveux, révélations de téléphone, verdicts de groupe, classements à voix haute, questions
-sans droit de refus. Volontairement hors périmètre : escalade de consommation au-delà du
-cul sec déjà présent, contenu sexuel explicite, et gages irréversibles ou humiliants
-au-delà de la soirée.
-
-### Notes techniques
-
-- Les défis ciblent 1 ou 2 joueurs via `{p1}` / `{p2}`, remplis par `fillTemplate()`.
-  Les mini-jeux n'ont pas de champ `n` : le moteur déduit le nombre de joueurs à tirer
-  des marqueurs présents dans le texte.
-- Le mode sans alcool (`soberize()`) traite les locutions verbe + « cul sec » / « gorgée »
-  avant leurs sous-mots, sinon les deux moitiés sont remplacées séparément et le rendu
-  donne « fait un gage une point de gage ». Les 447 items ont été passés au filtre.
-- Recettes par durée : 10/20/30/45/60 min (voir `RECIPES`).
-
-## Revue de code (phase 2.1)
-
-Cinq défauts trouvés et corrigés. Trois ont été reproduits dans le navigateur avant
-correctif, puis re-testés après.
-
-### 1. Exécution de script via un lien de partage — critique
-
-`applySharedConfigFromUrl()` reprenait les prénoms de `?c=<base64>` sans aucune
-validation, et `renderChips()` les concaténait dans du `innerHTML`. Un lien fabriqué
-exécutait donc du JS dans l'origine de l'app — et le lien de partage est justement fait
-pour être envoyé à des gens. L'URL étant nettoyée juste après, la victime ne voyait rien.
-
-Deux chemins de persistance existaient : le prénom du MVP part dans l'historique (Hall of
-Fame) et les règles perso sont relues depuis `localStorage`, tous deux rendus en
-`innerHTML`.
-
-**Correctif** — validation à la source (coercition en chaîne, 24 caractères et 12 joueurs
-maximum, entrées vides écartées) *et* `escapeHtml()` sur les 16 points d'insertion de
-texte utilisateur. Défense en profondeur : ni l'un ni l'autre seul.
-
-### 2. Le bouton « Accueil » d'un jeu ne coupait rien — élevé
-
-Chaque écran de jeu a deux sorties côte à côte : « Quitter » appelait bien `palmierQuit()`
-/ `pilQuit()`, « Accueil » appelait `goTo('home')` brut. La boucle de balance du Palmier
-(16 ms, soit 60 fps) continuait donc à tourner et à écrire dans le DOM jusqu'à la
-fermeture de l'onglet — sur un téléphone en soirée, c'est de la batterie pour rien.
-
-**Correctif** — `goTo()` exécute le nettoyage déclaré par l'écran qu'on quitte
-(`registerScreenCleanup`). Une seule place à tenir à jour au lieu de neuf écrans. L'écran
-de session (`main`) n'en déclare volontairement pas : `openPause()` passe par `goTo()` et
-l'horloge doit survivre à l'aller-retour.
-
-### 3. Double-tap sur « Reprendre » : horloge à 2× — élevé
-
-`resumeSession()` et `startMainLoop()` posaient un `setInterval` sans couper le précédent.
-Deux appels rapprochés faisaient tourner la soirée deux fois trop vite, et l'orphelin
-survivait à `clearInterval(state.globalInterval)` puisque seul le dernier handle était
-mémorisé — un `tickGlobal` fantôme finissait par déclencher `endSession()` depuis
-l'accueil.
-
-**Correctif** — `clearInterval` systématique avant de reposer l'intervalle.
-
-### 4. `localStorage` non protégé — moyen
-
-Trois écritures et trois lectures sans `try/catch` (`audio.js`, `display-mode.js`,
-`sober-mode.js`). En navigation privée iOS, `localStorage` *lève* au lieu de renvoyer
-`null` : l'exception coupait la suite de la fonction et les bascules son / mode TV / sans
-alcool paraissaient mortes. Pour le son, c'était le pire cas : on appuie sur muet, rien ne
-se passe et l'ambiance continue.
-
-**Correctif** — gardes sur les six accès. Les sept chemins de stockage ont été rejoués
-avec un `localStorage` qui lève systématiquement.
-
-### 5. Le service worker mémorisait les erreurs — moyen
-
-Le handler `fetch` mettait en cache *toute* réponse, sans tester `response.ok`. Un 404 ou
-un 502 servi pendant un déploiement devenait la version « hors ligne » de la ressource,
-définitivement. Et `caches.match()` renvoie `undefined` sur un miss, ce qui fait lever
-`respondWith()` au lieu d'afficher quelque chose.
-
-**Correctif** — `response.ok` avant mise en cache, `event.waitUntil` autour de l'écriture,
-et une vraie réponse 503 en repli. `CACHE_NAME` en v8.
-
-## Conformité légale (phase 3.1)
-
-`js/core/legal.js` · écrans `screen-age` et `screen-legal`
-
-### Barrière d'âge
-Premier écran au tout premier lancement, mémorisée dans `soiree_age_ok_v1`. Le refus
-mène à une impasse sans bouton de retour. Elle passe **avant** la config partagée et la
-reprise de soirée ; `confirmAge()` les rejoue ensuite, sinon un lien de partage ouvert au
-premier lancement perdait sa configuration.
-
-**C'est une déclaration, pas une vérification.** Rien n'empêche de recharger en répondant
-autrement. C'est le standard du secteur, pas un contrôle.
-
-### Message sanitaire
-« L'abus d'alcool est dangereux pour la santé. À consommer avec modération. »
-Formulation de l'article L3323-4 du code de la santé publique, imposée au mot près :
-elle vit dans une constante unique (`MESSAGE_SANITAIRE`) pour qu'aucune copie ne dérive.
-Affichée à trois endroits — barrière d'âge, pied des informations légales, et fin de
-soirée, le moment où le groupe a le plus bu.
-
-### Données personnelles
-Position favorable : **rien ne quitte l'appareil**. Pas de compte, pas de serveur, pas de
-mesure d'audience, pas de publicité. Les 8 clés de stockage servent uniquement au
-fonctionnement du jeu, ce qui relève de l'exemption de consentement de l'article 82 de la
-loi Informatique et Libertés — d'où l'absence de bandeau cookies, qui serait ici sans
-objet.
-
-Une exception documentée : le lien de partage encode les prénoms dans l'URL. S'il est
-envoyé, ils transitent par la messagerie utilisée.
-
-Bouton **Effacer toutes mes données** : confirmation en deux temps, supprime les 8 clés
-Soirée et rien d'autre (jamais un `localStorage.clear()`, qui emporterait ce qui ne nous
-appartient pas).
-
-### À compléter avant mise en ligne
-Cinq marqueurs `[À COMPLÉTER]` dans `LEGAL_SECTIONS` : identité de l'éditeur, directeur
-de la publication, adresse e-mail de contact (×2) et date de mise à jour. L'article 6-III
-de la LCEN les rend obligatoires pour un service en ligne accessible au public.
-
-### Réserve
-Ces textes sont une base sérieuse, pas un avis juridique. La loi Évin encadre étroitement
-tout ce qui touche à la promotion de l'alcool en France ; une relecture par un juriste est
-justifiée avant un lancement commercial ou toute campagne de communication.
-
-## État du projet
-
-### ✅ Fait (main branch)
-- Phase 0.1 : merge branche jami + refonte minimaliste accueil
-- Phase 0.2 : validation 7/7 jeux + Mode Rapide complet (aucune régression)
-- Phase 1.1 : UnderDicateur implémenté (moteur, 200 paires de mots, catalogue, précache)
-- Phase 1.4 : contenu Mode Rapide porté à 447 items + fenêtres d'intensité (Chaos = tier 2 pur)
-- Phase 2.1 : revue de code — 5 défauts corrigés (XSS lien de partage, fuites de timer, localStorage, SW)
-- Phase 3.1 : barrière 18+, message sanitaire, mentions légales, confidentialité, CGU
-- Toutes les features PWA + persistance + historique + avatars + partage
-- Phase 4.1 : refonte visuelle complète « Le Confetti » (palette ticket/papier, typographie
-  Unbounded/Work Sans/IBM Plex Mono, confetti canvas sur 3 déclencheurs réels, Mode Chaos
-  visuellement agressif) + QA complète (5 types de ticket, climax, fin de session, 9 jeux,
-  écrans wizard) + correctif des styles inline JS oubliés lors du premier passage
-
-### 🔨 À faire
-- **Phase 2.2** : appliquer la DA minimaliste aux écrans récents (historique, récap, partage, mes ajouts) — le récap (`recap-card.js`) garde volontairement sa propre palette sombre "poster", seule la police a été mise à jour
-- **Phase 3.3** : décision React Native / Expo vs PWA
-
-### Prochaines phases (post-MVP)
-1. **React Native / Expo** migration (animations Reanimated/Skia, native feel)
-2. **Monétisation** freemium via RevenueCat
-3. **Lancement** via BDE/réseaux étudiants français
-
-## Fichiers de référence actuels
-
-- `index.html` — structure principale
-- `js/core/` — moteurs (session, wizard, persistence, historique, etc.)
-- `js/games/` — jeux individuels
-- `js/data/content.js` — toutes les règles/défis/votes/moments
-- `js/data/games-catalog.js` — métadonnées jeux + filtres
-- `sw.js` — service worker (précache, network-first)
-- `.claude/launch.json` — config lancement local (`/run`)
-
-## Phase 5 — Accueil à deux choix, intensité automatique, trames variées
-
-### Décisions produit appliquées
-- Accueil réduit à deux cartes dominantes : **Lancer une soirée** (ex-Mode Rapide) et
-  **Choisir un jeu** (ex-Mode Jeux). Éléments secondaires (Historique, Mes ajouts, Sans
-  alcool, Infos légales) inchangés mais visuellement toujours en retrait.
-- Durées limitées à **10 / 30 / 60 min** (20 et 45 supprimées).
-- **Étape "ambiance" (Soft/Fun/Chaos) supprimée du wizard** : le parcours est maintenant
-  Joueurs → Prénoms → Durée → Lancer. L'intensité est désormais pilotée par le moteur
-  lui-même, phase par phase, au fil de la soirée (voir plus bas).
-- Joueurs de la dernière soirée réutilisables en un clic à l'étape des prénoms
-  (`soiree_last_players_v1`).
-- Écran de fin : boutons **Rejouer** (même config), **Changer la durée** (garde les
-  joueurs), **Choisir un jeu**, plus le partage du récap et un retour Accueil discret.
-- Cartes du catalogue de jeux : principe (1-2 lignes) + matériel nécessaire toujours
-  visibles (valeur par défaut "Aucun — tout est dans l'appli" si non renseigné dans
-  `games-catalog.js`).
-
-### Refonte du moteur Mode Rapide (`session-engine.js`, `content.js`)
-- **RECIPES (un seul dosage fixe par durée) remplacé par STRUCTURES** : plusieurs trames
-  par durée (2 pour 10 min, 3 pour 30 min, 2 pour 60 min), chacune découpée en phases
-  (part de temps + fenêtre de tiers + poids par type de contenu). La trame est tirée au
-  sort à chaque lancement en excluant la dernière utilisée pour cette durée
-  (`soiree_last_structure_v1`), et le contenu à l'intérieur de chaque phase est mélangé
-  indépendamment à chaque fois — deux soirées de même durée ne se ressemblent jamais.
-- **Intensité automatique** : `state.intensityValue`/`tierWindow()` ne dépendent plus
-  d'un curseur choisi une fois pour toutes, mais de la phase en cours
-  (`updateIntensityForIndex`), recalculée à chaque item. Une phase peut délibérément
-  redescendre en tier pour créer une respiration (trames "montagnes russes"/"grand
-  soir"), ce qui fait aussi varier le rythme (`speedFactor`) et le mode Chaos visuel.
-- **Historique de contenu persistant** (`soiree_used_<type>_v1`, un principe déjà
-  éprouvé sur le sac de mots d'UnderDicateur) : remplace l'ancien sac-mélangé remis à
-  zéro à chaque lancement. Un item n'est jamais reservi tant que tout le contenu
-  actuellement éligible n'a pas été vu une fois — y compris le texte du climax final.
-  Fonctionne avec une fenêtre de tiers qui change en cours de soirée (contrairement à
-  l'ancien sac, figé pour toute la session).
-- **Participation équilibrée** : `pickPlayers()` favorise désormais les joueurs les
-  moins ciblés jusque-là dans la soirée (avec un peu de hasard dans ce sous-groupe),
-  au lieu d'un tirage uniforme.
-- **Adaptation au nombre de joueurs** (`applyPlayerCountBias`) : votes moins fréquents à
-  2-3 joueurs (majorité triviale) au profit des défis/duels ; votes et moments collectifs
-  favorisés à 9 joueurs et plus.
-- **Finale garantie et fin non abrupte** : le climax est désormais systématiquement le
-  tout dernier item de la file (plus de recherche/échange approximatif dans la seconde
-  moitié). Si le minuteur global arrive à zéro pendant qu'un item est affiché, la
-  soirée ne se coupe plus au milieu : `state.timeUp` attend que le joueur avance
-  lui-même (bouton Suivant/Fait/Raté) avant de conclure, avec une grâce de secours de
-  20s si personne ne touche plus à rien.
-- **Anti-répétition de courtes séries** (`breakUpRuns`) : casse les suites de 3 activités
-  identiques d'affilée à l'intérieur d'une même phase.
-
-### Vérifications effectuées
-- `node --check` sur les ~30 fichiers JS du projet (aucune erreur de syntaxe).
-- Script Node (`test-engine.js`, hors du dépôt) simulant `buildStructuredQueue` +
-  `drawFromBag` + `pickPlayers` sur 3 durées × 5 effectifs (2 à 14 joueurs) × 8 tirages
-  = 120 combinaisons, sans DOM réel : aucune erreur, climax toujours en dernière
-  position, aucune répétition prématurée sur 200 tirages de vote consécutifs, aucune
-  répétition de trame sur 20 lancers consécutifs par durée.
-- Tous les fichiers référencés par `index.html`/`manifest.json` vérifiés répondants
-  (200) via un serveur local.
-- Relecture CSS ciblée : un bug déjà rencontré ailleurs dans le projet (`width:100%`
-  combiné à `flex:1` sur un bouton) a été retrouvé et corrigé sur la nouvelle rangée de
-  boutons de fin de soirée avant qu'il ne cause le même souci.
-- `sw.js` bumpé en v15 (accueil, wizard, moteur et fin de soirée ont tous changé).
-
-### Hors ligne / en ligne
-- Tout Mode Rapide + les 9 jeux (y compris Les Pilliers en local, passation d'un seul
-  téléphone) fonctionnent 100% hors ligne une fois l'appli chargée une première fois
-  (service worker network-first, voir sw.js).
-- Seule la variante **Pilliers en ligne** (`pilliers-online/`, un téléphone par joueur)
-  nécessite une connexion : elle repose sur Firebase Realtime Database, une origine
-  différente que le service worker laisse volontairement passer sans interception
-  (voir le garde-fou d'origine dans le handler `fetch` de `sw.js`).
-
-### Restant / limites connues
-- Reprise de session (`persistence.js`) : une snapshot sauvegardée avant cette phase 5
-  (ancien format sans `queueTierWindows`/`timeUp`) ne sera pas restaurée correctement
-  si elle traîne encore en localStorage au moment de la mise à jour — cas limite, sans
-  risque de plantage grâce aux valeurs de repli déjà en place, juste une reprise qui
-  redémarrerait à une intensité par défaut.
-- Les moyennes de durée par type (`AVG_DURATION`) servent uniquement au dosage du
-  nombre d'items par phase ; le rythme réel dépend toujours de la vitesse du groupe
-  (avance manuelle), pas d'un minutage strict par item.
+**Lancer les neuf avant et après toute modification.** Trois d'entre elles existent
+parce qu'un bug réel est passé entre les mailles des autres — voir « Pièges » plus bas.
+
+**Il y a un navigateur dans cet environnement** : `playwright` + Chromium sont
+disponibles (`executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'`).
+Des tests verts ne prouvent pas que l'interface fonctionne : **plusieurs bugs majeurs de
+cette passe n'étaient visibles qu'à l'écran** (un écran qui en recouvrait un autre, une
+partie bloquée en réduction d'animations). Ouvrez l'app, jouez une soirée, cliquez.
+
+---
+
+## 2. Architecture
+
+HTML/CSS/JS **vanilla**, sans framework, sans bundler. Tous les `<script>` sont chargés
+séquentiellement dans `index.html`, dans un ordre dont dépendent certaines définitions.
+Si vous ajoutez un fichier : `index.html` **et** `PRECACHE_URLS` de `sw.js`
+(test-assets-and-cache.js le vérifie).
+
+```
+index.html                  Tous les <div class="screen">, chargés d'un coup (pas de router)
+css/fonts.css               Polices auto-hébergées (fonts/, 208 Ko)
+css/base.css                Variables (palette), reset, famille de boutons
+css/app.css                 Accueil, réglages, before, bibliothèque, scènes
+css/games-shared.css        Vêtement commun des jeux + carte à jouer + composant secret
+css/games/*.css             Un fichier par mini-jeu
+js/data/content.js          Contenu du before + STRUCTURES (les trames de soirée)
+js/data/games-catalog.js    GAMES : les neuf jeux (nom, règles, bornes, startFn)
+js/data/game-art.js         Silhouettes SVG (utilisées dans l'index compact)
+js/data/game-posters.js     Affiches de la bibliothèque : l'objet réel de chaque jeu
+js/core/state.js            L'objet `state` global + goTo()
+js/core/session-engine.js   Le moteur : file, tirage, règles, rappels, commandes
+js/core/scenes.js           Les compositions du before + le chemin (module Trail)
+js/core/setup-wizard.js     La page de réglages unique (partagée before / jeux)
+js/core/navigation.js       La bibliothèque
+js/core/persistence.js      Sauvegarde et reprise de session
+js/games/shared-cards.js    Paquet de 52 cartes, carte à jouer, composant SECRET
+js/games/*.js               Un fichier par mini-jeu
+tests/*.js                  Les neuf suites
+sw.js                       Service worker — PENSEZ À BUMPER CACHE_NAME
+```
+
+---
+
+## 3. Direction artistique
+
+- Fond charbon `--bg:#0D0D0D`, **jaune acide** `--accent:#E8FF3D` en signature, blanc
+  chaud `--text:#FFF8ED`.
+- **Une seule couleur secondaire**, `--clay:#FF3B5C` (rose vif), réservée aux moments
+  spéciaux, aux surprises et aux pertes. Discipline volontaire : ne pas l'étendre.
+- Typographie : `Anton` (titres), `Work Sans` (lecture), `IBM Plex Mono` (compteurs).
+  **Auto-hébergées** : hors connexion, les requêtes vers fonts.googleapis échouaient et
+  toute la direction typographique tombait avec.
+- **Une seule famille de boutons** dans toute l'app : rectangle aux angles modérément
+  arrondis (15 px), contour fin, relief par liseré clair et ombre portée. Pas de pilules.
+- Jamais de couleur en dur : tout passe par les variables de `css/base.css`.
+- Aucune animation permanente ni stroboscopique ; `prefers-reduced-motion` respecté
+  partout — et **testé**, parce qu'il a déjà bloqué une partie.
+
+---
+
+## 4. Le before
+
+### L'écran
+
+Une barre en haut (Accueil · Ajouter des joueurs · son), la scène au centre, les
+commandes en bas — toujours à la même place, jamais recouvertes. **Le temps restant
+n'est affiché nulle part** : le chemin est le seul indicateur de progression globale.
+Un minuteur de manche n'apparaît que si la consigne impose réellement un délai.
+
+### Le chemin (`Trail`, dans `scenes.js`)
+
+Trois choses **volontairement séparées** :
+
+1. **la progression réelle** — dérivée du temps activement joué, monotone (tout recul
+   est refusé), figée pendant les pauses ;
+2. **le déplacement du décor** — le repère reste à hauteur fixe, c'est le paysage qui
+   défile ;
+3. **les effets de catégorie** — de brèves signatures lumineuses (défi, duel, vote,
+   règle, surprise, collectif, finale) qui n'écrivent **jamais** sur 1 ni sur 2.
+
+Le tracé est construit une seule fois par session. Aucun changement de catégorie ne peut
+le reconstruire, le faire sauter ni le remettre à zéro.
+
+### Les familles de contenu
+
+Six d'origine (règles, défis, mini-jeux, votes, moments, événements) **et huit ajoutées**,
+chacune avec sa mécanique, donc sa scène et ses commandes :
+
+| Famille | Mécanique |
+|---|---|
+| Quiz | une vraie réponse, révélée après le débat |
+| Dilemme | deux options de même poids, la minorité s'explique |
+| Mission secrète | lue sous le doigt, rappelée quelques manches plus tard |
+| Prédiction | posée maintenant, tranchée plus tard |
+| Destins liés | deux joueurs attachés, la conséquence devient une règle |
+| Barman | création collective autour d'un rôle tournant |
+| Tribunal | l'accusé, le jury, acquitté ou coupable |
+| Roulette | le prénom défile à l'écran et se pose |
+
+**538 items**, chaque famille couvrant les trois tiers d'intensité.
+
+### Les règles
+
+Au plus **4 en vigueur**, chacune avec une durée de vie, **levée explicitement** par une
+manche dédiée (une contrainte qui disparaît en silence laisse le groupe dans le doute).
+Deux règles marquées du même `conflict` ne coexistent jamais.
+
+### Le rythme
+
+Dix trames (3 / 4 / 3 selon la durée), toutes avec au moins une **respiration** — un
+creux d'intensité franc, sans quoi la soirée grimpe tout droit et s'aplatit. La file est
+construite sans série de trois items identiques, et le contenu de secours (file épuisée)
+puise dans huit familles en écartant les deux dernières servies.
+
+---
+
+## 5. Les neuf mini-jeux
+
+Tous passent par **la même page de réglages** que le before (bornes lues dans le champ
+`joueurs` du catalogue) et démarrent via `launchFromSetup()` → `startFn`. Tous partagent
+la même barre, le même plateau et les mêmes boutons. Ce qui les distingue est leur
+**mécanique**, pas leur habillage.
+
+| Jeu | Signature |
+|---|---|
+| Le Duel de Dés | face-à-face, cubes 3D à six faces, verdict par moitié d'écran |
+| Pile ou Face | une pièce cylindrique avec sa **tranche** de 36 segments |
+| Purple | le paquet contre la cagnotte, cartes retournées **une par une** |
+| Le Bus | une montée en quatre paliers, puis un couloir de cinq cases |
+| La Cible | un plateau feutré, la visée reste à l'écran, puis l'impact |
+| Le PMU | quatre couloirs, les as **glissent** — on voit les dépassements |
+| Le Palmier | une bouteille, les cartes rayonnent, et la tour s'écroule vraiment |
+| UnderDicateur | le mot sous voile opaque, lu sous le doigt |
+| Les Pilliers | le rôle sous voile opaque, la couleur du camp après ouverture |
+
+**Les règles et les probabilités sont inchangées** et vérifiées par `test-games.js`.
+
+### Le composant « secret » (`shared-cards.js`)
+
+Sur un téléphone qui circule, afficher un rôle dès qu'on touche l'écran suffit à ce que
+le voisin le lise. Le secret reste donc sous un **voile opaque** (pas un flou, qui se
+devine encore) et ne s'ouvre que **tant qu'un doigt reste appuyé**. Le bouton « suivant »
+est désactivé tant qu'il n'a pas été consulté. Sert aussi aux missions secrètes du before.
+
+---
+
+## 6. La bibliothèque
+
+Chaque jeu est présenté par **son objet réel** (`game-posters.js`), celui-là même qu'on
+manipulera en jouant, posé dans une scène avec sol, lumière rasante et ombre de contact.
+Pas d'icônes dessinées à part : la bibliothèque tient ainsi une promesse exacte, les
+objets sont nets à toutes les densités, et une retouche du jeu se répercute sur l'affiche.
+
+---
+
+## 7. Pièges — chacun a coûté un bug réel
+
+1. **`#id{display:…}` bat `.screen{display:none}`.** Écrire `#screen-xxx{display:flex}`
+   laisse l'écran affiché EN PERMANENCE par-dessus tous les autres. Symptôme trompeur :
+   le DOM de l'écran attendu est correct, son `innerText` aussi, mais on ne voit qu'un
+   écran vide. Toujours scoper à `.active`. → `test-screens.js`.
+2. **`cache.addAll` est atomique.** Une seule URL absente de `PRECACHE_URLS` fait échouer
+   l'installation du service worker, et tout le mode hors connexion avec, sans message.
+   → `test-assets-and-cache.js`.
+3. **L'ordre scène → commandes.** Une scène qui débloque son bouton principal doit le
+   faire APRÈS `renderMainFooter` (voir `afterSceneRendered`). Sinon le bouton naît
+   désactivé — ce qui a bloqué toute partie en réduction d'animations.
+4. **Mélanger puis rapiécer ne marche pas.** L'ancien casseur de séries permutait avec un
+   item situé juste avant, qu'il venait d'y déplacer, et remettait la série en place.
+   La file est désormais construite sans série. → `test-balance.js`.
+5. **`window.fireConfetti = …` ne crée pas de global `fireConfetti`.** Garder le préfixe
+   `window.`.
+6. **`localStorage` lève en navigation privée iOS.** Toujours `try{}catch(e){}`.
+7. **Échapper tout ce qui vient d'un prénom** (`escapeHtml`) : les prénoms peuvent venir
+   d'un lien de partage fabriqué par un tiers.
+8. **Les minuteurs survivent à la sortie d'un écran.** Chaque jeu a un jeton
+   d'invalidation et un `registerScreenCleanup` : sans cela, une relance programmée
+   continue d'écrire dans un écran déjà quitté.
+
+---
+
+## 8. Ce qui reste ouvert
+
+- **Vérification sur un vrai téléphone.** Tout a été vu dans Chromium à plusieurs tailles
+  (390×844, 360×640, 430×932) et en réduction d'animations, mais jamais sur un appareil
+  réel : encoche, barre de gestes iOS, retour haptique, son, et surtout le
+  **maintien du doigt** du composant secret, qui n'a été testé qu'à la souris.
+- **Le contenu n'a pas été joué par un vrai groupe.** Le dosage est vérifié
+  statistiquement, pas à l'usage.
+- **Cocktails à débloquer** : idée jamais implémentée. Le client suggérait de débloquer
+  selon la *participation* plutôt que la *réussite*, pour ne pas gamifier la
+  consommation d'alcool.
+- **Multijoueur en ligne des Pilliers** (`pilliers-online/`) : non retouché dans cette
+  passe, et non vérifié.
+- `js/core/display-mode.js` (mode grand écran) et `js/core/history.js` (retiré) :
+  fonctionnalités héritées, peu ou pas exercées.
+
+---
+
+## 9. Ton des textes
+
+Phrases courtes, complices, jamais de jargon forcé : « À toi. », « Qui assume ? »,
+« Vous avez 5 secondes. » Aucune gorgée n'est une obligation — le message sanitaire le
+dit, tout est passable, et tout reste jouable sans alcool.
