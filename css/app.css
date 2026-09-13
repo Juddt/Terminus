@@ -1,27 +1,30 @@
 /* Sound toggle */
-#sound-toggle-btn{position:absolute; top:14px; right:14px; z-index:999; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:rgba(243,234,214,0.72); color:var(--text-dim); font-size:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(4px);}
+#sound-toggle-btn{position:absolute; top:14px; right:14px; z-index:999; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:rgba(30,24,48,0.72); color:var(--text-dim); font-size:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(4px);}
 #sound-toggle-btn:active{transform:scale(0.92);}
 
 /* Home */
-#screen-home{padding:0;}
-.home-content{height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:64px 24px 40px; box-sizing:border-box; text-align:center;}
-.hero-title{font-family:'Unbounded', sans-serif; font-weight:800; font-size:25px; letter-spacing:1.5px; color:var(--text); line-height:1;}
+#screen-home{padding:0; overflow:hidden;}
+#screen-home::before{content:''; position:absolute; top:-70px; right:-70px; width:230px; height:230px; border-radius:50%; background:repeating-linear-gradient(45deg, var(--accent) 0 14px, transparent 14px 28px); opacity:0.14; pointer-events:none; z-index:0;}
+#screen-home::after{content:''; position:absolute; bottom:-50px; left:-50px; width:170px; height:170px; border-radius:50%; background:repeating-linear-gradient(-45deg, var(--clay) 0 10px, transparent 10px 20px); opacity:0.12; pointer-events:none; z-index:0;}
+.home-content{position:relative; z-index:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:64px 24px 40px; box-sizing:border-box; text-align:center;}
+.hero-title{font-family:'Anton', sans-serif; font-weight:400; font-size:52px; letter-spacing:1px; color:var(--text); line-height:0.95;}
 .hero-tag{font-size:14px; letter-spacing:0; text-transform:none; color:var(--text-dim); margin-top:10px; text-align:center; font-family:'Work Sans',sans-serif;}
 
 .mark{display:flex; flex-direction:column; align-items:center; gap:14px;}
 .mark-dot{width:46px; height:46px; border-radius:50%; border:1px solid var(--accent); display:flex; align-items:center; justify-content:center;}
 .mark-name{font-size:13px; letter-spacing:4px; color:var(--text-dim);}
 
-/* Les cartes de mode reprennent la forme d'un ticket : coins poinçonnés (les deux
-   pastilles ::before/::after, couleur du fond de l'app) et bord perforé à gauche. */
-.mode-card{width:100%; position:relative; border:none; border-radius:10px; padding:22px 22px 22px 26px; text-align:left; background:var(--surface-2); margin-bottom:14px; cursor:pointer; box-shadow:0 2px 0 rgba(30,26,20,0.06);}
-.mode-card::before{content:''; position:absolute; left:-6px; top:50%; transform:translateY(-50%); width:12px; height:12px; border-radius:50%; background:var(--bg);}
-.mode-card .mode-title{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); font-weight:600; margin-bottom:10px; font-family:'IBM Plex Mono',monospace;}
-.mode-card .mode-desc{font-family:'Unbounded', sans-serif; font-size:17px; color:var(--text); line-height:1.35; font-weight:600;}
-.mode-card.primary{background:var(--accent); box-shadow:0 4px 14px rgba(225,80,47,0.35);}
-.mode-card.primary .mode-title{color:rgba(30,26,20,0.7);}
-.mode-card.primary .mode-desc{color:var(--ink-on-light);}
-.mode-card.primary::before{background:var(--bg);}
+/* Les deux cartes d'accueil ont un format bien arrondi et dynamique, distinct du style
+   ticket utilisé ailleurs dans l'app — ce sont les deux portes
+   d'entrée de l'appli, elles doivent se remarquer immédiatement. */
+.mode-card{width:100%; border:none; border-radius:24px; padding:28px 26px; text-align:left; background:var(--surface-2); margin-bottom:14px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.35); transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.mode-card:active{transform:scale(0.96);}
+.mode-card .mode-icon{font-size:32px; line-height:1; margin-bottom:10px;}
+.mode-card .mode-name{font-family:'Anton', sans-serif; font-size:21px; font-weight:700; color:var(--text); line-height:1.25;}
+.mode-card .mode-tag{font-family:'Work Sans',sans-serif; font-size:13.5px; color:var(--text-dim); margin-top:6px; line-height:1.35;}
+.mode-card.primary{background:linear-gradient(135deg, var(--accent-bright), var(--accent)); box-shadow:0 8px 24px rgba(232,255,61,0.35);}
+.mode-card.primary .mode-name{color:var(--ink-on-light);}
+.mode-card.primary .mode-tag{color:rgba(13,13,13,0.72);}
 
 .topnav{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
 .back-link{font-size:13px; color:var(--text-dim); cursor:pointer; display:flex; align-items:center; gap:5px;}
@@ -30,17 +33,63 @@
 .scroll-screen::-webkit-scrollbar{display:none;}
 
 /* Games list / detail */
-.game-card{border:1px solid var(--line); border-radius:18px; padding:14px 16px; margin-bottom:9px; cursor:pointer;}
-.game-card .game-name{font-family:'Unbounded', sans-serif; font-size:16px; color:var(--text); margin-bottom:5px;}
-.game-card .game-meta{font-size:11px; color:var(--text-faint); display:flex; gap:10px;}
-.game-card .game-meta span{display:flex; align-items:center; gap:4px;}
+/* --- BIBLIOTHÈQUE : scène de présentation pleine largeur ---------------------------
+   Plus de grand panneau coloré : l'objet est posé sur le fond de l'app, éclairé par un
+   halo dont la teinte vient du jeu. Le texte et le bouton sont hiérarchisés dessous. */
+.games-scene{display:flex; gap:0; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin:0 -24px;}
+.games-scene::-webkit-scrollbar{display:none;}
+.game-stage{flex:0 0 100%; scroll-snap-align:center; display:flex; flex-direction:column; align-items:center; text-align:center; padding:4px 30px 0; background:none; border:none; border-radius:0; cursor:pointer;}
+
+/* Socle lumineux : halo diffus + ellipse de contact, l'objet paraît posé sur une scène. */
+.game-stage-object{position:relative; width:100%; height:210px; display:flex; align-items:center; justify-content:center; background:none;}
+.game-stage-object::before{content:''; position:absolute; top:12%; left:50%; transform:translateX(-50%); width:74%; height:74%; border-radius:50%; background:var(--stage-glow, var(--accent)); opacity:0.17; filter:blur(34px);}
+.game-stage-object svg{position:relative; width:178px; height:178px; filter:drop-shadow(0 22px 26px rgba(0,0,0,0.6));
+  transition:transform .38s cubic-bezier(.22,1,.36,1);}
+.game-stage:active .game-stage-object svg{transform:scale(0.95);}
+@media (prefers-reduced-motion: no-preference){
+  .game-stage-object svg{animation:objectIn .5s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes objectIn{ from{ opacity:0; transform:translateY(16px) scale(0.92);} to{ opacity:1; transform:none;} }
+}
+
+.game-stage-body{padding:2px 0 0; width:100%;}
+.game-stage .game-name{font-family:'Anton', sans-serif; font-size:30px; letter-spacing:0.4px; color:var(--text); line-height:1.04; margin-bottom:8px;}
+.game-stage .game-principle{font-size:14px; color:var(--text-dim); line-height:1.45; margin-bottom:14px; max-width:300px; margin-left:auto; margin-right:auto;}
+.game-stage-meta{display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:16px;}
+.game-stage-meta span{font-size:11px; letter-spacing:0.4px; color:var(--text-faint); background:rgba(255,255,255,0.05); border:1px solid var(--line); border-radius:20px; padding:6px 13px;}
+.game-stage .btn{padding:16px; max-width:300px; margin:0 auto;}
+
+/* Commandes stables : elles ne bougent pas d'un jeu à l'autre. */
+.games-nav{display:flex; align-items:center; justify-content:center; gap:16px; margin:16px 0 18px;}
+.games-nav-btn{width:48px; height:48px; flex-shrink:0; border-radius:50%; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:19px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.games-nav-btn:active{transform:scale(0.9);}
+
+/* Index compact "Tous les jeux" */
+.games-index-toggle{width:100%; background:none; border:1px dashed var(--line); border-radius:16px; color:var(--text-dim); font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; padding:14px; cursor:pointer; font-family:'Work Sans',sans-serif;}
+.games-index{display:none; margin-top:12px;}
+.games-index.open{display:block;}
+.games-index-row{display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--line); cursor:pointer;}
+.games-index-row svg{width:34px; height:34px; flex-shrink:0;}
+.games-index-name{font-family:'Anton',sans-serif; font-size:15px; color:var(--text); letter-spacing:0.3px;}
+.games-index-meta{margin-left:auto; font-size:11px; color:var(--text-faint);}
+
+/* Sur écran large, on recompose (objet à gauche, texte à droite) plutôt que d'étirer
+   la mise en page mobile. */
+@media (min-width:720px){
+  .game-stage{flex-direction:row; align-items:center; text-align:left; gap:32px; padding:8px 48px 0;}
+  .game-stage-object{width:46%; height:250px;}
+  .game-stage-object svg{width:210px; height:210px;}
+  .game-stage-body{width:54%;}
+  .game-stage-meta{justify-content:flex-start;}
+  .game-stage .game-principle{margin-left:0;}
+  .game-stage .btn{margin:0;}
+}
 
 .game-detail-meta{display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap;}
 .game-detail-meta .gd-item{font-size:11px; color:var(--text-faint);}
-.game-detail-meta .gd-item b{color:var(--accent); font-weight:500; display:block; font-family:'Unbounded', sans-serif; font-size:15px;}
+.game-detail-meta .gd-item b{color:var(--accent); font-weight:500; display:block; font-family:'Anton', sans-serif; font-size:15px;}
 .game-desc{font-size:13.5px; color:var(--text-dim); line-height:1.5; margin-bottom:22px;}
-.rule-step{display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid rgba(30,26,20,0.08);}
-.rule-step .step-num{font-family:'Unbounded', sans-serif; color:var(--accent-bright); font-size:13px; font-weight:600; flex-shrink:0; min-width:36px;}
+.rule-step{display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.10);}
+.rule-step .step-num{font-family:'Anton', sans-serif; color:var(--accent-bright); font-size:13px; font-weight:600; flex-shrink:0; min-width:36px;}
 .rule-step .step-text{font-size:13px; color:var(--text-dim); line-height:1.4;}
 
 /* Setup wizard */
@@ -54,7 +103,7 @@
 
 .stepper{display:flex; align-items:center; justify-content:center; gap:22px; margin:18px 0;}
 .stepper button{width:48px; height:48px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--text); font-size:20px; font-family:'Work Sans'; flex-shrink:0;}
-.count-input{font-family:'Unbounded', sans-serif; font-size:42px; width:90px; text-align:center; background:transparent; border:none; color:var(--text); -moz-appearance:textfield;}
+.count-input{font-family:'Anton', sans-serif; font-size:42px; width:90px; text-align:center; background:transparent; border:none; color:var(--text); -moz-appearance:textfield;}
 .count-input::-webkit-outer-spin-button, .count-input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
 .count-input:focus{outline:none;}
 .unit-label{text-align:center; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint); margin-bottom:18px;}
@@ -70,49 +119,178 @@
 .chip span.x{color:var(--text-faint); cursor:pointer; font-size:14px; padding:0 2px;}
 .choice-list{display:flex; flex-direction:column; gap:9px;}
 .choice{padding:16px 16px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; cursor:pointer;}
-.choice .choice-label{font-family:'Unbounded', sans-serif; font-size:16px; color:var(--text-dim);}
+.choice .choice-label{font-family:'Anton', sans-serif; font-size:16px; color:var(--text-dim);}
 .choice .choice-sub{font-size:11px; color:var(--text-faint); margin-top:3px;}
 .choice.selected{border-color:var(--accent);}
 .choice.selected .choice-label{color:var(--accent);}
 
-.slider-wrap{margin:30px 0 10px;}
-input[type="range"]{width:100%; height:2px; background:var(--line); border-radius:2px; -webkit-appearance:none; outline:none;}
-input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:26px; height:26px; border-radius:50%; background:var(--accent); border:3px solid var(--bg); cursor:pointer; margin-top:-2px;}
-input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%; background:var(--accent); border:3px solid var(--bg); cursor:pointer;}
-.slider-label{font-family:'Unbounded', sans-serif; font-size:22px; color:var(--accent); text-align:center; margin-top:20px;}
-.slider-sub{font-size:13px; color:var(--text-faint); text-align:center; margin-top:6px;}
-.slider-marks{display:flex; justify-content:space-between; font-size:10px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase; margin-top:8px;}
-
 /* Countdown */
 #screen-countdown{align-items:center; justify-content:center; text-align:center;}
-#cd-number{font-family:'Unbounded', sans-serif; font-size:130px; color:var(--accent); line-height:1;}
+#cd-number{font-family:'Anton', sans-serif; font-size:130px; color:var(--accent); line-height:1;}
 
 /* Main session (Mode Rapide) */
 #screen-main{padding:20px 20px 28px;}
 .topbar{display:flex; flex-direction:column; gap:14px; margin-bottom:14px;}
-.global-track{height:2px; background:var(--line); border-radius:2px; overflow:hidden;}
-.global-fill{height:100%; background:var(--accent); width:100%; transition:width 1s linear;}
-#rules-banner{display:flex; flex-wrap:wrap; gap:6px;}
-.rule-pill{font-size:11px; color:var(--text-dim); border:1px solid var(--line); border-radius:5px; padding:6px 10px; display:flex; align-items:center; gap:6px;}
-.rule-pill .ic{color:var(--accent); font-size:12px;}
+
+/* Bouton compteur de règles + panneau coulissant (remplace le bandeau permanent) */
+.rules-count-btn{align-self:flex-start; align-items:center; gap:7px; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); border:1px solid var(--line); border-radius:30px; padding:7px 13px; cursor:pointer;}
+.rules-count-num{background:var(--accent); color:var(--ink-on-light); border-radius:20px; min-width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-family:'Anton',sans-serif; font-size:11px; padding:0 5px;}
+.rules-sheet{position:fixed; inset:0; z-index:120; background:rgba(0,0,0,0.6); display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity .2s ease;}
+.rules-sheet.open{opacity:1; pointer-events:auto;}
+.rules-sheet-panel{width:100%; max-width:480px; margin:0 auto; background:var(--surface); border-radius:26px 26px 0 0; padding:12px 22px 30px; transform:translateY(100%); transition:transform .26s cubic-bezier(.22,1,.36,1); max-height:72vh; overflow-y:auto;}
+.rules-sheet.open .rules-sheet-panel{transform:translateY(0);}
+.rules-sheet-grab{width:42px; height:4px; border-radius:4px; background:var(--line); margin:0 auto 16px;}
+.rules-sheet-title{font-family:'Anton',sans-serif; font-size:20px; color:var(--text); margin-bottom:14px;}
+.rules-sheet-row{display:flex; align-items:flex-start; gap:10px; padding:13px 0; border-bottom:1px solid var(--line); font-size:14px; color:var(--text); line-height:1.45;}
+.rules-sheet-dot{flex-shrink:0; width:8px; height:8px; border-radius:50%; background:var(--accent); margin-top:6px;}
+.rules-sheet-empty{font-size:13px; color:var(--text-faint); padding:8px 0;}
 
 /* Le moment en cours est présenté comme un ticket : sa couleur — définie par
    #screen-main[data-type] — annonce le type avant même la lecture (principe « Confetti »),
    avec coins poinçonnés et numéro de tirage repris du compteur de tours. */
-.main-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:20px; padding:32px 22px; margin:6px 0; border-radius:16px; position:relative; background:var(--type-defi); color:var(--ink-on-dark); box-shadow:0 10px 26px rgba(30,26,20,0.16); transition:background .25s ease, color .25s ease;}
-.main-body::before,.main-body::after{content:''; position:absolute; left:50%; transform:translateX(-50%); width:22px; height:22px; border-radius:50%; background:var(--bg); z-index:1;}
-.main-body::before{top:-11px;}
-.main-body::after{bottom:-11px;}
-#screen-main[data-type="vote"] .main-body{background:var(--type-vote); color:var(--ink-on-dark);}
-#screen-main[data-type="regle"] .main-body{background:var(--type-regle); color:var(--ink-on-light);}
-#screen-main[data-type="mini"] .main-body{background:var(--type-mini); color:var(--ink-on-dark);}
-#screen-main[data-type="moment"] .main-body{background:var(--type-moment); color:var(--ink-on-dark);}
-.ticket-num{position:absolute; top:14px; right:18px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; color:inherit; opacity:0.62;}
-.item-eyebrow{font-size:11px; letter-spacing:2.5px; text-transform:uppercase; font-weight:600; color:inherit; opacity:0.82;}
-.item-text{font-family:'Unbounded', sans-serif; font-size:26px; font-weight:600; line-height:1.28; color:inherit;}
-.player-tags{display:flex; gap:8px; flex-wrap:wrap; justify-content:center;}
-.player-tag{display:flex; align-items:center; gap:7px; border:1px solid currentColor; border-radius:30px; padding:7px 13px; font-size:12.5px; color:inherit; font-weight:500;}
-.player-tag .avatar-badge-sm{width:20px; height:20px; font-size:11px;}
+/* --- SCÈNE DU MODE BEFORE ---------------------------------------------------------
+   Remplace l'ancien ticket : plus de rectangle qui encadre l'activité. Les éléments
+   sont posés directement sur le fond, et chaque type de moment a sa composition (voir
+   scenes.js). La couleur d'accent de la scène suit le type via --scene-accent. */
+.scene{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:14px; padding:10px 20px 6px; position:relative; --scene-accent:var(--accent);}
+#screen-main[data-type="vote"] .scene{--scene-accent:#5AA0F0;}
+#screen-main[data-type="regle"] .scene{--scene-accent:var(--text);}
+#screen-main[data-type="mini"] .scene{--scene-accent:var(--accent);}
+#screen-main[data-type="moment"] .scene{--scene-accent:var(--clay);}
+
+/* Halo diffus derrière la scène : donne de la profondeur au fond charbon sans ajouter
+   de rectangle. Sa couleur suit le type de moment. */
+.scene::before{content:''; position:absolute; top:8%; left:50%; transform:translateX(-50%); width:min(115%,430px); height:52%; background:radial-gradient(ellipse at center, var(--scene-accent) 0%, transparent 68%); opacity:0.13; filter:blur(28px); pointer-events:none;}
+
+/* Entrée séquencée : chaque élément porte son propre délai (--d) pour guider la
+   lecture — qui joue, puis ce qu'il faut faire. */
+@media (prefers-reduced-motion: no-preference){
+  .scene.entering > *, .scene.entering .scene-duel > *{animation:sceneIn .34s cubic-bezier(.22,1,.36,1) both; animation-delay:var(--d,0s);}
+  @keyframes sceneIn{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+}
+
+.scene-kicker{font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--text-faint);}
+.scene-kicker.light{color:var(--clay);}
+/* Trois corps de consigne selon la longueur (voir instructionClass) : une phrase courte
+   claque en très gros, une longue reste lisible sans occuper tout l'écran. */
+.scene-instruction{font-family:'Anton',sans-serif; font-weight:400; color:var(--text); max-width:340px; letter-spacing:0.3px;}
+.scene-instruction.xl{font-size:33px; line-height:1.1;}
+.scene-instruction.lg{font-size:25px; line-height:1.18;}
+.scene-instruction.md{font-family:'Work Sans',sans-serif; font-weight:500; font-size:18px; line-height:1.45; letter-spacing:0; max-width:330px;}
+.scene-instruction.big{font-family:'Anton',sans-serif; font-weight:400; font-size:30px; line-height:1.14; letter-spacing:0.3px; max-width:340px;}
+.scene-question{font-family:'Anton',sans-serif; font-size:27px; line-height:1.15; color:var(--text); max-width:330px;}
+
+.scene-avatar{width:44px; height:44px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 6px 18px rgba(0,0,0,0.5);}
+.scene-avatar.big{width:76px; height:76px; font-size:38px; box-shadow:0 10px 26px rgba(0,0,0,0.55), inset 0 2px 0 rgba(255,255,255,0.28);}
+
+/* Défi express : le prénom domine, la consigne suit. */
+.scene-who{display:flex; flex-direction:column; align-items:center; gap:10px;}
+.scene-who-name{font-family:'Anton',sans-serif; font-size:34px; letter-spacing:0.5px; color:var(--scene-accent); line-height:1; max-width:300px; overflow-wrap:anywhere;}
+
+/* Duel : deux côtés opposés, séparés par le VS. */
+.scene-duel{display:flex; align-items:center; justify-content:center; gap:8px; width:100%;}
+.duel-side{flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:9px;}
+.duel-name{font-family:'Anton',sans-serif; font-size:19px; color:var(--text); line-height:1.1; overflow-wrap:anywhere; max-width:100%;}
+.duel-a .scene-avatar{box-shadow:0 10px 26px rgba(0,0,0,0.55), 0 0 0 3px var(--accent);}
+.duel-b .scene-avatar{box-shadow:0 10px 26px rgba(0,0,0,0.55), 0 0 0 3px var(--clay);}
+.duel-vs{flex:0 0 auto; font-family:'Anton',sans-serif; font-size:22px; color:var(--bg); background:var(--text); width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; transform:rotate(-8deg); box-shadow:0 6px 18px rgba(0,0,0,0.5);}
+
+/* Vote : zones tactiles, puis révélation centrale. */
+.vote-zones{display:flex; flex-wrap:wrap; gap:9px; justify-content:center; max-width:340px;}
+.vote-zone{display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:30px; padding:9px 15px 9px 9px; color:var(--text); font-size:14px; cursor:pointer; transition:transform .12s cubic-bezier(.34,1.56,.64,1), border-color .15s;}
+.vote-zone:active{transform:scale(0.94);}
+.vote-zone .scene-avatar{width:30px; height:30px; font-size:15px;}
+.vote-zone-name{overflow-wrap:anywhere;}
+.vote-zones.done .vote-zone{opacity:0.3;}
+.vote-zones.done .vote-zone.chosen{opacity:1; border-color:var(--accent); background:var(--surface-2);}
+.scene-vote-reveal{display:none; flex-direction:column; gap:4px;}
+.scene-vote-reveal.shown{display:flex;}
+.vote-reveal-name{font-family:'Anton',sans-serif; font-size:30px; color:var(--accent); line-height:1; overflow-wrap:anywhere;}
+.vote-reveal-tag{font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint);}
+
+/* Nouvelle règle : annonce lisible, sans minuteur qui presse la lecture. */
+.scene-rule{display:flex; flex-direction:column; align-items:center; gap:16px; width:100%;}
+.rule-flash{font-family:'Anton',sans-serif; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:var(--bg); background:var(--text); padding:7px 16px; border-radius:4px; transform:rotate(-1.5deg);}
+.rule-text{font-family:'Anton',sans-serif; font-size:29px; line-height:1.16; color:var(--text); max-width:330px; padding:0 6px; border-left:3px solid var(--accent); border-right:3px solid var(--accent);}
+.rule-hint{font-size:12px; color:var(--text-faint); letter-spacing:0.4px;}
+
+/* Surprise : rupture brève de l'ambiance. */
+.scene-surprise{display:flex; flex-direction:column; align-items:center; gap:14px; position:relative;}
+.surprise-burst{position:absolute; top:-40px; left:50%; transform:translateX(-50%); width:190px; height:190px; border-radius:50%; background:conic-gradient(from 0deg, var(--clay), transparent 28%, var(--clay) 52%, transparent 78%, var(--clay)); opacity:0.20; filter:blur(9px); pointer-events:none;}
+@media (prefers-reduced-motion: no-preference){
+  .scene.entering .surprise-burst{animation:burstIn .55s ease-out both;}
+  @keyframes burstIn{ from{ transform:translateX(-50%) scale(0.4); opacity:0; } to{ transform:translateX(-50%) scale(1); opacity:0.20; } }
+}
+
+/* --- CHEMIN DE PROGRESSION (décor d'arrière-plan) ----------------------------------
+   Tracé vertical sinueux qui monte : la portion parcourue est lumineuse, celle à venir
+   reste sourde. Purement décoratif — pointer-events:none garantit qu'il ne capte aucun
+   geste destiné à la scène, et il ne provoque jamais de défilement (position absolue). */
+.trail{position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+.trail svg{width:100%; height:100%; display:block;}
+.trail-bg{fill:none; stroke:rgba(255,255,255,0.07); stroke-width:2.4; stroke-linecap:round;}
+.trail-done{fill:none; stroke:var(--accent); stroke-width:2.2; stroke-linecap:round; opacity:0.85;
+  transition:stroke-dashoffset 1s linear;}
+.trail-done-glow{fill:none; stroke:var(--accent); stroke-width:7; stroke-linecap:round; opacity:0.20;
+  filter:blur(6px); transition:stroke-dashoffset 1s linear;}
+.trail-mark{fill:rgba(255,255,255,0.22);}
+.trail-head-halo{fill:var(--accent); opacity:0.28; filter:blur(4px);}
+.trail-head-core{fill:#FFFFFF;}
+#trail-head{transition:transform 1s linear;}
+#trail-shift{transition:transform 1.2s cubic-bezier(.22,1,.36,1);}
+/* Le chemin s'efface derrière la zone centrale pour ne jamais gêner la lecture. */
+.trail::after{content:''; position:absolute; left:0; right:0; top:24%; height:52%;
+  background:radial-gradient(ellipse at center, var(--bg) 42%, rgba(13,13,13,0) 78%); }
+.trail.near-end .trail-done{stroke:var(--clay);}
+.trail.near-end .trail-done-glow{stroke:var(--clay);}
+.trail.near-end .trail-head-halo{fill:var(--clay);}
+.trail.advancing .trail-head-halo{opacity:0.55;}
+@media (prefers-reduced-motion: reduce){
+  /* Sans animation, le tracé reste compréhensible : la portion parcourue est visible,
+     seuls les déplacements progressifs sont neutralisés. */
+  .trail-done, .trail-done-glow, #trail-head, #trail-shift{transition:none;}
+}
+
+/* --- BARRE SUPÉRIEURE -------------------------------------------------------------- */
+.topbar-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.topbar-right{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+.top-btn{background:var(--surface); border:1px solid var(--line); color:var(--text-dim);
+  font-family:'Work Sans',sans-serif; font-size:12.5px; font-weight:500; border-radius:30px;
+  padding:10px 15px; cursor:pointer; white-space:nowrap; min-height:40px;
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.top-btn:active{transform:scale(0.94);}
+.top-btn.icon-only{padding:10px 0; width:40px; display:flex; align-items:center; justify-content:center; font-size:15px;}
+/* Petits écrans : on raccourcit le libellé plutôt que de le laisser déborder ou se
+   faire couper (le "+" seul n'est pas assez explicite, on garde donc "Joueurs"). */
+@media (max-width:360px){
+  .top-btn{padding:10px 12px; font-size:12px;}
+  .top-btn .label-long{display:none;}
+}
+.topbar-secondary{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; min-height:22px;}
+.trail-remaining{font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:0.09em;
+  text-transform:uppercase; color:var(--text-faint); margin-left:auto;}
+.trail.near-end ~ .topbar .trail-remaining{color:var(--clay);}
+
+/* Zone de scène : au-dessus du décor, et défilable si la consigne est longue ou
+   l'écran petit — le contenu défile, jamais les commandes. */
+.scene-wrap{position:relative; z-index:1; flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex;}
+
+/* --- ZONE DE COMMANDES (toujours au même endroit) ---------------------------------
+   Pas de grand panneau visible : juste une zone stable, avec l'action principale en
+   première ligne et les utilitaires en seconde. Respecte la zone de sécurité iOS. */
+.main-footer{position:relative; z-index:2; flex-shrink:0; padding:10px 24px calc(14px + env(safe-area-inset-bottom));}
+.footer-main{display:flex; gap:10px;}
+.footer-main .btn{flex:1; width:auto !important; min-height:58px;}
+/* Réussi / Raté : même taille, toujours dans le même ordre (Raté puis Réussi). */
+.footer-main .challenge-btn-fail, .footer-main .challenge-btn-done{flex:1 1 0;}
+.footer-aside{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:8px;}
+.footer-aside button{flex:1; background:none; border:none; color:var(--text-faint);
+  font-family:'Work Sans',sans-serif; font-size:13px; cursor:pointer; padding:13px 6px;
+  min-height:46px; border-radius:12px;}
+.footer-aside button:active{background:rgba(255,255,255,0.05);}
+
+.player-tag{display:flex; align-items:center; gap:8px; border:2px solid currentColor; border-radius:30px; padding:9px 16px; font-size:15px; font-family:'Anton', sans-serif; letter-spacing:0.3px; color:inherit; font-weight:400;}
+.player-tag .avatar-badge-sm{width:24px; height:24px; font-size:13px;}
 .main-footer{display:flex; flex-direction:column; align-items:center; gap:14px;}
 .footer-buttons{display:flex; gap:12px; width:100%;}
 .footer-btn{flex:1; padding:14px 10px !important; width:auto !important;}
@@ -120,17 +298,28 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 .ring-wrap svg{width:74px; height:74px; transform:rotate(-90deg);}
 .ring-bg{fill:none; stroke:var(--line); stroke-width:3;}
 .ring-fg{fill:none; stroke:var(--accent); stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset .3s linear;}
-.ring-label{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Unbounded', sans-serif; font-size:24px; font-weight:600; color:var(--text);}
+.ring-label{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Anton', sans-serif; font-size:24px; font-weight:600; color:var(--text);}
 
-/* Special / climax — même logique de ticket, teintes dédiées */
-#screen-special{align-items:center; justify-content:center; text-align:center; background:var(--type-moment); color:var(--ink-on-dark); border-top:8px solid var(--bg); border-bottom:8px solid var(--bg);}
-#special-eyebrow{font-size:11px; letter-spacing:3px; text-transform:uppercase; color:rgba(251,244,231,0.75); margin-bottom:14px;}
-#special-icon{font-size:34px; margin-bottom:18px;}
-#special-text{font-family:'Unbounded', sans-serif; font-size:25px; font-weight:600; line-height:1.4;}
-#screen-special.climax{background:var(--clay);}
-#screen-special.climax #special-eyebrow{color:rgba(251,244,231,0.85);}
-#screen-special.climax #special-icon{font-size:42px;}
-#screen-special.climax #special-text{font-size:30px;}
+/* Moment & Finale : rupture d'ambiance sur le fond charbon (halo + lumière rasante),
+   au lieu d'un aplat de couleur plein écran. La finale (.climax) pousse l'intensité et
+   ajoute le récapitulatif de ce qui s'est réellement passé. */
+#screen-special{align-items:center; justify-content:center; text-align:center; color:var(--text); background:var(--bg); overflow:hidden; gap:0;}
+.special-glow{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(140%,520px); height:56%; border-radius:50%; background:radial-gradient(ellipse at center, var(--clay) 0%, transparent 70%); opacity:0.30; filter:blur(30px); pointer-events:none;}
+#special-eyebrow{position:relative; font-family:'Anton',sans-serif; font-size:12px; letter-spacing:5px; text-transform:uppercase; color:var(--clay); margin-bottom:20px;}
+#special-icon{display:none;}
+#special-text{position:relative; font-family:'Anton', sans-serif; font-size:29px; font-weight:400; line-height:1.18; max-width:330px; padding:0 22px;}
+#screen-special.climax .special-glow{opacity:0.45; height:70%;}
+#screen-special.climax #special-text{font-size:37px; line-height:1.08;}
+#screen-special.climax #special-eyebrow{color:var(--accent);}
+.special-recap{position:relative; display:none; gap:22px; margin-top:30px; padding-top:20px; border-top:1px solid var(--line);}
+.special-recap.shown{display:flex;}
+.special-recap span{display:flex; flex-direction:column; gap:3px; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint);}
+.special-recap b{font-family:'Anton',sans-serif; font-size:25px; letter-spacing:0; color:var(--text);}
+@media (prefers-reduced-motion: no-preference){
+  #screen-special.active .special-glow{animation:glowIn .7s cubic-bezier(.22,1,.36,1) both;}
+  #screen-special.active #special-text{animation:sceneIn .45s cubic-bezier(.22,1,.36,1) .12s both;}
+  @keyframes glowIn{ from{ transform:translate(-50%,-50%) scale(0.55); opacity:0; } }
+}
 
 /* Pause */
 #screen-pause{align-items:center; justify-content:center; gap:18px; text-align:center; color:var(--text-faint);}
@@ -142,7 +331,7 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 .end-sub{text-align:center; color:var(--text-dim); font-size:13px; margin-bottom:28px;}
 .stat-card{background:var(--surface); border:none; border-radius:18px; padding:22px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;}
 .stat-label{font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-faint);}
-.stat-value{font-family:'Unbounded', sans-serif; font-size:18px; color:var(--accent); margin-top:3px;}
+.stat-value{font-family:'Anton', sans-serif; font-size:18px; color:var(--accent); margin-top:3px;}
 .stat-sub{font-size:11px; color:var(--text-faint); margin-top:2px;}
 
 /* Compteur live de défis (topbar, pendant la partie) */
@@ -150,7 +339,7 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 
 /* Résultats par joueur (défis + verres) sur l'écran de fin */
 .player-results-title{font-size:14px; color:var(--text-faint); text-transform:uppercase; letter-spacing:1px; margin:18px 0 10px; font-weight:500;}
-.player-result-row{display:flex; align-items:center; justify-content:space-between; padding:12px 4px; border-bottom:1px solid rgba(30,26,20,0.08);}
+.player-result-row{display:flex; align-items:center; justify-content:space-between; padding:12px 4px; border-bottom:1px solid rgba(255,255,255,0.10);}
 .player-result-name{display:flex; align-items:center; gap:10px; font-size:14px; color:var(--text);}
 .player-result-stats{display:flex; gap:14px; font-size:12px; color:var(--text-dim);}
 
@@ -159,9 +348,9 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 .podium-card.podium-mvp{border:1px solid var(--accent);}
 .podium-icon{font-size:26px;}
 .podium-card > div:nth-child(2){flex:1;}
-.podium-name{font-family:'Unbounded', sans-serif; font-size:16px; color:var(--text); margin-top:3px; display:flex; align-items:center; gap:8px;}
+.podium-name{font-family:'Anton', sans-serif; font-size:16px; color:var(--text); margin-top:3px; display:flex; align-items:center; gap:8px;}
 .podium-name .avatar-badge-sm{width:20px; height:20px; font-size:11px;}
-.podium-count{font-family:'Unbounded', sans-serif; font-size:20px; color:var(--accent);}
+.podium-count{font-family:'Anton', sans-serif; font-size:20px; color:var(--accent);}
 
 /* Home : bandeau de reprise + liens utilitaires */
 .resume-banner{width:100%; background:var(--surface); border:1px solid var(--accent); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; font-size:13px; text-align:left;}
@@ -169,14 +358,32 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 .home-links span{font-size:12px; color:var(--text-faint); cursor:pointer; letter-spacing:0.3px;}
 .home-links span.active{color:var(--accent);}
 
+/* Bandeau "reprendre les mêmes joueurs" (étape des prénoms) */
+.reuse-players-banner{margin-bottom:14px;}
+.reuse-players-banner .btn{width:100%; font-size:13.5px;}
+
+/* Aperçu du groupe sous le compteur de joueurs */
+.count-preview{display:flex; flex-wrap:wrap; gap:9px; justify-content:center; margin-top:38px; max-width:280px; margin-left:auto; margin-right:auto;}
+.count-dot{width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:19px; box-shadow:0 4px 12px rgba(0,0,0,0.4);}
+
+/* Sélecteur Chill / Chaos (étape durée du wizard) */
+.mode-toggle{display:flex; gap:10px; margin-bottom:22px;}
+.mode-toggle-btn{flex:1; background:var(--surface); border:2px solid var(--line); border-radius:14px; padding:16px 10px; font-family:'Anton', sans-serif; font-size:18px; letter-spacing:1px; color:var(--text-dim); cursor:pointer; transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.mode-toggle-btn:active{transform:scale(0.95);}
+.mode-toggle-btn.selected{border-color:var(--accent); color:var(--accent); background:var(--surface-2);}
+.mode-toggle-btn[data-mode="chill"].selected{border-color:var(--sage); color:var(--sage);}
+
+/* Bouton + (topbar session) : ajouter/retirer un joueur sans quitter la partie */
+.add-player-btn{width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--line); color:var(--text-dim); font-size:18px; line-height:1; cursor:pointer;}
+.session-player-row{display:flex; align-items:center; justify-content:space-between; padding:10px 4px; border-bottom:1px solid var(--line); font-size:14px;}
+.remove-player-x{color:var(--text-faint); cursor:pointer; padding:4px 8px;}
+.end-actions-row{display:flex; gap:10px;}
+.end-actions-row .btn{flex:1; width:auto !important;}
+
 /* Filtre catégories du catalogue de jeux */
 .games-filter-wrap{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
 .games-filter-chip{font-size:12px; padding:8px 14px; border-radius:30px; border:1px solid var(--line); color:var(--text-dim); cursor:pointer;}
 .games-filter-chip.selected{border-color:var(--accent); color:var(--accent);}
-.game-difficulty{font-weight:500;}
-.game-difficulty-facile{color:var(--sage);}
-.game-difficulty-modere{color:var(--accent-bright);}
-.game-difficulty-intense{color:var(--clay);}
 
 /* Carte-souvenir (canvas) */
 .recap-preview{display:flex; justify-content:center;}
@@ -194,8 +401,10 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 .tv-mode-toggle.active{border-color:var(--accent); color:var(--accent);}
 
 /* Mode grand écran : agrandit le contenu principal pour une lecture à distance */
-#frame.tv-mode .item-text{font-size:46px;}
-#frame.tv-mode .item-eyebrow{font-size:15px;}
+#frame.tv-mode .scene-instruction.big{font-size:44px;}
+#frame.tv-mode .scene-question{font-size:40px;}
+#frame.tv-mode .scene-kicker{font-size:14px;}
+#frame.tv-mode .scene-who-name{font-size:48px;}
 #frame.tv-mode .player-tag{font-size:16px; padding:10px 18px;}
 #frame.tv-mode .ring-wrap{width:100px; height:100px;}
 #frame.tv-mode .ring-wrap svg{width:100px; height:100px;}
@@ -205,20 +414,14 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
    écran de la session et le dernier badge des mini-jeux. */
 .topbar > div:first-child,
 .palm-header{padding-right:52px;}
-.game-card .game-meta{align-items:center;}
-.game-rules-link{margin-left:auto; color:var(--text-dim); text-decoration:underline; text-underline-offset:3px; cursor:pointer;}
 
-/* --- Barrière d'âge et informations légales --------------------------------- */
-#screen-age{align-items:center; justify-content:center;}
-.age-wrap{display:flex; flex-direction:column; align-items:center; text-align:center; gap:0; max-width:340px;}
-.age-mark{font-family:'Unbounded', sans-serif; font-size:44px; color:var(--accent); letter-spacing:1px; margin-bottom:18px;}
-.age-title{font-family:'Unbounded', sans-serif; font-size:26px; color:var(--text); line-height:1.25; margin-bottom:14px;}
-.age-text{font-size:14px; color:var(--text-dim); line-height:1.55; margin-bottom:12px;}
-.age-actions{display:flex; flex-direction:column; gap:10px; width:100%; margin-top:22px;}
-.age-sanitaire{font-size:11px; color:var(--text-faint); line-height:1.5; margin-top:30px; letter-spacing:0.2px;}
+/* --- Badge 18+ et informations légales --------------------------------------- */
+/* Discret, non bloquant : posé en haut à droite de l'accueil, renvoie vers les
+   informations légales complètes au clic (voir openLegalScreen). */
+.age-badge{position:absolute; top:14px; right:58px; z-index:5; font-family:'Anton', sans-serif; font-size:12px; font-weight:700; color:var(--text-dim); background:var(--surface-2); border-radius:999px; padding:5px 11px; cursor:pointer; letter-spacing:0.5px; height:34px; box-sizing:border-box; display:flex; align-items:center;}
 
 .legal-section{margin-bottom:26px;}
-.legal-h{font-family:'Unbounded', sans-serif; font-size:17px; color:var(--accent); margin:0 0 10px;}
+.legal-h{font-family:'Anton', sans-serif; font-size:17px; color:var(--accent); margin:0 0 10px;}
 .legal-p{font-size:13.5px; color:var(--text-dim); line-height:1.6; margin:0 0 12px;}
 .legal-p b{color:var(--text); font-weight:600;}
 .legal-date{font-size:12px; color:var(--text-faint);}
@@ -233,7 +436,7 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
    jamais du mouvement seul). */
 #frame.chaos-mode::before, #frame.chaos-mode::after{
   content:''; position:absolute; left:0; right:0; height:7px; z-index:500; pointer-events:none;
-  background:repeating-linear-gradient(135deg, var(--clay) 0 10px, #1E1A14 10px 20px);
+  background:repeating-linear-gradient(135deg, var(--clay) 0 10px, var(--bg) 10px 20px);
   background-size:200% 100%;
 }
 #frame.chaos-mode::before{top:0;}
@@ -243,30 +446,121 @@ input[type="range"]::-moz-range-thumb{width:26px; height:26px; border-radius:50%
 }
 @keyframes hazardMarch{ from{background-position:0 0;} to{background-position:-40px 0;} }
 
-#frame.chaos-mode #screen-main[data-type="defi"] .main-body{background:var(--clay);}
-#frame.chaos-mode #screen-main[data-type="defi"] .item-text{text-transform:uppercase; letter-spacing:0.01em; font-weight:700;}
+#frame.chaos-mode #screen-main[data-scene="defi"] .scene{--scene-accent:var(--clay);}
+#frame.chaos-mode #screen-main[data-scene="defi"] .scene::before{opacity:0.24;}
+#frame.chaos-mode #screen-main[data-scene="defi"] .scene-instruction.big{text-transform:uppercase;}
+#frame.chaos-mode #screen-main[data-scene="defi"] .scene-who-name{color:var(--clay);}
 #frame.chaos-mode #screen-main .ring-fg{stroke:var(--clay);}
 @media (prefers-reduced-motion: no-preference){
-  #frame.chaos-mode #screen-main[data-type="defi"] .main-body{ animation:chaosPulse 1.3s ease-in-out infinite; }
+  #frame.chaos-mode #screen-main[data-scene="defi"] .scene-avatar.big{ animation:chaosPulse 1.3s ease-in-out infinite; }
 }
 @keyframes chaosPulse{
-  0%,100%{ box-shadow:0 10px 26px rgba(30,26,20,0.16), 0 0 0 0 rgba(196,52,43,0.5); }
-  50%{ box-shadow:0 10px 26px rgba(30,26,20,0.16), 0 0 0 7px rgba(196,52,43,0); }
+  0%,100%{ box-shadow:0 10px 26px rgba(0,0,0,0.55), 0 0 0 0 rgba(255,59,92,0.6); }
+  50%{ box-shadow:0 10px 26px rgba(0,0,0,0.55), 0 0 0 10px rgba(255,59,92,0); }
 }
 
-/* --- Interface ordinateur ----------------------------------------------------
-   Sous 900px de large, rien ne change : #frame occupe tout l'écran comme avant.
-   Au-dessus, plutôt qu'une colonne étroite perdue dans un fond noir, on agrandit
-   #frame lui-même (boutons, textes, fond : tout suit, puisque c'est un simple
-   transform:scale) pour qu'il remplisse l'écran en conservant ses proportions.
-   --app-scale est calculée en JS (voir index.html, fitFrameScale) à partir du
-   canevas de référence 480×900 et plafonnée pour ne pas devenir démesurée sur
-   un très grand écran ; elle n'est utilisée que par cette media query. */
-@media (min-width:900px){
-  html,body{ background:var(--bg); }
-  #frame{
-    width:480px; max-width:none; height:700px;
-    transform:scale(var(--app-scale, 1));
-    transform-origin:center center;
-  }
+/* Panneau joueurs : indice d'état + distinction des prénoms identiques */
+.players-sheet-hint{font-size:12px; color:var(--text-faint); letter-spacing:0.3px;}
+.dup-tag{display:inline-flex; align-items:center; justify-content:center; min-width:17px; height:17px;
+  border-radius:20px; background:var(--surface-2); color:var(--text-dim); font-size:10px;
+  font-family:'IBM Plex Mono',monospace; margin-left:5px; padding:0 4px;}
+.session-player-row{display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:9px 2px; border-bottom:1px solid var(--line); font-size:14px;}
+.session-player-row > span:first-child{display:flex; align-items:center; gap:9px; min-width:0; overflow-wrap:anywhere;}
+.remove-player-x{color:var(--text-faint); cursor:pointer; padding:6px 10px; flex-shrink:0;}
+
+/* --- PAGE DE CONFIGURATION UNIQUE -------------------------------------------------
+   Un seul écran : mode, durée, joueurs, prénoms, action. Pas de grosses cartes autour
+   de chaque réglage — juste des blocs séparés par du rythme vertical. */
+/* NE PAS mettre de display ici sans .active : une règle #id bat .screen{display:none}
+   et l'écran resterait affiché en permanence, superposé à l'accueil. */
+#screen-setup{padding-bottom:0;}
+#screen-setup.active{display:flex; flex-direction:column;}
+.setup-page{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:18px;}
+.setup-title{font-family:'Anton',sans-serif; font-size:34px; line-height:1.05; color:var(--text); margin:2px 0 22px;}
+
+.setup-block{margin-bottom:26px;}
+.setup-legend{font-size:10.5px; letter-spacing:2.4px; text-transform:uppercase;
+  color:var(--text-faint); margin-bottom:11px;}
+.setup-legend-hint{text-transform:none; letter-spacing:0.2px; opacity:0.7;}
+
+/* Sélecteur horizontal (ambiance, durée) : sélection immédiatement visible */
+.seg{display:flex; gap:8px;}
+.seg-btn{flex:1; background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  color:var(--text-dim); font-family:'Work Sans',sans-serif; font-size:14px; font-weight:600;
+  padding:15px 6px; min-height:52px; cursor:pointer;
+  transition:transform .1s cubic-bezier(.34,1.56,.64,1), border-color .16s, color .16s, background .16s;}
+.seg-btn:active{transform:scale(0.95);}
+.seg-btn.selected{border-color:var(--accent); color:var(--ink-on-light); background:var(--accent);
+  box-shadow:0 4px 16px rgba(232,255,61,0.22);}
+
+/* Compteur −  4 joueurs  + */
+.counter{display:flex; align-items:center; justify-content:space-between; gap:14px;}
+.counter-btn{width:54px; height:54px; flex-shrink:0; border-radius:50%;
+  background:var(--surface); border:1px solid var(--line); color:var(--text);
+  font-size:23px; line-height:1; cursor:pointer;
+  transition:transform .1s cubic-bezier(.34,1.56,.64,1), opacity .16s;}
+.counter-btn:active{transform:scale(0.9);}
+.counter-btn:disabled{opacity:0.3; cursor:default; transform:none;}
+.counter-value{flex:1; text-align:center; font-family:'Anton',sans-serif; font-size:29px; color:var(--text);}
+.counter-unit{font-family:'Work Sans',sans-serif; font-size:14px; font-weight:500; color:var(--text-dim);}
+
+/* Prénoms : une ligne par joueur, grande zone tactile, repère discret */
+.name-rows{display:flex; flex-direction:column; gap:8px;}
+.name-row{display:flex; align-items:center; gap:12px; background:var(--surface);
+  border:1px solid var(--line); border-radius:14px; padding:0 14px; min-height:54px;}
+.name-row:focus-within{border-color:var(--accent);}
+.name-row-dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+.name-row-input{flex:1; min-width:0; background:none; border:none; outline:none;
+  color:var(--text); font-family:'Work Sans',sans-serif; font-size:16px; padding:15px 0;}
+.name-row-input::placeholder{color:var(--text-faint);}
+@media (prefers-reduced-motion: no-preference){
+  .name-row{animation:nameRowIn .22s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes nameRowIn{ from{ opacity:0; transform:translateY(-6px);} to{ opacity:1; transform:none;} }
 }
+
+/* Action principale : fixée en bas, avec sa propre place réservée (jamais par-dessus
+   les champs, et au-dessus de la zone de sécurité du téléphone). */
+.setup-cta{flex-shrink:0; padding:12px 0 calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg, rgba(13,13,13,0), var(--bg) 34%);}
+.setup-cta .btn{min-height:58px;}
+
+/* --- ACCUEIL : lancement divisé en deux ambiances ---------------------------------
+   Le choix chill/chaos se fait ici, pas dans les réglages. Chaque moitié porte son
+   ambiance : le chaos en jaune acide plein, le chill en surface sombre et verte. */
+.launch-split{display:flex; gap:10px; margin-bottom:14px;}
+.launch-half{flex:1; min-width:0; display:flex; flex-direction:column; align-items:flex-start;
+  gap:5px; border:none; border-radius:22px; padding:24px 18px; cursor:pointer; text-align:left;
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.launch-half:active{transform:scale(0.95);}
+.launch-half-name{font-family:'Anton',sans-serif; font-size:25px; letter-spacing:1px; line-height:1;}
+.launch-half-tag{font-family:'Work Sans',sans-serif; font-size:11.5px; line-height:1.3; opacity:0.72;}
+
+.launch-chaos{background:linear-gradient(150deg, var(--accent-bright), var(--accent) 55%, var(--accent-deep));
+  box-shadow:0 8px 24px rgba(232,255,61,0.32);}
+.launch-chaos .launch-half-name{color:var(--ink-on-light);}
+.launch-chaos .launch-half-tag{color:rgba(13,13,13,0.75);}
+
+.launch-chill{background:linear-gradient(150deg, #1F2A24, var(--surface) 60%);
+  border:1px solid rgba(143,232,168,0.34); box-shadow:0 6px 20px rgba(0,0,0,0.35);}
+.launch-chill .launch-half-name{color:var(--sage);}
+.launch-chill .launch-half-tag{color:var(--text-faint);}
+
+/* Le bouton de lancement des réglages reprend l'ambiance choisie. */
+#setup-launch-btn.is-chill{background:var(--sage); color:var(--ink-on-light);
+  box-shadow:0 6px 18px rgba(143,232,168,0.28);}
+
+/* Sous-titre des réglages : dit d'emblée que c'est court */
+.setup-subtitle{font-size:13.5px; color:var(--text-dim); margin:-14px 0 24px;}
+
+/* Reprise du groupe précédent : proposée, jamais imposée */
+.reuse-group{width:100%; background:none; border:1px dashed var(--line); border-radius:14px;
+  color:var(--text-dim); font-family:'Work Sans',sans-serif; font-size:12.5px; padding:13px 14px;
+  margin-bottom:10px; cursor:pointer; text-align:left; overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap;}
+.reuse-group:active{transform:scale(0.98);}
+
+/* Repère de saisie plus visible : le champ vide doit appeler à écrire */
+.name-row-input::placeholder{color:var(--text-faint); opacity:1;}
+.name-row{border-style:dashed;}
+.name-row:focus-within{border-style:solid;}

@@ -8,10 +8,11 @@ const SESSION_SNAPSHOT_KEY = 'soiree_session_snapshot_v1';
 // Champs de `state` à sauvegarder : tout ce qui décrit la partie en cours, sans les
 // handles d'intervalle (non sérialisables et de toute façon invalides après reload).
 const SNAPSHOT_FIELDS = [
-  'playerCount','players','durationMin','intensityValue',
+  'playerCount','players','durationMin','intensityValue','sessionMode',
   'globalSecondsTotal','globalSecondsLeft','activeRules',
-  'ringTotal','ringLeft','bags','climaxElapsedTarget','climaxFired',
-  'climaxQueueIndex','stats','typesQueue','queueIndex','lastItem','paused'
+  'ringTotal','ringLeft','climaxElapsedTarget','climaxFired',
+  'climaxQueueIndex','stats','typesQueue','queueTierWindows','currentTierWindow',
+  'queueIndex','lastItem','paused','timeUp','timeUpGrace'
 ];
 
 function saveSessionSnapshot(){
@@ -73,31 +74,25 @@ function resumeSession(){
 
   SNAPSHOT_FIELDS.forEach(k=>{ if(k in snapshot) state[k] = snapshot[k]; });
   state.sessionActive = true;
+  // "Accueil" met la partie en pause (voir quitSessionToHome) : on la l\u00e8ve ici,
+  // sinon le minuteur repartirait fig\u00e9 et le chemin n'avancerait plus.
+  state.paused = false;
+  state.pausedForPlayers = false;
   // Compatibilité avec une snapshot enregistrée avant l'ajout des stats fait/raté par
   // joueur : évite un throw dans markChallengeResult/renderPlayerResults si absentes.
   state.stats.playerChallenges = state.stats.playerChallenges || {};
   state.stats.playerDrinks = state.stats.playerDrinks || {};
 
-  document.getElementById('frame').classList.toggle('chaos-mode', state.intensityValue >= 85);
+  document.getElementById('frame').classList.toggle('chaos-mode', state.sessionMode !== 'chill' && state.intensityValue >= 85);
   goTo('main');
-  document.getElementById('global-fill').style.width =
-    Math.max(0, (state.globalSecondsLeft / state.globalSecondsTotal) * 100) + '%';
+  if(typeof renderProgressPath === 'function') renderProgressPath();
   renderRulesBanner();
   renderChallengeCounter();
 
   if(state.lastItem){
-    document.getElementById('screen-main').dataset.type = (typeof EYEBROW_TO_TYPE !== 'undefined' && EYEBROW_TO_TYPE[state.lastItem.eyebrow]) || 'defi';
-    document.getElementById('ticket-num').textContent = 'N° ' + String(state.queueIndex).padStart(3,'0') + ' / ' + state.typesQueue.length;
-    document.getElementById('item-eyebrow').textContent = state.lastItem.eyebrow;
-    document.getElementById('item-text').textContent = soberize(state.lastItem.text);
-    const tagsWrap = document.getElementById('item-players');
-    tagsWrap.innerHTML = '';
-    (state.lastItem.players||[]).forEach(p=>{
-      const tag = document.createElement('div');
-      tag.className = 'player-tag';
-      tag.innerHTML = '<span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+escapeHtml(p.name);
-      tagsWrap.appendChild(tag);
-    });
+    // Rejoue la scène exactement comme elle était (voir scenes.js) : même composition,
+    // mêmes joueurs, sans repiocher de contenu dans le sac.
+    renderScene(state.lastItem.eyebrow, state.lastItem.text, state.lastItem.players||[], 0);
     renderMainFooter(state.lastItem.eyebrow === 'Défi');
   }
 

@@ -16,16 +16,5 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="game.js"></script>
-<script>
-  // Interface ordinateur (voir style.css, min-width:900px) : voir index.html du
-  // site principal pour la même logique, notes détaillées là-bas.
-  function fitFrameScale(){
-    const DESIGN_W = 480, DESIGN_H = 700, MAX_SCALE = 2.2;
-    const scale = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H, MAX_SCALE);
-    document.documentElement.style.setProperty('--app-scale', scale);
-  }
-  fitFrameScale();
-  window.addEventListener('resize', fitFrameScale);
-</script>
 </body>
 </html>

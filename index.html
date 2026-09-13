@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="Soirée">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/games-shared.css">
@@ -33,11 +33,12 @@
   <button id="sound-toggle-btn" onclick="Sound.toggle()">🔊</button>
 
   <div class="screen active" id="screen-home">
+    <div class="age-badge" onclick="openLegalScreen()">18+</div>
     <div class="home-content">
       <div id="resume-banner" class="resume-banner hidden">
         <div id="resume-banner-text">Soirée en cours</div>
         <div style="display:flex; gap:8px;">
-          <button class="btn btn-primary" style="padding:10px 16px;" onclick="resumeSession()">Reprendre</button>
+          <button class="btn btn-primary" style="padding:10px 16px;" onclick="resumeSession()">Reprendre le before</button>
           <button class="btn btn-ghost" style="padding:10px 16px;" onclick="dismissResumableSession()">Ignorer</button>
         </div>
       </div>
@@ -46,18 +47,24 @@
         <div class="hero-tag">Ce soir, personne ne gère</div>
       </div>
       <div style="width:100%;">
-        <button class="mode-card primary" onclick="goTo('setup')">
-          <div class="mode-title">Mode rapide</div>
-          <div class="mode-desc">L'app pilote toute la soirée</div>
-        </button>
+        <!-- Le before se lance directement dans son ambiance : le choix Chill/Chaos se
+             fait ici, plus dans la page de réglages. -->
+        <div class="launch-split">
+          <button class="launch-half launch-chill" onclick="openLaunchEntry('chill')">
+            <span class="launch-half-name">CHILL</span>
+            <span class="launch-half-tag">Tranquille, on chauffe</span>
+          </button>
+          <button class="launch-half launch-chaos" onclick="openLaunchEntry('chaos')">
+            <span class="launch-half-name">CHAOS</span>
+            <span class="launch-half-tag">Ça part tout de suite</span>
+          </button>
+        </div>
         <button class="mode-card" onclick="openGamesList()">
-          <div class="mode-title">Mode jeux</div>
-          <div class="mode-desc">Les classiques, un par un</div>
+          <div class="mode-name">Choisir un jeu</div>
+          <div class="mode-tag">Votre jeu préféré, quand vous voulez.</div>
         </button>
         <div class="home-links">
-          <span onclick="openHistoryScreen()">Historique</span>
           <span onclick="openCustomScreen()">Mes ajouts</span>
-          <span class="sober-mode-toggle" onclick="toggleSoberMode()">Sans alcool</span>
           <span onclick="openLegalScreen()">Infos l&eacute;gales</span>
         </div>
       </div>
@@ -65,51 +72,42 @@
     </div>
   </div>
 
-  <div class="screen" id="screen-setup">
-    <div class="progress" id="setup-progress"><div></div><div></div><div></div><div></div></div>
+  <!-- Page de configuration unique : mode, durée, joueurs et prénoms sur un seul écran.
+       Remplace l'ancien tunnel en trois étapes avec boutons "Suivant". -->
+  <div class="screen scroll-screen" id="screen-setup">
+    <div class="topnav"><div class="back-link" onclick="resetAll()">← Accueil</div></div>
 
-    <div class="step active" data-step="0">
-      <h2>Vous êtes combien ?</h2>
-      <div class="step-sub">Entre 2 et 20 joueurs</div>
-      <div class="stepper">
-        <button onclick="changeCount(-1)">–</button>
-        <input class="count-input" id="player-count" type="number" value="4" min="2" max="20" oninput="clampCount()">
-        <button onclick="changeCount(1)">+</button>
+    <div class="setup-page">
+      <h2 class="setup-title">Réglages</h2>
+      <div class="setup-subtitle">Deux réglages, et ça part.</div>
+
+      <!-- 2. Durée (uniquement pour le before) -->
+      <div class="setup-block" id="setup-duration-block">
+        <div class="setup-legend">Durée</div>
+        <div class="seg" id="duration-seg"></div>
       </div>
-      <div class="spacer"></div>
-      <button class="btn btn-primary" onclick="nextStep()">Suivant</button>
-    </div>
 
-    <div class="step" data-step="1">
-      <h2>Les prénoms</h2>
-      <div class="step-sub">Un par un, validez avec Entrée</div>
-      <input class="name-input" id="name-field" placeholder="Tape un prénom et valide" maxlength="16">
-      <div class="step-sub" id="names-remaining" style="margin-bottom:14px;">Encore 4 prénoms sur 4</div>
-      <div class="chips" id="chips-wrap"></div>
-      <div class="spacer"></div>
-      <button class="btn btn-primary" id="names-next-btn" onclick="nextStep()" disabled>Suivant</button>
-    </div>
-
-    <div class="step" data-step="2">
-      <h2>Durée de la soirée</h2>
-      <div class="step-sub">Chaque durée a sa propre composition de contenu</div>
-      <div class="choice-list" id="duration-list"></div>
-      <div class="spacer"></div>
-      <button class="btn btn-primary" onclick="nextStep()">Suivant</button>
-    </div>
-
-    <div class="step" data-step="3">
-      <h2>Quelle ambiance ce soir ?</h2>
-      <div class="step-sub">Glissez pour régler l'intensité</div>
-      <div class="slider-wrap">
-        <input type="range" id="intensity-slider" min="0" max="100" value="50" oninput="updateIntensityLabel(this.value)">
-        <div class="slider-marks"><span>Soft</span><span>Fun</span><span>Chaos</span></div>
+      <!-- 3. Nombre de joueurs -->
+      <div class="setup-block">
+        <div class="setup-legend">Joueurs</div>
+        <div class="counter">
+          <button class="counter-btn" id="count-minus" onclick="changeCount(-1)" aria-label="Retirer un joueur">−</button>
+          <div class="counter-value"><span id="player-count-label">4</span> <span class="counter-unit">joueurs</span></div>
+          <button class="counter-btn" id="count-plus" onclick="changeCount(1)" aria-label="Ajouter un joueur">+</button>
+        </div>
       </div>
-      <div class="slider-label" id="intensity-label">Fun</div>
-      <div class="slider-sub" id="intensity-sub">Le standard, ça commence à bouger</div>
-      <div class="spacer"></div>
-      <button class="btn btn-ghost" style="margin-bottom:10px;" onclick="openShareScreen()">Partager cette config</button>
-      <button class="btn btn-primary" onclick="launchSession()">Lancer</button>
+
+      <!-- 4. Prénoms, directement dans la page -->
+      <div class="setup-block">
+        <div class="setup-legend">Prénoms <span class="setup-legend-hint">facultatif</span></div>
+        <button class="reuse-group" id="reuse-group" style="display:none;" onclick="reusePreviousGroup()"></button>
+        <div class="name-rows" id="name-rows"></div>
+      </div>
+    </div>
+
+    <!-- 5. Action principale -->
+    <div class="setup-cta">
+      <button class="btn btn-primary" id="setup-launch-btn" onclick="launchSession()">Lancer le before</button>
     </div>
   </div>
 
@@ -119,48 +117,47 @@
   </div>
 
   <div class="screen" id="screen-main">
+    <!-- Chemin de progression : décor d'arrière-plan, jamais interactif (pointer-events
+         désactivé en CSS) pour ne pas capter les gestes destinés à la scène. -->
+    <div class="trail" id="trail" aria-hidden="true"></div>
     <div class="topbar">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div class="game-home-btn" onclick="if(confirm('Quitter la soirée ?')){clearInterval(state.globalInterval);clearInterval(state.ringInterval);state.sessionActive=false;clearSessionSnapshot();document.getElementById('frame').classList.remove('chaos-mode');goTo('home');}">Accueil</div>
-        <div class="tv-mode-toggle" onclick="toggleTvMode()" title="Mode grand écran">⛶</div>
+      <div class="topbar-row">
+        <button class="top-btn" onclick="quitSessionToHome()">Accueil</button>
+        <div class="topbar-right">
+          <button class="top-btn" onclick="openAddPlayerOverlay()">+ <span class="label-long">Ajouter des </span>joueurs</button>
+          <button class="top-btn icon-only" id="sound-inline-btn" onclick="Sound.toggle()" aria-label="Son">♪</button>
+        </div>
       </div>
-      <div class="global-track"><div class="global-fill" id="global-fill"></div></div>
-      <div id="rules-banner"></div>
-      <div id="challenge-counter" class="challenge-counter"></div>
+      <div class="topbar-secondary">
+        <div id="rules-count-btn" class="rules-count-btn" style="display:none;" onclick="openRulesSheet()"></div>
+        <div class="trail-remaining" id="trail-remaining"></div>
+      </div>
     </div>
-    <div class="main-body">
-      <div class="ticket-num" id="ticket-num"></div>
-      <div class="item-eyebrow" id="item-eyebrow">Défi</div>
-      <div class="item-text" id="item-text">—</div>
-      <div class="player-tags" id="item-players"></div>
-    </div>
+    <div class="scene-wrap"><div class="scene" id="scene"></div></div>
     <div class="main-footer">
-      <div class="ring-wrap">
+      <div class="ring-wrap" id="ring-wrap">
         <svg width="48" height="48" viewBox="0 0 48 48">
           <circle class="ring-bg" cx="24" cy="24" r="20"></circle>
           <circle class="ring-fg" id="ring-fg" cx="24" cy="24" r="20" stroke-dasharray="125.6" stroke-dashoffset="0"></circle>
         </svg>
         <div class="ring-label" id="ring-label">10</div>
       </div>
-      <div class="footer-buttons" id="footer-buttons">
-        <button class="btn btn-ghost footer-btn" onclick="openPause()">Pause</button>
-        <button class="btn btn-ghost footer-btn" id="next-btn" onclick="advanceManually()">Suivant</button>
-      </div>
-      <div class="end-early-link" onclick="endSessionEarly()">Terminer la soirée maintenant</div>
+      <div class="footer-buttons" id="footer-buttons"></div>
     </div>
   </div>
 
   <div class="screen" id="screen-special">
+    <div class="special-glow"></div>
     <div id="special-eyebrow">Moment</div>
-    <div id="special-icon">▲</div>
+    <div id="special-icon"></div>
     <div id="special-text">—</div>
+    <div id="special-recap" class="special-recap"></div>
   </div>
 
   <div class="screen" id="screen-pause">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
     <div style="font-size:14px; letter-spacing:1px;">En pause</div>
     <button class="btn btn-primary" style="width:auto; padding:14px 30px;" onclick="closePause()">Reprendre</button>
-    <div class="end-early-link" onclick="endSessionEarly()">Terminer la soirée maintenant</div>
   </div>
 
   <div class="screen scroll-screen" id="screen-end">
@@ -170,17 +167,27 @@
     <div id="player-results-wrap"></div>
     <div id="stats-wrap"></div>
     <div class="spacer"></div>
-    <button class="btn btn-ghost" style="margin-bottom:10px;" onclick="openRecapScreen()">Partager le récap</button>
-    <button class="btn btn-primary" onclick="resetAll()">Relancer une soirée</button>
+    <button class="btn btn-primary" style="margin-bottom:10px;" onclick="playAgainSameConfig()">🔁 Rejouer</button>
+    <div class="end-actions-row">
+      <button class="btn btn-ghost" onclick="changeDuration()">Changer la durée</button>
+      <button class="btn btn-ghost" onclick="openGamesList()">Choisir un jeu</button>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="openRecapScreen()">Partager le récap</button>
+    <div class="end-early-link" style="text-align:center;" onclick="resetAll()">Accueil</div>
     <div class="legal-footer" id="end-sanitaire"></div>
   </div>
 
   <div class="screen scroll-screen" id="screen-games-list">
     <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
     <h2 style="font-size:20px; margin-bottom:4px;">Les classiques</h2>
-    <div class="step-sub" style="margin-bottom:16px;">Touche un jeu pour le lancer</div>
     <div id="games-filter-wrap" class="games-filter-wrap"></div>
-    <div id="games-list-wrap"></div>
+    <div id="games-list-wrap" class="games-scene"></div>
+    <div class="games-nav">
+      <div class="games-nav-btn" onclick="scrollGamesScene(-1)" aria-label="Jeu précédent">←</div>
+      <div class="games-nav-btn" onclick="scrollGamesScene(1)" aria-label="Jeu suivant">→</div>
+    </div>
+    <button class="games-index-toggle" id="games-index-toggle" onclick="toggleGamesIndex()">Tous les jeux</button>
+    <div id="games-index" class="games-index"></div>
   </div>
 
   <div class="screen scroll-screen" id="screen-game-detail">
@@ -475,22 +482,6 @@
     <div class="palm-footer" id="pil-footer"></div>
   </div>
 
-  <!-- Barrière d'âge : premier écran au tout premier lancement -->
-  <div class="screen" id="screen-age">
-    <div class="age-wrap">
-      <div id="age-body">
-        <div class="age-mark">18+</div>
-        <div class="age-title">R&eacute;serv&eacute; aux majeurs</div>
-        <div class="age-text">Soir&eacute;e propose des jeux &agrave; boire entre adultes. Pour continuer, tu dois avoir 18&nbsp;ans ou plus.</div>
-      </div>
-      <div id="age-actions" class="age-actions">
-        <button class="btn btn-primary" onclick="confirmAge()">J&rsquo;ai 18 ans ou plus</button>
-        <button class="btn btn-ghost" onclick="refuseAge()">J&rsquo;ai moins de 18 ans</button>
-      </div>
-      <div class="age-sanitaire" id="age-sanitaire"></div>
-    </div>
-  </div>
-
   <!-- Mentions l&eacute;gales, donn&eacute;es et conditions -->
   <div class="screen scroll-screen" id="screen-legal">
     <div class="topnav"><div class="back-link" onclick="goTo('home')">&larr; Accueil</div></div>
@@ -523,17 +514,6 @@
     <div class="spacer"></div>
     <button class="btn btn-ghost" style="margin-bottom:10px;" onclick="downloadRecapImage()">Télécharger l'image</button>
     <button class="btn btn-primary" onclick="shareRecapImage()">Partager</button>
-  </div>
-
-  <!-- Historique cumulé des soirées -->
-  <div class="screen scroll-screen" id="screen-history">
-    <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
-    <h2 style="font-size:20px; margin-bottom:4px;">Historique</h2>
-    <div class="step-sub" style="margin-bottom:22px;">Les records de ce groupe, cumulés sur cet appareil</div>
-    <div id="history-wrap"></div>
-    <div id="hall-of-fame-wrap"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-ghost" onclick="clearHistory()">Effacer l'historique</button>
   </div>
 
   <!-- Contenu personnalisé (mode solo custom) -->
@@ -571,10 +551,43 @@
   <div id="rules-overlay" class="rules-overlay hidden" onclick="closeRulesOverlay()">
     <div class="rules-modal" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-family:Unbounded,sans-serif;font-size:18px;">Règles</div>
+        <div style="font-family:Anton,sans-serif;font-size:18px;">Règles</div>
         <div style="cursor:pointer;color:var(--text-dim);font-size:18px;" onclick="closeRulesOverlay()">✕</div>
       </div>
       <div id="rules-overlay-content"></div>
+    </div>
+  </div>
+
+  <!-- Soirée déjà en cours : choix explicite plutôt qu'une reprise silencieuse -->
+  <div id="session-conflict-overlay" class="rules-overlay hidden">
+    <div class="rules-modal" onclick="event.stopPropagation()" style="text-align:center;">
+      <div style="font-family:Anton,sans-serif;font-size:19px;margin-bottom:10px;">Soirée en cours</div>
+      <p id="session-conflict-text" style="color:var(--text-dim);font-size:14px;line-height:1.5;margin:0 0 22px;"></p>
+      <button class="btn btn-primary" style="margin-bottom:10px;" onclick="conflictResume()">Reprendre cette soirée</button>
+      <button class="btn btn-ghost" onclick="conflictRestart()">Recommencer une nouvelle</button>
+    </div>
+  </div>
+
+  <!-- Gérer les joueurs en cours de partie (bouton + de la topbar) -->
+  <!-- Ajout de joueurs : panneau depuis le bas, partie suspendue pendant la saisie -->
+  <div id="players-sheet" class="rules-sheet" onclick="closeAddPlayerOverlay()">
+    <div class="rules-sheet-panel" onclick="event.stopPropagation()">
+      <div class="rules-sheet-grab"></div>
+      <div class="rules-sheet-title">Joueurs</div>
+      <div class="players-sheet-hint" id="players-sheet-hint"></div>
+      <div id="session-players-list" style="margin:14px 0 16px;"></div>
+      <input class="name-input" id="add-player-field" placeholder="Prénom, puis Entrée" maxlength="16" autocomplete="off">
+      <button class="btn btn-primary" style="margin-top:12px;" onclick="closeAddPlayerOverlay()">Reprendre la partie</button>
+    </div>
+  </div>
+
+  <!-- Panneau des règles actives, coulissant depuis le bas -->
+  <div id="rules-sheet" class="rules-sheet" onclick="closeRulesSheet()">
+    <div class="rules-sheet-panel" onclick="event.stopPropagation()">
+      <div class="rules-sheet-grab"></div>
+      <div class="rules-sheet-title">Règles actives</div>
+      <div id="rules-sheet-list"></div>
+      <button class="btn btn-ghost" style="margin-top:16px;" onclick="closeRulesSheet()">Fermer</button>
     </div>
   </div>
 
@@ -582,6 +595,7 @@
 
 <script src="js/data/content.js"></script>
 <script src="js/data/games-catalog.js"></script>
+<script src="js/data/game-art.js"></script>
 <script src="js/data/underdicateur-words.js"></script>
 <script src="js/core/state.js"></script>
 <script src="js/core/audio.js"></script>
@@ -590,9 +604,9 @@
 <script src="js/core/setup-wizard.js"></script>
 <script src="js/core/custom-content.js"></script>
 <script src="js/core/sober-mode.js"></script>
+<script src="js/core/scenes.js"></script>
 <script src="js/core/session-engine.js"></script>
 <script src="js/core/persistence.js"></script>
-<script src="js/core/history.js"></script>
 <script src="js/core/display-mode.js"></script>
 <script src="js/core/legal.js"></script>
 <script src="js/lib/qrcode.js"></script>
@@ -611,16 +625,12 @@
 <script>
   // Initialisation au chargement : applique un lien de config partagé s'il y en a un
   // (prioritaire), sinon propose de reprendre une soirée interrompue. Restaure aussi
-  // les préférences visuelles/sonores persistées.
+  // les préférences visuelles persistées. Plus de barrière d'âge bloquante : l'accueil
+  // s'affiche directement, avec juste le badge 18+ (voir screen-home).
   applyTvModeClass();
-  renderSoberModeToggle();
   renderSanitaryNotices();
-  // La barrière d’âge passe avant tout : ni config partagée ni reprise de soirée
-  // ne doivent pouvoir afficher l’app à quelqu’un qui n’a pas déclaré sa majorité.
-  if(!checkAgeGate()){
-    const hadSharedConfig = applySharedConfigFromUrl();
-    if(!hadSharedConfig) checkForResumableSession();
-  }
+  const hadSharedConfig = applySharedConfigFromUrl();
+  if(!hadSharedConfig) checkForResumableSession();
 
   // Enregistre le service worker pour le mode hors-ligne (voir sw.js). Échoue
   // silencieusement sur file:// ou http non-localhost (contexte non sécurisé) : l'app
@@ -628,18 +638,6 @@
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   }
-
-  // Interface ordinateur (voir css/app.css, min-width:900px) : au-delà de ce seuil,
-  // #frame est agrandi et mis à l'échelle pour occuper l'écran en conservant ses
-  // proportions (boutons, textes, fond… tout suit) au lieu de rester une colonne
-  // étroite. --app-scale n'est utilisé que par la media query correspondante.
-  function fitFrameScale(){
-    const DESIGN_W = 480, DESIGN_H = 700, MAX_SCALE = 2.2;
-    const scale = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H, MAX_SCALE);
-    document.documentElement.style.setProperty('--app-scale', scale);
-  }
-  fitFrameScale();
-  window.addEventListener('resize', fitFrameScale);
 </script>
 </body>
 </html>

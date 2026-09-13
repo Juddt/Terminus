@@ -16,7 +16,9 @@
     return canvas;
   }
   function resize(){
-    if(!canvas) return;
+    // parentElement peut être absent si le canvas n'est pas (encore) attaché au DOM :
+    // un accès direct fait planter tout le script de confettis.
+    if(!canvas || !canvas.parentElement) return;
     const r = canvas.parentElement.getBoundingClientRect();
     canvas.width = r.width; canvas.height = r.height;
   }

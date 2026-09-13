@@ -1,37 +1,44 @@
 :root{
-  --bg: #F3EAD6;
-  --surface: #ECDFC4;
-  --surface-2: #E4D4B4;
-  --line: rgba(30,26,20,0.14);
-  --accent: #E1502F;
-  --accent-bright: #EB6B4A;
-  --accent-deep: #B23E22;
-  --sage: #2E7D57;
-  --clay: #C4342B;
-  --text: #1E1A14;
-  --text-dim: rgba(30,26,20,0.62);
-  --text-faint: rgba(30,26,20,0.42);
-  /* Une couleur de ticket par type de moment — le principe « Confetti » : on reconnaît
-     le type avant même d'avoir lu, comme des tickets de fête foraine. */
-  --type-defi: #E1502F;
-  --type-vote: #1D6E86;
-  --type-regle: #DA9A1F;
-  --type-mini: #6A4A82;
-  --type-moment: #8A6DA8;
-  --ink-on-light: #1E1A14;
-  --ink-on-dark: #FBF4E7;
+  --bg: #0D0D0D;
+  --surface: #1A1A1A;
+  --surface-2: #242424;
+  --line: rgba(255,255,255,0.14);
+  --accent: #E8FF3D;
+  --accent-bright: #F2FF7A;
+  --accent-deep: #B8CC1F;
+  --sage: #8FE8A8;
+  --clay: #FF3B5C;
+  --text: #FFF8ED;
+  --text-dim: rgba(255,248,237,0.68);
+  --text-faint: rgba(255,248,237,0.42);
+  /* Palette disciplinée façon affiche : la plupart des tickets partagent la même
+     signature jaune acide (Défi, Mini-jeu), la Règle prend le blanc chaud (calme,
+     persistant), la Question reste sur le noir (contemplatif). Le rose vif n'est
+     JAMAIS utilisé ailleurs que sur les Moments/Surprises — c'est la couleur
+     secondaire "ponctuelle" de la direction artistique, une rupture volontaire. */
+  --type-defi: #E8FF3D;
+  --type-vote: #1A1A1A;
+  --type-regle: #FFF8ED;
+  --type-mini: #E8FF3D;
+  --type-moment: #FF3B5C;
+  --ink-on-light: #0D0D0D;
+  --ink-on-dark: #FFF8ED;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
-html,body{margin:0; padding:0; height:100%; background:#0E0B08;}
+html,body{margin:0; padding:0; height:100%; background:#000;}
 body{font-family:'Work Sans', sans-serif; color:var(--text); overflow:hidden; display:flex; align-items:center; justify-content:center;}
 #frame{width:100%; max-width:480px; height:100vh; height:100dvh; background:var(--bg); position:relative; overflow:hidden;}
 .screen{position:absolute; inset:0; display:none; flex-direction:column; padding:32px 24px; box-sizing:border-box;}
 .screen.active{display:flex;}
-h1,h2,h3{font-family:'Unbounded', sans-serif; font-weight:700; margin:0;}
+h1,h2,h3{font-family:'Anton', sans-serif; font-weight:700; margin:0;}
 .eyebrow{font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
-.btn{border:none; border-radius:16px; padding:19px 20px; font-family:'Work Sans', sans-serif; font-size:15px; font-weight:500; cursor:pointer; width:100%; transition: transform .08s ease, opacity .15s ease;}
-.btn:active{transform:scale(0.97);}
-.btn-primary{background:var(--accent); color:var(--ink-on-light); font-weight:600;}
-.btn-ghost{background:transparent; border:1px solid var(--line); color:var(--text-dim);}
+.btn{border:none; border-radius:20px; padding:21px 20px; font-family:'Work Sans', sans-serif; font-size:16px; font-weight:600; cursor:pointer; width:100%; transition: transform .12s cubic-bezier(.34,1.56,.64,1), opacity .15s ease, box-shadow .12s ease;}
+.btn:active{transform:scale(0.94);}
+.btn-primary{background:var(--accent); color:var(--ink-on-light); font-weight:700; box-shadow:0 6px 18px rgba(232,255,61,0.25);}
+.btn-primary:active{box-shadow:0 2px 8px rgba(232,255,61,0.35);}
+.btn-ghost{background:var(--surface); border:1px solid var(--line); color:var(--text-dim);}
 .spacer{flex:1;}
+#screen-setup{overflow:hidden;}
+#screen-setup::after{content:''; position:absolute; bottom:-60px; right:-60px; width:190px; height:190px; border-radius:50%; background:repeating-linear-gradient(45deg, var(--accent) 0 12px, transparent 12px 24px); opacity:0.10; pointer-events:none; z-index:0;}
+#screen-setup > .step{position:relative; z-index:1;}
 .hidden{display:none !important;}

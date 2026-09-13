@@ -26,8 +26,7 @@ function decodeShareConfig(payload){
 function buildShareUrl(){
   const cfg = {
     n: state.players.map(p=>p.name),
-    d: state.durationMin,
-    i: state.intensityValue
+    d: state.durationMin
   };
   const url = new URL(window.location.href);
   url.search = '';
@@ -70,9 +69,9 @@ function copyShareUrl(){
 }
 
 // Au chargement de la page, si l'URL contient une config partagée (?c=...), on
-// pré-remplit le wizard (joueurs + durée + intensité) et on saute directement à
-// l'étape "intensité" pour confirmer/lancer — la personne qui reçoit le lien n'a
-// qu'à valider.
+// pré-remplit le wizard (joueurs + durée) et on saute directement à l'étape des
+// prénoms, prêts à valider — la personne qui reçoit le lien n'a plus qu'à passer à
+// la durée puis lancer.
 // Renvoie true si une config partagée a été trouvée et appliquée (auquel cas l'appelant
 // n'a pas besoin de proposer par-dessus le bandeau de reprise de session).
 function applySharedConfigFromUrl(){
@@ -99,7 +98,6 @@ function applySharedConfigFromUrl(){
   }));
   state.playerCount = state.players.length;
   state.durationMin = DURATIONS.some(d=>d.min===cfg.d) ? cfg.d : state.durationMin;
-  state.intensityValue = Number.isFinite(cfg.i) ? Math.max(0, Math.min(100, cfg.i)) : state.intensityValue;
 
   // Nettoie l'URL pour ne pas re-appliquer la config si l'utilisateur recharge
   // après avoir modifié ses joueurs.
@@ -107,16 +105,10 @@ function applySharedConfigFromUrl(){
   cleanUrl.searchParams.delete('c');
   window.history.replaceState({}, '', cleanUrl.toString());
 
-  goTo('setup');
-  document.getElementById('player-count').value = state.playerCount;
-  // Synchronise aussi le slider d'intensité et son libellé : sans ça, l'input DOM garde
-  // sa valeur par défaut (50) même si state.intensityValue a été mis à jour.
-  document.getElementById('intensity-slider').value = state.intensityValue;
-  updateIntensityLabel(state.intensityValue);
-  state.step = 1;
-  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
-  document.querySelector('.step[data-step="1"]').classList.add('active');
-  document.querySelectorAll('#setup-progress div').forEach((d,i)=> d.classList.toggle('done', i < state.step));
-  renderChips();
+  // Bascule sur la page de configuration unique avec les pr\u00e9noms partag\u00e9s d\u00e9j\u00e0
+  // pr\u00e9remplis. L'ancien code pointait sur le tunnel en \u00e9tapes (#player-count,
+  // .step[data-step]) qui n'existe plus : il aurait plant\u00e9 \u00e0 l'ouverture du lien.
+  nameDraft = state.players.map(p => p.name);
+  openSetupFor({ type:'before', game:null });
   return true;
 }

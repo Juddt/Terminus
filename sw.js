@@ -4,7 +4,7 @@
 // bloqués sur une vieille version jusqu'à un rechargement supplémentaire après chaque
 // mise à jour — gênant tant que l'app change encore souvent. Bumper CACHE_NAME force
 // quand même le remplacement complet du cache au prochain déploiement.
-const CACHE_NAME = 'soiree-cache-v15';
+const CACHE_NAME = 'soiree-cache-v24';
 
 const PRECACHE_URLS = [
   './',
@@ -23,6 +23,7 @@ const PRECACHE_URLS = [
   './css/games/pilliers.css',
   './js/data/content.js',
   './js/data/games-catalog.js',
+  './js/data/game-art.js',
   './js/data/underdicateur-words.js',
   './js/core/state.js',
   './js/core/navigation.js',
@@ -31,6 +32,7 @@ const PRECACHE_URLS = [
   './js/core/audio.js',
   './js/core/confetti.js',
   './js/core/sober-mode.js',
+  './js/core/scenes.js',
   './js/core/session-engine.js',
   './js/core/persistence.js',
   './js/core/history.js',

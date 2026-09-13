@@ -2,11 +2,11 @@ let creatorsGlasses = 0;
 
 let state = {
   step:0, playerCount:4, players:[],
-  durationMin:20, intensityValue:50,
+  durationMin:30, intensityValue:50, sessionMode:'chaos',
   globalSecondsTotal:0, globalSecondsLeft:0, globalInterval:null,
   ringInterval:null, activeRules:[],
   ringTotal:10, ringLeft:10,
-  paused:false, bags:{},
+  paused:false, timeUp:false, timeUpGrace:0,
   climaxElapsedTarget:0, climaxFired:false,
   stats:{ challenges:0, specials:0, rulesAdded:0, targets:{}, playerChallenges:{}, playerDrinks:{} },
   // sessionActive : vrai uniquement pendant une soirée Mode Rapide en cours (voir

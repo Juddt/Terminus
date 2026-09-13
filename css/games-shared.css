@@ -2,10 +2,10 @@
 .palm-header{display:flex; justify-content:space-between; align-items:center; padding:12px 14px 4px;}
 .game-home-btn{font-size:11px; color:var(--text-dim); opacity:0.4; cursor:pointer;}
 .palm-badges{display:flex; gap:4px;}
-.badge{background:rgba(30,26,20,0.05); border:none; border-radius:20px; padding:6px 10px; font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:3px;}
+.badge{background:rgba(255,255,255,0.07); border:none; border-radius:20px; padding:6px 10px; font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:3px;}
 .badge .bv{font-weight:700; color:var(--text); font-size:12px;}
 .palm-status-bar{padding:2px 14px 4px; display:flex; flex-wrap:wrap; gap:4px; min-height:8px;}
-.master-pill{background:rgba(225,80,47,0.14); border:none; border-radius:20px; padding:6px 10px; font-size:11px; color:var(--accent-bright); display:inline-flex; gap:4px;}
+.master-pill{background:rgba(232,255,61,0.16); border:none; border-radius:20px; padding:6px 10px; font-size:11px; color:var(--accent-bright); display:inline-flex; gap:4px;}
 .master-pill .mn{color:var(--accent-bright); font-weight:600;}
 .palm-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 16px; gap:6px; overflow:visible;}
 .palm-footer{padding:8px 16px 22px; display:flex; gap:10px;}
@@ -14,9 +14,9 @@
 .palm-card.red{background:#f6f1e7; color:#a82020; border:none;}
 .palm-card.black{background:#f6f1e7; color:#1a1a1a; border:none;}
 .palm-card .card-suit{position:absolute; bottom:8px; right:12px; font-size:18px;}
-.palm-card .card-val{font-family:'Unbounded',sans-serif;}
-.palm-player-big{font-family:'Unbounded',sans-serif; font-size:32px; color:var(--accent); font-weight:600;}
-.palm-rule-line{font-family:'Unbounded',sans-serif; font-size:20px; color:var(--text); line-height:1.35; max-width:300px; margin-top:4px;}
+.palm-card .card-val{font-family:'Anton',sans-serif;}
+.palm-player-big{font-family:'Anton',sans-serif; font-size:32px; color:var(--accent); font-weight:600;}
+.palm-rule-line{font-family:'Anton',sans-serif; font-size:20px; color:var(--text); line-height:1.35; max-width:300px; margin-top:4px;}
 .palm-kings-left{font-size:12px; color:var(--text-faint); margin-top:2px;}
 
 /* Rules overlay */

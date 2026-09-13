@@ -253,7 +253,10 @@ function palmShowBalance(){
     }
   }
 
-  document.getElementById('palm-tap-btn').addEventListener('click', doTap);
+  // Créé juste avant par le rendu du jeu, mais on garde par sécurité : un accès direct
+  // non gardé fait planter tout le script si le rendu a échoué.
+  const tapBtn = document.getElementById('palm-tap-btn');
+  if(tapBtn) tapBtn.addEventListener('click', doTap);
 }
 
 /* --- Card placed / collapse --- */

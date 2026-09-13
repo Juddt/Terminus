@@ -9,15 +9,17 @@ const Sound = (function(){
   function getCtx(){
     if(!ctx){
       const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
       ctx = new AC();
     }
-    if(ctx.state === 'suspended') ctx.resume();
+    if(ctx && ctx.state === 'suspended') ctx.resume();
     return ctx;
   }
 
   function tone(freq, duration, opts){
     opts = opts || {};
     const c = getCtx();
+    if(!c) return;
     const t0 = c.currentTime;
     const osc = c.createOscillator();
     const gain = c.createGain();
@@ -36,6 +38,7 @@ const Sound = (function(){
   function noiseBurst(duration, opts){
     opts = opts || {};
     const c = getCtx();
+    if(!c) return;
     const t0 = c.currentTime;
     const bufferSize = Math.max(1, Math.floor(c.sampleRate * duration));
     const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
@@ -123,7 +126,12 @@ const Sound = (function(){
   function play(name){
     if(muted) return;
     const fn = effects[name];
-    if(fn) fn();
+    if(!fn) return;
+    // Le son ne doit JAMAIS faire échouer l'appelant : sans Web Audio (navigateur qui
+    // ne le supporte pas, contexte bloqué, quota dépassé), `new AudioContext()` lève
+    // une exception qui remontait jusqu'à launchSession/advanceQueue et cassait la
+    // partie entière. On échoue en silence : pas de son, mais le jeu continue.
+    try{ fn(); }catch(e){}
   }
 
   function updateToggleUI(){

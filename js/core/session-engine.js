@@ -6,55 +6,202 @@ function shuffleArr(arr){
   }
   return a;
 }
-function buildBag(arr){ return { items: shuffleArr(arr), index:0 }; }
+
+// --- Historique persistant de contenu déjà servi (remplace l'ancien sac-mélangé qui
+// repartait de zéro à chaque lancement de soirée, dans le même onglet ou non) ---
+// Un item est retiré de la pioche possible dès qu'il a été servi, jusqu'à ce que TOUT
+// le contenu actuellement éligible (selon la fenêtre de tiers en cours) ait été vu au
+// moins une fois — auquel cas le cycle recommence. Persisté en localStorage : deux
+// soirées d'affilée ne resservent donc pas les mêmes premières phrases.
+function keyOf(item){ return typeof item === 'string' ? item : item.text; }
+function loadUsedSet(bagKey){
+  try{
+    const raw = localStorage.getItem('soiree_used_'+bagKey+'_v1');
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  }catch(e){ return new Set(); }
+}
+function saveUsedSet(bagKey, set){
+  try{ localStorage.setItem('soiree_used_'+bagKey+'_v1', JSON.stringify([...set])); }catch(e){}
+}
 function drawFromBag(bagKey, sourceArr){
-  let bag = state.bags[bagKey];
-  if(!bag || bag.index >= bag.items.length){
-    bag = buildBag(filterByTier(sourceArr));
-    state.bags[bagKey] = bag;
-  }
-  const item = bag.items[bag.index];
-  bag.index++;
-  return item;
+  const pool = filterByTier(sourceArr);
+  let used = loadUsedSet(bagKey);
+  let candidates = pool.filter(i=> !used.has(keyOf(i)));
+  if(!candidates.length){ used = new Set(); candidates = pool; }
+  const chosen = pick(candidates);
+  used.add(keyOf(chosen));
+  saveUsedSet(bagKey, used);
+  return chosen;
 }
 
-function buildQueue(recipe){
-  let arr = [];
-  Object.keys(recipe).forEach(type=>{ for(let i=0;i<recipe[type];i++) arr.push(type); });
-  arr = shuffleArr(arr);
-  const half = Math.floor(arr.length/2);
-  const specialIdxs = arr.map((t,i)=> t==='special' ? i : -1).filter(i=>i>=0);
-  const hasLateSpecial = specialIdxs.some(i=>i>=half);
-  if(specialIdxs.length>0 && !hasLateSpecial){
-    const swapWith = half + Math.floor(Math.random()*(arr.length-half));
-    const idx = specialIdxs[0];
-    const tmp = arr[idx]; arr[idx] = arr[swapWith]; arr[swapWith] = tmp;
+// Correspondance entre la fenêtre de tiers d'une phase et une intensité numérique
+// représentative, réutilisée par speedFactor() (rythme) et le mode Chaos visuel
+// (#frame.chaos-mode, seuil >=85) — voir updateIntensityForIndex.
+const TIER_TO_INTENSITY = {0:20, 1:55, 2:90};
+
+// Assouplit ou renforce certains types de contenu selon le nombre de joueurs : un vote
+// est moins intéressant à 2-3 (la majorité est triviale), un défi/mini-jeu en duel
+// devient au contraire le cœur du jeu ; à l'inverse un grand groupe profite davantage
+// des votes et des moments collectifs.
+function applyPlayerCountBias(weights, playerCount){
+  const w = {...weights};
+  if(playerCount <= 3){
+    if(w.vote) w.vote *= 0.5;
+    if(w.challenge) w.challenge *= 1.3;
+  } else if(playerCount >= 9){
+    if(w.vote) w.vote *= 1.4;
+    if(w.light) w.light *= 1.2;
   }
-  const lateSpecials = arr.map((t,i)=> (t==='special' && i>=half) ? i : -1).filter(i=>i>=0);
-  state.climaxQueueIndex = lateSpecials.length ? lateSpecials[Math.floor(Math.random()*lateSpecials.length)] : -1;
+  return w;
+}
+
+// Casse les séries de 3 activités identiques consécutives (ex. 3 votes d'affilée) en
+// échangeant l'une d'elles avec la première occurrence différente trouvée plus loin
+// (ou, à défaut, plus tôt) dans la même phase. Opère phase par phase plutôt que sur la
+// file entière : un échange entre deux phases ferait fuiter la fenêtre de tiers d'une
+// phase dans une autre (ex. du contenu Chaos de la finale qui atterrit à l'ouverture).
+function breakUpRuns(tokens){
+  const arr = [...tokens];
+  for(let i=2;i<arr.length;i++){
+    if(arr[i]===arr[i-1] && arr[i]===arr[i-2]){
+      let swapIdx = -1;
+      for(let j=i+1;j<arr.length;j++){ if(arr[j]!==arr[i]){ swapIdx=j; break; } }
+      if(swapIdx===-1){ for(let j=i-3;j>=0;j--){ if(arr[j]!==arr[i]){ swapIdx=j; break; } } }
+      if(swapIdx!==-1){ const tmp=arr[i]; arr[i]=arr[swapIdx]; arr[swapIdx]=tmp; }
+    }
+  }
   return arr;
 }
 
+// Mémorise la dernière trame utilisée PAR DURÉE (10/30/60 ont chacune leur propre
+// historique), pour ne jamais la reproposer au lancement suivant de la même durée.
+const LAST_STRUCTURE_KEY = 'soiree_last_structure_v1';
+function loadLastStructureId(durationMin){
+  try{ return (JSON.parse(localStorage.getItem(LAST_STRUCTURE_KEY)||'{}'))[durationMin] || null; }
+  catch(e){ return null; }
+}
+function saveLastStructureId(durationMin, id){
+  try{
+    const raw = JSON.parse(localStorage.getItem(LAST_STRUCTURE_KEY)||'{}');
+    raw[durationMin] = id;
+    localStorage.setItem(LAST_STRUCTURE_KEY, JSON.stringify(raw));
+  }catch(e){}
+}
+
+// Nombre total d'items de contenu par durée (hors climax final, ajouté à part) —
+// reprend exactement les volumes de l'ancienne table RECIPES, calibrés à l'usage pour
+// remplir la durée sans jamais répéter de contenu (voir le journal de bord). Le bug
+// corrigé ici calculait ce total en divisant le temps de chaque phase par la durée
+// nominale de chaque type d'item (AVG_DURATION) : pour un type court comme "rule" (5s
+// nominales), ça gonflait le compte de façon disproportionnée (jusqu'à 250+ items sur
+// une soirée d'1h, largement dominés par des règles) au lieu des ~80 items visés,
+// puisque les items s'enchaînent au rythme du groupe (avance manuelle), pas au rythme
+// du minuteur indicatif de chaque item.
+const TOTAL_ITEMS_BY_DURATION = { 10:10, 30:30, 60:80 };
+
+// Répartit `total` items entiers entre les types de `weights` en respectant leurs
+// proportions relatives, sans perte d'arrondi (méthode des plus grands restes) : la
+// somme des comptes obtenus vaut toujours exactement `total`.
+function distributeCounts(total, weights){
+  const types = Object.keys(weights);
+  const sumW = types.reduce((a,t)=> a + weights[t], 0) || 1;
+  const exact = types.map(t=> ({ t, value: total * weights[t] / sumW }));
+  const counts = {};
+  let assigned = 0;
+  exact.forEach(e=>{ counts[e.t] = Math.floor(e.value); assigned += counts[e.t]; });
+  let remainder = total - assigned;
+  exact.sort((a,b)=> (b.value - Math.floor(b.value)) - (a.value - Math.floor(a.value)));
+  for(let i=0; i<remainder && exact.length; i++){ counts[exact[i % exact.length].t]++; }
+  return counts;
+}
+
+// Construit la file d'une soirée à partir d'une trame (STRUCTURES) choisie au hasard
+// pour la durée demandée, en écartant la dernière trame utilisée pour cette même durée.
+// Renvoie { queue, tierWindows } : deux tableaux parallèles — le type de chaque item et
+// la fenêtre de tiers à utiliser au moment de le tirer (state.currentTierWindow en est
+// synchronisé à chaque avancée, voir updateIntensityForIndex). Un climax est toujours
+// ajouté en tout dernier, garantissant une vraie fin plutôt qu'un contenu quelconque.
+function buildStructuredQueue(durationMin, playerCount){
+  const profiles = STRUCTURES[durationMin] || STRUCTURES[30];
+  const avoidId = loadLastStructureId(durationMin);
+  const pool = profiles.filter(p=> p.id !== avoidId);
+  const profile = pick(pool.length ? pool : profiles);
+  saveLastStructureId(durationMin, profile.id);
+
+  const totalItems = Math.max(1, (TOTAL_ITEMS_BY_DURATION[durationMin] || 30) - 1); // -1 : le climax est ajouté à part, hors de ce total
+  const queue = [];
+  const tierWindows = [];
+  let remaining = totalItems;
+  profile.phases.forEach((phase, i)=>{
+    const isLast = i === profile.phases.length - 1;
+    const weights = applyPlayerCountBias(phase.weights, playerCount);
+    // La dernière phase absorbe l'arrondi restant, pour retomber exactement sur
+    // `totalItems` au total plutôt que de dériver de quelques unités phase après phase.
+    const phaseCount = isLast ? remaining : Math.min(remaining, Math.max(1, Math.round(totalItems * phase.share)));
+    remaining -= phaseCount;
+    const counts = distributeCounts(phaseCount, weights);
+    let tokens = [];
+    Object.keys(counts).forEach(type=>{ for(let i=0;i<counts[type];i++) tokens.push(type); });
+    tokens = breakUpRuns(shuffleArr(tokens));
+    tokens.forEach(t=>{ queue.push(t); tierWindows.push(phase.tier); });
+  });
+  // Climax garanti tout à la fin, quel que soit le contenu déjà généré pour la finale —
+  // on ne dépend plus d'un tirage qui pourrait placer le "special" ailleurs.
+  const lastPhase = profile.phases[profile.phases.length-1];
+  queue.push('special');
+  tierWindows.push(lastPhase.tier);
+  state.climaxQueueIndex = queue.length - 1;
+  return { queue, tierWindows };
+}
+
+// Synchronise state.currentTierWindow / state.intensityValue / le mode Chaos visuel sur
+// la phase à laquelle appartient l'item d'index `idx` de la file en cours. Remplace
+// l'ancien réglage manuel unique (curseur Soft/Fun/Chaos) : l'intensité grimpe et
+// redescend désormais toute seule, phase après phase, au fil de la structure choisie.
+function updateIntensityForIndex(idx){
+  const raw = (state.queueTierWindows && state.queueTierWindows[idx]) || {min:0, max:1};
+  // Mode Chill : on ne dépasse jamais la fenêtre {0,1} (jamais de contenu tier 2, jamais
+  // le mode Chaos visuel, rythme mécaniquement plus doux via speedFactor). Mode Chaos :
+  // pleine amplitude de la trame, inchangée.
+  const cap = state.sessionMode === 'chill' ? 1 : 2;
+  const tw = { min: Math.min(raw.min, cap), max: Math.min(raw.max, cap) };
+  state.currentTierWindow = tw;
+  state.intensityValue = TIER_TO_INTENSITY[tw.max] != null ? TIER_TO_INTENSITY[tw.max] : 55;
+  const frame = document.getElementById('frame');
+  if(frame) frame.classList.toggle('chaos-mode', state.sessionMode !== 'chill' && state.intensityValue >= 85);
+}
+
+// L'ambiance est choisie à l'accueil (boutons CHILL / CHAOS), plus par un sélecteur
+// dans les réglages. Point d'entrée unique pour la définir.
+function setSessionMode(mode){
+  state.sessionMode = (mode === 'chill') ? 'chill' : 'chaos';
+}
+
 function launchSession(){
-  // Mode Chaos (intensité >= 85) : traitement visuel délibérément plus agressif —
-  // voir #frame.chaos-mode dans app.css (liseré alarme, ticket défi qui pulse, texte
-  // en capitales). Recalculé à chaque lancement puisque l'intensité peut changer entre deux
-  // sessions (reprise de config partagée notamment).
-  document.getElementById('frame').classList.toggle('chaos-mode', state.intensityValue >= 85);
   state.globalSecondsTotal = state.durationMin * 60;
   state.globalSecondsLeft = state.globalSecondsTotal;
+  // Les joueurs viennent des champs de la page de configuration : un champ vide
+  // devient "Joueur N" (voir collectPlayers), le lancement n'est jamais bloqué.
+  if(typeof collectPlayers === 'function') state.players = collectPlayers();
   state.activeRules = [];
-  state.bags = {};
   state.climaxFired = false;
+  state.timeUp = false;
+  state.timeUpGrace = 0;
   // playerChallenges : {done, failed} par joueur (boutons ✓ Fait / ✗ Raté). playerDrinks :
   // verres bus par joueur — convention du jeu, incrémenté uniquement quand un défi est
   // marqué "Raté" (pas de tentative de deviner un nombre de gorgées dans le texte libre
   // des règles/événements, trop peu fiable).
   state.stats = { challenges:0, specials:0, rulesAdded:0, targets:{}, playerChallenges:{}, playerDrinks:{} };
-  state.typesQueue = buildQueue(RECIPES[state.durationMin]);
+  const built = buildStructuredQueue(state.durationMin, state.players.length);
+  state.typesQueue = built.queue;
+  state.queueTierWindows = built.tierWindows;
   state.queueIndex = 0;
+  // Réglage initial avant le premier advanceQueue() (countdown encore affiché) : évite un
+  // court instant où l'intensité/le mode Chaos garderaient la valeur de la session d'avant.
+  updateIntensityForIndex(0);
   state.sessionActive = true;
-  document.getElementById('challenge-counter').textContent = '';
+  if(typeof saveLastPlayers === 'function') saveLastPlayers();
+  renderChallengeCounter();
   goTo('countdown');
   let n = 3;
   document.getElementById('cd-number').textContent = n;
@@ -65,64 +212,213 @@ function launchSession(){
   }, 800);
 }
 
-function startMainLoop(){
-  goTo('main');
-  document.getElementById('global-fill').style.width = '100%';
-  // Toujours couper l'intervalle précédent : sinon un double appel (double-tap sur
-  // « Reprendre ») en laisse deux en vie et l'horloge tourne deux fois trop vite, sans
-  // que clearInterval(state.globalInterval) puisse rattraper l'orphelin.
-  clearInterval(state.globalInterval);
-  state.globalInterval = setInterval(tickGlobal, 1000);
-  advanceQueue();
+// Relance une soirée à l'identique (mêmes joueurs, même durée) depuis l'écran de fin —
+// bouton "Rejouer". Une nouvelle trame sera choisie (voir buildStructuredQueue), donc la
+// partie suivante ne rejoue jamais du contenu identique dans le même ordre.
+// Relance une soirée à l'identique (mêmes joueurs, même durée) depuis l'écran de fin —
+// bouton "Rejouer". Une nouvelle trame sera choisie (voir buildStructuredQueue), donc la
+// partie suivante ne rejoue jamais du contenu identique dans le même ordre.
+function playAgainSameConfig(){ launchSession(); }
+
+// --- Entrée "Lancer le before" et gestion des joueurs en cours de partie -----------
+
+// Si une soirée existe déjà, on demande explicitement quoi faire plutôt que de reprendre
+// ou d'écraser en silence.
+function openLaunchEntry(mode){
+  state.pendingLaunchMode = mode;
+  const snapshot = loadSessionSnapshot();
+  if(snapshot){
+    const minutesLeft = Math.max(1, Math.round(snapshot.globalSecondsLeft / 60));
+    document.getElementById('session-conflict-text').textContent =
+      'Une soirée est en cours avec '+snapshot.players.length+' joueur'+(snapshot.players.length>1?'s':'')+' (~'+minutesLeft+' min restantes).';
+    document.getElementById('session-conflict-overlay').classList.remove('hidden');
+  } else {
+    startNewSessionWizard();
+  }
+}
+function startNewSessionWizard(mode){
+  // Ouvre la page de configuration unique (voir setup-wizard.js). L'ancien code
+  // manipulait les .step[data-step] du tunnel, qui n'existent plus.
+  openSetupFor({ type:'before', game:null, mode: mode || state.pendingLaunchMode || state.sessionMode });
+}
+function closeSessionConflictModal(){ document.getElementById('session-conflict-overlay').classList.add('hidden'); }
+function conflictResume(){ closeSessionConflictModal(); resumeSession(); }
+function conflictRestart(){
+  closeSessionConflictModal();
+  clearSessionSnapshot();
+  document.getElementById('resume-banner').classList.add('hidden');
+  startNewSessionWizard(state.pendingLaunchMode);
 }
 
-function tickGlobal(){
-  if(state.paused) return;
-  state.globalSecondsLeft--;
-  const pct = Math.max(0, (state.globalSecondsLeft / state.globalSecondsTotal) * 100);
-  document.getElementById('global-fill').style.width = pct + '%';
-  // Snapshot périodique (toutes les 5s) pour la reprise de session : suffisant pour ne
-  // jamais perdre plus de quelques secondes, sans écrire dans localStorage à chaque tick.
-  if(state.globalSecondsLeft % 5 === 0) saveSessionSnapshot();
-  // Safety net : force le climax s'il n'a pas encore eu lieu et qu'il reste peu de temps
-  if(!state.climaxFired && state.globalSecondsLeft > 5 && state.globalSecondsLeft <= 30){
-    fireClimax();
-    return;
-  }
-  if(state.globalSecondsLeft <= 0){ endSession(); }
+// Retour \u00e0 l'accueil depuis une partie : quitter n'est PAS terminer. On fige les
+// minuteurs, on sauvegarde l'\u00e9tat exact, la soir\u00e9e reste reprenable.
+function quitSessionToHome(){
+  state.paused = true;
+  clearInterval(state.globalInterval);
+  clearInterval(state.ringInterval);
+  saveSessionSnapshot();
+  document.getElementById('frame').classList.remove('chaos-mode');
+  goTo('home');
+  checkForResumableSession();
+}
+
+function openAddPlayerOverlay(){
+  // Partie suspendue pendant la saisie : sinon le minuteur tourne clavier ouvert.
+  state.pausedForPlayers = !state.paused;
+  if(state.pausedForPlayers) state.paused = true;
+  renderSessionPlayersList();
+  document.getElementById('add-player-field').value = '';
+  document.getElementById('players-sheet').classList.add('open');
+}
+function closeAddPlayerOverlay(){
+  document.getElementById('players-sheet').classList.remove('open');
+  if(state.pausedForPlayers){ state.paused = false; state.pausedForPlayers = false; }
+  saveSessionSnapshot();
 }
 
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function pickPlayers(n){ return [...state.players].sort(()=>Math.random()-0.5).slice(0, n); }
+
+// Choisit les joueurs les moins sollicit\u00e9s jusqu'ici (state.stats.targets), avec une
+// marge (min+1) et un tirage al\u00e9atoire dans ce sous-groupe : la participation s'\u00e9quilibre
+// sans devenir m\u00e9caniquement pr\u00e9visible.
+function pickPlayers(n){
+  if(!state.players.length || n<=0) return [];
+  const counts = state.players.map(p=> state.stats.targets[p.name]||0);
+  const minCount = Math.min(...counts);
+  let candidates = state.players.filter(p=> (state.stats.targets[p.name]||0) <= minCount+1);
+  if(candidates.length < n) candidates = state.players;
+  return shuffleArr(candidates).slice(0, n);
+}
+
+// D\u00e9marre la boucle principale apr\u00e8s le compte \u00e0 rebours de lancement.
+function startMainLoop(){
+  goTo('main');
+  clearInterval(state.globalInterval);
+  state.globalInterval = setInterval(tickGlobal, 1000);
+  if(typeof renderProgressPath === 'function') renderProgressPath();
+  renderRulesBanner();
+  advanceQueue();
+}
+
+// --- Joueurs pendant la partie (panneau depuis le bas) ---
+function renderSessionPlayersList(){
+  const wrap = document.getElementById('session-players-list');
+  if(!wrap) return;
+  // Pr\u00e9noms identiques : on autorise la saisie mais on les distingue par un indice.
+  const counts = {};
+  state.players.forEach(p=>{ counts[p.name] = (counts[p.name]||0) + 1; });
+  const seen = {};
+  wrap.innerHTML = state.players.map((p,i)=>{
+    seen[p.name] = (seen[p.name]||0) + 1;
+    const suffix = counts[p.name] > 1 ? ' <span class="dup-tag">'+seen[p.name]+'</span>' : '';
+    return '<div class="session-player-row">'+
+      '<span><span class="name-row-dot" style="background:'+p.color+'"></span>'+escapeHtml(p.name)+suffix+'</span>'+
+      (state.players.length > 2 ? '<span class="remove-player-x" onclick="removeSessionPlayer('+i+')">\u2715</span>' : '')+
+    '</div>';
+  }).join('');
+  const hint = document.getElementById('players-sheet-hint');
+  if(hint) hint.textContent = state.players.length + ' joueur' + (state.players.length>1?'s':'') + ' \u00b7 la partie est en pause';
+}
+
+function addSessionPlayer(){
+  const field = document.getElementById('add-player-field');
+  if(!field) return;
+  const name = field.value.trim();
+  if(!name) return;
+  const idx = state.players.length;
+  state.players.push({
+    name,
+    uid: 'p' + Date.now() + '_' + idx,
+    color: PLAYER_COLORS[idx % PLAYER_COLORS.length],
+    avatar: PLAYER_AVATARS[idx % PLAYER_AVATARS.length]
+  });
+  state.playerCount = state.players.length;
+  // Le champ reste ouvert et vide : on encha\u00eene plusieurs pr\u00e9noms d'affil\u00e9e.
+  field.value = '';
+  if(field.focus) field.focus();
+  Sound.play('tick');
+  renderSessionPlayersList();
+  saveSessionSnapshot();
+}
+
+function removeSessionPlayer(idx){
+  if(state.players.length <= 2) return;
+  state.players.splice(idx, 1);
+  state.playerCount = state.players.length;
+  // Statistiques conserv\u00e9es : les effacer fausserait le r\u00e9capitulatif final.
+  renderSessionPlayersList();
+  saveSessionSnapshot();
+}
+
 function fillTemplate(text, players){
   let t = text;
   players.forEach((p,i)=>{ t = t.split('{p'+(i+1)+'}').join(p.name); });
   return t;
 }
-// Le curseur d'intensité choisit une FENÊTRE de tiers, pas un simple plafond. Avec un
-// plafond seul (tier <= limite), le mode Chaos continuait à piocher dans tout le tier 0 :
-// l'app servait « trinquez avant chaque gorgée » entre deux confessions, et l'intensité
-// ne montait jamais vraiment. Chaque cran exclut donc aussi ce qui est devenu trop tiède.
+// La fenêtre de tiers vient désormais de la phase en cours dans la trame de la soirée
+// (voir updateIntensityForIndex), plus d'un curseur manuel unique pour toute la
+// soirée : chaque phase peut resserrer ou élargir la fenêtre, ce qui fait à la fois
+// monter l'intensité (phases tardives) et respirer (phases de repli volontairement plus
+// tièdes, voir les trames "montagnes russes"/"grand soir" dans content.js).
 function tierWindow(){
-  const v = state.intensityValue;
-  if(v >= 85) return {min:2, max:2};   // Chaos  — uniquement le tier 2
-  if(v >= 60) return {min:1, max:2};   // Chaud  — Fun et Chaos mélangés
-  if(v >= 30) return {min:0, max:1};   // Fun    — Soft et Fun
-  return {min:0, max:0};               // Soft   — uniquement le tier 0
+  return state.currentTierWindow || {min:0, max:1};
 }
 
 function filterByTier(arr){
   const w = tierWindow();
-  const narrowed = arr.filter(i => i.tier >= w.min && i.tier <= w.max);
+  // i.tier===undefined (ex. CLIMAX_EVENTS, sans notion de tier) : toujours éligible,
+  // jamais exclu par une fenêtre qui ne le concerne pas.
+  const narrowed = arr.filter(i => i.tier === undefined || (i.tier >= w.min && i.tier <= w.max));
   // Repli si un stock personnalisé est trop maigre pour tenir la soirée dans la fenêtre :
   // mieux vaut des items hors registre que le même qui revient toutes les cinq minutes.
-  return narrowed.length ? narrowed : arr.filter(i => i.tier <= w.max);
+  return narrowed.length ? narrowed : arr.filter(i => i.tier === undefined || i.tier <= w.max);
 }
 
 function speedFactor(){ return 1 - (state.intensityValue/100) * 0.4; }
 
+// Tic global d'une seconde : fait avancer le temps de la soir\u00e9e (et donc le chemin de
+// progression, qui s'y adosse). Ne d\u00e9cr\u00e9mente jamais pendant une pause, ce qui rend les
+// pauses r\u00e9ellement neutres sur la dur\u00e9e de jeu.
+function tickGlobal(){
+  if(state.paused) return;
+
+  // Temps \u00e9coul\u00e9 et l'utilisateur n'a pas encore avanc\u00e9 : on ne coupe pas l'activit\u00e9
+  // affich\u00e9e en pleine lecture. Courte gr\u00e2ce pour laisser terminer, puis on conclut.
+  if(state.timeUp){
+    state.timeUpGrace--;
+    if(state.timeUpGrace <= 0) endSession();
+    return;
+  }
+
+  state.globalSecondsLeft--;
+  if(typeof renderProgressPath === 'function') renderProgressPath();
+  if(state.globalSecondsLeft % 5 === 0) saveSessionSnapshot();
+
+  // Filet de s\u00e9curit\u00e9 : si le rythme r\u00e9el du groupe a pris du retard sur le minuteur,
+  // on d\u00e9clenche quand m\u00eame la finale avant la fin.
+  if(!state.climaxFired && state.globalSecondsLeft > 5 && state.globalSecondsLeft <= 30){
+    fireClimax();
+    return;
+  }
+
+  if(state.globalSecondsLeft <= 0){
+    state.timeUp = true;
+    state.timeUpGrace = 20;
+  }
+}
+
 function advanceQueue(){
+  // Garde-fou anti-double-appui : deux taps rapides sur "Continuer"/"R\u00e9ussi" sautaient
+  // deux manches d'un coup. Le verrou se lib\u00e8re d\u00e8s que la nouvelle sc\u00e8ne est pos\u00e9e.
+  if(state.advanceLock) return;
+  state.advanceLock = true;
+  setTimeout(()=>{ state.advanceLock = false; }, 450);
   clearInterval(state.ringInterval);
+
+  // Le temps global est écoulé (voir tickGlobal) : plutôt que d'afficher un nouvel item
+  // pour l'interrompre aussitôt, on termine proprement la soirée ici, au moment où le
+  // joueur avance de lui-même — jamais en pleine lecture d'un défi.
+  if(state.timeUp){ endSession(); return; }
 
   let type;
   if(state.queueIndex < state.typesQueue.length){
@@ -132,6 +428,7 @@ function advanceQueue(){
     type = Math.random() < 0.5 ? 'vote' : 'light';
   }
   const isClimax = (state.queueIndex === state.climaxQueueIndex);
+  updateIntensityForIndex(state.queueIndex);
   state.queueIndex++;
 
   if(type === 'special'){
@@ -165,7 +462,7 @@ function advanceQueue(){
     renderItem('Mini-jeu', text, players, Math.round(m.dur*speedFactor()));
   } else if(type === 'vote'){
     const v = drawFromBag('vote', VOTES);
-    renderItem('Vote', v.text, [], Math.round(20*speedFactor()));
+    renderItem('Question', v.text, [], Math.round(20*speedFactor()));
   } else {
     const l = drawFromBag('light', LIGHT_EVENTS);
     renderItem('Moment', l.text, [], Math.round(l.dur*speedFactor()));
@@ -175,101 +472,90 @@ function advanceQueue(){
 // Fait correspondre le libellé affiché au type de ticket (couleur définie dans app.css
 // via #screen-main[data-type]) — le principe « Confetti » : la couleur du ticket annonce
 // le type de moment avant même la lecture.
-const EYEBROW_TO_TYPE = { 'Défi':'defi', 'Vote':'vote', 'Nouvelle règle':'regle', 'Mini-jeu':'mini', 'Moment':'moment' };
+const EYEBROW_TO_TYPE = { 'Défi':'defi', 'Question':'vote', 'Nouvelle règle':'regle', 'Mini-jeu':'mini', 'Moment':'moment' };
 
 function renderItem(eyebrow, text, players, seconds){
-  const type = EYEBROW_TO_TYPE[eyebrow] || 'defi';
-  document.getElementById('screen-main').dataset.type = type;
-  document.getElementById('ticket-num').textContent = 'N° ' + String(state.queueIndex).padStart(3,'0') + ' / ' + state.typesQueue.length;
-  document.getElementById('item-eyebrow').textContent = eyebrow;
-  document.getElementById('item-text').textContent = soberize(text);
-  if(document.getElementById('frame').classList.contains('chaos-mode') && type === 'defi' && navigator.vibrate){
-    navigator.vibrate([40,30,40]);
-  }
-  const tagsWrap = document.getElementById('item-players');
-  tagsWrap.innerHTML = '';
-  players.forEach(p=>{
-    const tag = document.createElement('div');
-    tag.className = 'player-tag';
-    tag.innerHTML = '<span class="avatar-badge avatar-badge-sm" style="background:'+p.color+'">'+(p.avatar||'')+'</span>'+escapeHtml(p.name);
-    tagsWrap.appendChild(tag);
-  });
-  // Sauvegardé pour la reprise de session (persistence.js) : permet de réafficher
-  // l'item courant sans avoir à le retirer une seconde fois du bag.
+  renderScene(eyebrow, text, players, seconds);
   state.lastItem = { eyebrow, text, players };
-  renderMainFooter(eyebrow === 'Défi');
-  startRing(Math.max(4,seconds));
+  renderMainFooter(eyebrow === 'D\u00e9fi');
+  // Le compte \u00e0 rebours de manche n'appara\u00eet que si la consigne impose r\u00e9ellement un
+  // temps limite ("en 20 secondes", "avant la fin du minuteur", "chrono"). Ailleurs il
+  // \u00e9tait purement d\u00e9coratif \u2014 et pire, il pressait la lecture d'une r\u00e8gle ou d'une
+  // question ouverte qui n'a aucune raison d'\u00eatre chronom\u00e9tr\u00e9e.
+  const timed = /minuteur|seconde|chrono|avant la fin/i.test(text);
+  const ring = document.getElementById('ring-wrap');
+  if(timed && seconds > 0){
+    if(ring) ring.style.display = '';
+    startRing(Math.max(4, seconds));
+  } else {
+    clearInterval(state.ringInterval);
+    if(ring) ring.style.display = 'none';
+  }
   saveSessionSnapshot();
 }
+
 
 // Remplace "Pause / Suivant" par "✗ Raté / ✓ Fait" quand l'item affiché est un défi, pour
 // forcer une réponse qui alimente les stats par joueur (voir markChallengeResult). Les
 // autres types d'item (règle, mini-jeu, vote, moment) gardent l'avancement libre.
 function renderMainFooter(isChallenge){
   const wrap = document.getElementById('footer-buttons');
-  if(isChallenge){
-    wrap.innerHTML = '<button class="btn btn-ghost footer-btn challenge-btn-fail" onclick="markChallengeResult(false)">✗ Raté</button>'+
-      '<button class="btn btn-primary footer-btn challenge-btn-done" onclick="markChallengeResult(true)">✓ Fait</button>';
+  const kind = state.sceneKind;
+  let main;
+  if(kind === 'regle'){
+    main = '<button class="btn btn-primary footer-btn" onclick="advanceManually()">C\'est not\u00e9</button>';
+  } else if(kind === 'vote'){
+    // Le libell\u00e9 suit l'\u00e9tat du vote : tant que personne n'est d\u00e9sign\u00e9, on valide le
+    // vote ; une fois le r\u00e9sultat r\u00e9v\u00e9l\u00e9, on continue. Jamais deux validations pour
+    // la m\u00eame action.
+    main = '<button class="btn btn-primary footer-btn" id="vote-main-btn" onclick="advanceManually()">Valider le vote</button>';
+  } else if(isChallenge){
+    // Ordre fixe : Rat\u00e9 \u00e0 gauche, R\u00e9ussi \u00e0 droite, m\u00eame taille, d'une manche \u00e0 l'autre.
+    main = '<button class="btn btn-ghost footer-btn challenge-btn-fail" onclick="markChallengeResult(false)">Rat\u00e9</button>'+
+      '<button class="btn btn-primary footer-btn challenge-btn-done" onclick="markChallengeResult(true)">R\u00e9ussi</button>';
   } else {
-    wrap.innerHTML = '<button class="btn btn-ghost footer-btn" onclick="openPause()">Pause</button>'+
-      '<button class="btn btn-ghost footer-btn" id="next-btn" onclick="advanceManually()">Suivant</button>';
+    main = '<button class="btn btn-primary footer-btn" onclick="advanceManually()">Continuer</button>';
   }
+  wrap.innerHTML = '<div class="footer-main">'+main+'</div>'+
+    '<div class="footer-aside">'+
+      '<button onclick="openPause()">Pause</button>'+
+      '<button onclick="skipActivity()">Passer</button>'+
+    '</div>';
 }
 
-// Enregistre le résultat d'un défi pour chaque joueur ciblé (state.lastItem.players) puis
-// avance — un seul tap fait à la fois office de "Suivant" et de vote fait/raté.
-function markChallengeResult(done){
-  clearInterval(state.ringInterval);
-  const players = (state.lastItem && state.lastItem.players) || [];
-  players.forEach(p=>{
-    const rec = state.stats.playerChallenges[p.name] || (state.stats.playerChallenges[p.name] = {done:0, failed:0});
-    if(done){
-      rec.done++;
-      if(window.fireConfetti) fireConfetti('small');
-    } else {
-      rec.failed++;
-      // Raté = tu bois, convention classique des jeux à gages.
-      state.stats.playerDrinks[p.name] = (state.stats.playerDrinks[p.name]||0) + 1;
-    }
-  });
-  renderChallengeCounter();
-  advanceQueue();
-}
 
 function renderChallengeCounter(){
+  // Volontairement vide pendant la partie : ces compteurs encombraient l'en-t\u00eate \u00e0
+  // chaque manche. L'information reste calcul\u00e9e dans state.stats et pr\u00e9sent\u00e9e dans le
+  // r\u00e9capitulatif de fin (voir renderPlayerResults), l\u00e0 o\u00f9 elle est pertinente.
   const el = document.getElementById('challenge-counter');
-  let done = 0, failed = 0;
-  Object.values(state.stats.playerChallenges).forEach(r=>{ done += r.done; failed += r.failed; });
-  el.textContent = (done === 0 && failed === 0) ? '' :
-    '🎯 ' + done + ' relevé' + (done!==1?'s':'') + ' · ' + failed + ' raté' + (failed!==1?'s':'');
+  if(el) el.textContent = '';
 }
 
-function startRing(seconds){
-  resumeRingFrom(seconds, seconds);
-}
 
-// Démarre (ou reprend) l'anneau de progression. `total` est la durée complète de la
-// manche, `left` le temps restant à afficher — identiques pour un démarrage normal,
-// différents quand on reprend une session interrompue (persistence.js).
+// --- Minuteur de manche (affiché uniquement si la consigne impose un temps limite) ---
+function startRing(seconds){ resumeRingFrom(seconds, seconds); }
+
 function resumeRingFrom(total, left){
   state.ringTotal = total;
   state.ringLeft = left;
   const fg = document.getElementById('ring-fg');
+  const label = document.getElementById('ring-label');
+  if(!fg || !label) return;
   const circumference = 125.6;
-  document.getElementById('ring-label').textContent = Math.max(0, left);
+  label.textContent = Math.max(0, left);
   fg.setAttribute('stroke-dashoffset', circumference * (1 - left/total));
   fg.style.stroke = left > 0 ? 'var(--accent)' : 'var(--sage)';
   clearInterval(state.ringInterval);
   state.ringInterval = setInterval(()=>{
     if(state.paused) return;
     state.ringLeft--;
-    document.getElementById('ring-label').textContent = Math.max(0, state.ringLeft);
-    const offset = circumference * (1 - state.ringLeft / state.ringTotal);
-    fg.setAttribute('stroke-dashoffset', offset);
+    label.textContent = Math.max(0, state.ringLeft);
+    fg.setAttribute('stroke-dashoffset', circumference * (1 - state.ringLeft / state.ringTotal));
     if(state.ringLeft <= 0){
       clearInterval(state.ringInterval);
       fg.style.stroke = 'var(--sage)';
-      document.getElementById('ring-label').textContent = '✓';
+      label.textContent = '\u2713';
       Sound.play('ding');
       if(navigator.vibrate) navigator.vibrate([60]);
     } else if(state.ringLeft <= 3){
@@ -278,30 +564,71 @@ function resumeRingFrom(total, left){
   }, 1000);
 }
 
+// Réussi / Raté : seuls les défis alimentent ces compteurs.
+function markChallengeResult(done){
+  clearInterval(state.ringInterval);
+  const players = (state.lastItem && state.lastItem.players) || [];
+  players.forEach(p=>{
+    const rec = state.stats.playerChallenges[p.name] || (state.stats.playerChallenges[p.name] = {done:0, failed:0});
+    if(done){
+      rec.done++;
+      if(window.fireConfetti) window.fireConfetti('small');
+    } else {
+      rec.failed++;
+      // Raté = tu bois, convention classique des jeux à gages.
+      state.stats.playerDrinks[p.name] = (state.stats.playerDrinks[p.name]||0) + 1;
+    }
+  });
+  advanceQueue();
+}
+
+// Passer : avance sans rien comptabiliser. Une activité passée n'est PAS un échec, elle
+// ne touche donc ni playerChallenges ni playerDrinks.
+function skipActivity(){
+  clearInterval(state.ringInterval);
+  advanceQueue();
+}
+
 function advanceManually(){
   clearInterval(state.ringInterval);
   advanceQueue();
 }
 
+// Le bandeau permanent de règles a été remplacé par un bouton compteur discret
+// ("Règles · 2") qui ouvre un panneau depuis le bas. Les règles restent consultables à
+// tout moment sans manger l'écran en permanence ni dupliquer la règle déjà affichée sur
+// le ticket au moment où elle tombe.
 function renderRulesBanner(){
-  const wrap = document.getElementById('rules-banner');
-  wrap.innerHTML = '';
-  state.activeRules.forEach(r=>{
-    const pill = document.createElement('div');
-    pill.className = 'rule-pill';
-    pill.innerHTML = '<span class="ic">·</span>' + escapeHtml(soberize(r));
-    wrap.appendChild(pill);
-  });
+  const btn = document.getElementById('rules-count-btn');
+  if(!btn) return;
+  const n = state.activeRules.length;
+  btn.style.display = n ? 'flex' : 'none';
+  btn.innerHTML = 'Règles <span class="rules-count-num">'+n+'</span>';
 }
+
+function openRulesSheet(){
+  const list = document.getElementById('rules-sheet-list');
+  list.innerHTML = state.activeRules.length
+    ? state.activeRules.map(r=>
+        '<div class="rules-sheet-row"><span class="rules-sheet-dot"></span>'+escapeHtml(soberize(r))+'</div>'
+      ).join('')
+    : '<div class="rules-sheet-empty">Aucune règle active pour le moment.</div>';
+  document.getElementById('rules-sheet').classList.add('open');
+}
+function closeRulesSheet(){ document.getElementById('rules-sheet').classList.remove('open'); }
 
 function showSpecialEvent(){
   const e = drawFromBag('special', SPECIAL_EVENTS);
   const players = e.n ? pickPlayers(e.n) : [];
   const text = fillTemplate(e.text, players);
   state.stats.specials++;
-  document.getElementById('screen-special').classList.remove('climax');
+  const sp = document.getElementById('screen-special');
+  sp.classList.remove('climax');
+  sp.dataset.scene = 'moment';
+  const rc = document.getElementById('special-recap');
+  if(rc) rc.classList.remove('shown');
   document.getElementById('special-eyebrow').textContent = 'Moment';
-  document.getElementById('special-icon').textContent = '▲';
+  document.getElementById('special-icon').textContent = '';
   document.getElementById('special-text').textContent = soberize(text);
   goTo('special');
   if(navigator.vibrate) navigator.vibrate([80,40,80]);
@@ -311,16 +638,29 @@ function showSpecialEvent(){
 
 function fireClimax(){
   state.climaxFired = true;
-  const text = pick(CLIMAX_EVENTS);
-  document.getElementById('screen-special').classList.add('climax');
-  document.getElementById('special-eyebrow').textContent = "L'instant";
-  document.getElementById('special-icon').textContent = '◆';
+  const text = drawFromBag('climax', CLIMAX_EVENTS);
+  const screen = document.getElementById('screen-special');
+  screen.classList.add('climax');
+  screen.dataset.scene = 'finale';
+  document.getElementById('special-eyebrow').textContent = "Dernière manche";
+  document.getElementById('special-icon').textContent = '';
   document.getElementById('special-text').textContent = soberize(text);
+  // Conclusion adaptée à ce qui s'est réellement passé : on reprend les compteurs de la
+  // soirée en cours plutôt qu'une formule générique.
+  const recap = document.getElementById('special-recap');
+  if(recap){
+    const s = state.stats;
+    recap.innerHTML =
+      '<span><b>'+s.challenges+'</b> défis</span>'+
+      '<span><b>'+state.activeRules.length+'</b> règles</span>'+
+      '<span><b>'+s.specials+'</b> surprises</span>';
+    recap.classList.add('shown');
+  }
   goTo('special');
   if(navigator.vibrate) navigator.vibrate([100,60,100,60,220]);
   Sound.play('sting');
-  if(window.fireConfetti) fireConfetti('big');
-  setTimeout(()=>{ goTo('main'); advanceQueue(); }, 4500);
+  if(window.fireConfetti) window.fireConfetti('big');
+  setTimeout(()=>{ goTo('main'); advanceQueue(); }, 5200);
 }
 
 function openPause(){ state.paused = true; goTo('pause'); }
@@ -389,10 +729,7 @@ function renderPlayerResults(){
 // calculés à partir de ce qui s'est réellement passé, pas de la durée prévue, donc rien
 // à distinguer côté affichage — seule la durée réellement jouée (voir endSession) diffère
 // de la durée planifiée.
-function endSessionEarly(){
-  if(!confirm('Terminer la soirée maintenant ? Le récap et les gagnants s\'afficheront quand même.')) return;
-  endSession();
-}
+
 
 function endSession(){
   clearInterval(state.globalInterval);
@@ -402,7 +739,7 @@ function endSession(){
   document.getElementById('frame').classList.remove('chaos-mode');
   goTo('end');
   Sound.play('win');
-  if(window.fireConfetti) fireConfetti('huge');
+  if(window.fireConfetti) window.fireConfetti('huge');
 
   // Durée réellement jouée plutôt que la durée planifiée (state.durationMin) : identique
   // en fin normale (le minuteur est à 0), mais plus courte si la soirée s'est terminée en
@@ -434,20 +771,15 @@ function endSession(){
   cc.className = 'creators-counter';
   cc.textContent = '🥂 '+creatorsGlasses+' verre'+(creatorsGlasses>1?'s':'')+' pour les créateurs du jeu';
   wrap.appendChild(cc);
-
-  recordSessionInHistory();
 }
 
 function resetAll(){
   state.sessionActive = false;
   clearSessionSnapshot();
-  state.step = 0; state.playerCount = 4; state.players = []; state.durationMin = 20;
-  document.getElementById('player-count').value = 4;
-  document.getElementById('intensity-slider').value = 50;
-  updateIntensityLabel(50);
-  document.getElementById('chips-wrap').innerHTML = '';
-  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
-  document.querySelector('.step[data-step="0"]').classList.add('active');
-  document.querySelectorAll('#setup-progress div').forEach(d=>d.classList.remove('done'));
+  state.playerCount = 4; state.players = []; state.durationMin = 30; state.sessionMode = 'chaos';
+  // La page de configuration unique n'a plus ni #player-count, ni #chips-wrap, ni
+  // .step[data-step] : ces acc\u00e8s faisaient planter le retour \u00e0 l'accueil.
+
+  if(typeof nameDraft !== 'undefined') nameDraft = [];
   goTo('home');
 }

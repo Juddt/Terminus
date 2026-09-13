@@ -1,5 +1,15 @@
 # Résumé conversation Soirée — Pour Claude Code
 
+> ⚠️ **CE DOCUMENT EST DÉPASSÉ.** Il a été écrit avant une refonte complète du before, de
+> la bibliothèque de jeux, de la page de réglages et de la direction artistique (palette
+> "carnet/ticket" puis thème sombre néon, toutes deux abandonnées depuis).
+>
+> **Lis `HANDOFF_CLAUDE_CODE.md` à la place** — c'est le document de transition à jour.
+> Celui-ci est conservé uniquement comme trace historique de l'architecture d'origine
+> (moteur de contenu, système de tickets, principe des sacs mélangés) ; certains
+> mécanismes de bas niveau qu'il décrit existent encore, mais toute la partie
+> présentation/interface qu'il documente a été remplacée.
+
 ## Le projet
 
 **Soirée** est une app mobile de jeux de soirée/alcool. Un seul téléphone posé au centre de la table agit comme maître du jeu. L'objectif est de devenir le leader premium en France face à des concurrents cheap (Picolo, TOZ, Chopine).
@@ -465,3 +475,87 @@ justifiée avant un lancement commercial ou toute campagne de communication.
 - `js/data/games-catalog.js` — métadonnées jeux + filtres
 - `sw.js` — service worker (précache, network-first)
 - `.claude/launch.json` — config lancement local (`/run`)
+
+## Phase 5 — Accueil à deux choix, intensité automatique, trames variées
+
+### Décisions produit appliquées
+- Accueil réduit à deux cartes dominantes : **Lancer une soirée** (ex-Mode Rapide) et
+  **Choisir un jeu** (ex-Mode Jeux). Éléments secondaires (Historique, Mes ajouts, Sans
+  alcool, Infos légales) inchangés mais visuellement toujours en retrait.
+- Durées limitées à **10 / 30 / 60 min** (20 et 45 supprimées).
+- **Étape "ambiance" (Soft/Fun/Chaos) supprimée du wizard** : le parcours est maintenant
+  Joueurs → Prénoms → Durée → Lancer. L'intensité est désormais pilotée par le moteur
+  lui-même, phase par phase, au fil de la soirée (voir plus bas).
+- Joueurs de la dernière soirée réutilisables en un clic à l'étape des prénoms
+  (`soiree_last_players_v1`).
+- Écran de fin : boutons **Rejouer** (même config), **Changer la durée** (garde les
+  joueurs), **Choisir un jeu**, plus le partage du récap et un retour Accueil discret.
+- Cartes du catalogue de jeux : principe (1-2 lignes) + matériel nécessaire toujours
+  visibles (valeur par défaut "Aucun — tout est dans l'appli" si non renseigné dans
+  `games-catalog.js`).
+
+### Refonte du moteur Mode Rapide (`session-engine.js`, `content.js`)
+- **RECIPES (un seul dosage fixe par durée) remplacé par STRUCTURES** : plusieurs trames
+  par durée (2 pour 10 min, 3 pour 30 min, 2 pour 60 min), chacune découpée en phases
+  (part de temps + fenêtre de tiers + poids par type de contenu). La trame est tirée au
+  sort à chaque lancement en excluant la dernière utilisée pour cette durée
+  (`soiree_last_structure_v1`), et le contenu à l'intérieur de chaque phase est mélangé
+  indépendamment à chaque fois — deux soirées de même durée ne se ressemblent jamais.
+- **Intensité automatique** : `state.intensityValue`/`tierWindow()` ne dépendent plus
+  d'un curseur choisi une fois pour toutes, mais de la phase en cours
+  (`updateIntensityForIndex`), recalculée à chaque item. Une phase peut délibérément
+  redescendre en tier pour créer une respiration (trames "montagnes russes"/"grand
+  soir"), ce qui fait aussi varier le rythme (`speedFactor`) et le mode Chaos visuel.
+- **Historique de contenu persistant** (`soiree_used_<type>_v1`, un principe déjà
+  éprouvé sur le sac de mots d'UnderDicateur) : remplace l'ancien sac-mélangé remis à
+  zéro à chaque lancement. Un item n'est jamais reservi tant que tout le contenu
+  actuellement éligible n'a pas été vu une fois — y compris le texte du climax final.
+  Fonctionne avec une fenêtre de tiers qui change en cours de soirée (contrairement à
+  l'ancien sac, figé pour toute la session).
+- **Participation équilibrée** : `pickPlayers()` favorise désormais les joueurs les
+  moins ciblés jusque-là dans la soirée (avec un peu de hasard dans ce sous-groupe),
+  au lieu d'un tirage uniforme.
+- **Adaptation au nombre de joueurs** (`applyPlayerCountBias`) : votes moins fréquents à
+  2-3 joueurs (majorité triviale) au profit des défis/duels ; votes et moments collectifs
+  favorisés à 9 joueurs et plus.
+- **Finale garantie et fin non abrupte** : le climax est désormais systématiquement le
+  tout dernier item de la file (plus de recherche/échange approximatif dans la seconde
+  moitié). Si le minuteur global arrive à zéro pendant qu'un item est affiché, la
+  soirée ne se coupe plus au milieu : `state.timeUp` attend que le joueur avance
+  lui-même (bouton Suivant/Fait/Raté) avant de conclure, avec une grâce de secours de
+  20s si personne ne touche plus à rien.
+- **Anti-répétition de courtes séries** (`breakUpRuns`) : casse les suites de 3 activités
+  identiques d'affilée à l'intérieur d'une même phase.
+
+### Vérifications effectuées
+- `node --check` sur les ~30 fichiers JS du projet (aucune erreur de syntaxe).
+- Script Node (`test-engine.js`, hors du dépôt) simulant `buildStructuredQueue` +
+  `drawFromBag` + `pickPlayers` sur 3 durées × 5 effectifs (2 à 14 joueurs) × 8 tirages
+  = 120 combinaisons, sans DOM réel : aucune erreur, climax toujours en dernière
+  position, aucune répétition prématurée sur 200 tirages de vote consécutifs, aucune
+  répétition de trame sur 20 lancers consécutifs par durée.
+- Tous les fichiers référencés par `index.html`/`manifest.json` vérifiés répondants
+  (200) via un serveur local.
+- Relecture CSS ciblée : un bug déjà rencontré ailleurs dans le projet (`width:100%`
+  combiné à `flex:1` sur un bouton) a été retrouvé et corrigé sur la nouvelle rangée de
+  boutons de fin de soirée avant qu'il ne cause le même souci.
+- `sw.js` bumpé en v15 (accueil, wizard, moteur et fin de soirée ont tous changé).
+
+### Hors ligne / en ligne
+- Tout Mode Rapide + les 9 jeux (y compris Les Pilliers en local, passation d'un seul
+  téléphone) fonctionnent 100% hors ligne une fois l'appli chargée une première fois
+  (service worker network-first, voir sw.js).
+- Seule la variante **Pilliers en ligne** (`pilliers-online/`, un téléphone par joueur)
+  nécessite une connexion : elle repose sur Firebase Realtime Database, une origine
+  différente que le service worker laisse volontairement passer sans interception
+  (voir le garde-fou d'origine dans le handler `fetch` de `sw.js`).
+
+### Restant / limites connues
+- Reprise de session (`persistence.js`) : une snapshot sauvegardée avant cette phase 5
+  (ancien format sans `queueTierWindows`/`timeUp`) ne sera pas restaurée correctement
+  si elle traîne encore en localStorage au moment de la mise à jour — cas limite, sans
+  risque de plantage grâce aux valeurs de repli déjà en place, juste une reprise qui
+  redémarrerait à une intensité par défaut.
+- Les moyennes de durée par type (`AVG_DURATION`) servent uniquement au dosage du
+  nombre d'items par phase ; le rythme réel dépend toujours de la vitesse du groupe
+  (avance manuelle), pas d'un minutage strict par item.

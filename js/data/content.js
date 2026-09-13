@@ -474,16 +474,73 @@ const CLIMAX_EVENTS = [
 ];
 
 const DURATIONS = [
-  {min:10, label:"10 minutes", sub:"2 mini-jeux · 3 votes · 2 défis · 1 cul sec"},
-  {min:20, label:"20 minutes", sub:"4 mini-jeux · 6 votes · 4 défis · 2 cul secs"},
-  {min:30, label:"30 minutes", sub:"6 mini-jeux · 9 votes · 6 défis · 3 cul secs"},
-  {min:45, label:"45 minutes", sub:"12 mini-jeux · 18 votes · 12 défis · 5 cul secs"},
-  {min:60, label:"1 heure", sub:"16 mini-jeux · 24 votes · 16 défis · 7 cul secs"},
+  {min:10, label:"10 minutes", sub:"Démarrage immédiat, montée rapide, finale marquante"},
+  {min:30, label:"30 minutes", sub:"Plusieurs temps forts, progression claire"},
+  {min:60, label:"1 heure", sub:"Plusieurs cycles, des respirations, une vraie conclusion"},
 ];
-const RECIPES = {
-  10: {minigame:2, vote:3, challenge:2, special:1, rule:1, light:1},
-  20: {minigame:4, vote:6, challenge:4, special:2, rule:2, light:2},
-  30: {minigame:6, vote:9, challenge:6, special:3, rule:3, light:3},
-  45: {minigame:12, vote:18, challenge:12, special:5, rule:7, light:6},
-  60: {minigame:16, vote:24, challenge:16, special:7, rule:8, light:9},
+
+// STRUCTURES — remplace l'ancienne table RECIPES (un seul dosage fixe par durée) par
+// plusieurs trames possibles par durée. Chaque trame découpe la soirée en phases
+// successives (part du temps total + fenêtre de tiers + poids relatifs par type de
+// contenu) : l'ordre des phases reste fixe (on ne rejoue jamais la finale avant le
+// début), mais le contenu précis à l'intérieur de chaque phase est tiré au sort à
+// chaque lancement (voir buildStructuredQueue dans session-engine.js). Une trame est
+// choisie au hasard parmi celles de la durée, en écartant la dernière utilisée pour
+// cette durée (voir loadLastStructureId) afin que deux soirées d'affilée ne se
+// ressemblent pas trop. `finale:true` marque la dernière phase : c'est dans cette
+// phase que le climax garanti est ajouté (voir buildStructuredQueue).
+const STRUCTURES = {
+  10: [
+    { id:'d10-flash', phases:[
+      { share:0.30, tier:{min:0,max:0}, weights:{minigame:2, light:1, rule:1} },
+      { share:0.45, tier:{min:0,max:1}, weights:{challenge:3, minigame:2, vote:1} },
+      { share:0.25, tier:{min:1,max:2}, weights:{challenge:1, vote:1}, finale:true },
+    ]},
+    { id:'d10-etincelle', phases:[
+      { share:0.25, tier:{min:0,max:0}, weights:{vote:1, minigame:1} },
+      { share:0.50, tier:{min:0,max:1}, weights:{minigame:2, challenge:3} },
+      { share:0.25, tier:{min:1,max:2}, weights:{challenge:1, light:1}, finale:true },
+    ]},
+  ],
+  30: [
+    { id:'d30-ascension', phases:[
+      { share:0.15, tier:{min:0,max:0}, weights:{light:1, vote:1, rule:1} },
+      { share:0.30, tier:{min:0,max:1}, weights:{challenge:2, minigame:2, vote:1} },
+      { share:0.30, tier:{min:1,max:2}, weights:{challenge:3, minigame:2, special:1} },
+      { share:0.25, tier:{min:1,max:2}, weights:{challenge:2, vote:2}, finale:true },
+    ]},
+    { id:'d30-montagnes-russes', phases:[
+      { share:0.15, tier:{min:0,max:0}, weights:{minigame:1, vote:1} },
+      { share:0.20, tier:{min:1,max:2}, weights:{challenge:2, minigame:1} },
+      { share:0.15, tier:{min:0,max:0}, weights:{light:2, vote:1} },
+      { share:0.25, tier:{min:1,max:2}, weights:{challenge:2, minigame:2, special:1} },
+      { share:0.25, tier:{min:1,max:2}, weights:{vote:1, challenge:2}, finale:true },
+    ]},
+    { id:'d30-duel', phases:[
+      { share:0.15, tier:{min:0,max:0}, weights:{vote:1, minigame:1, rule:1} },
+      { share:0.45, tier:{min:0,max:2}, weights:{challenge:4, minigame:2} },
+      { share:0.20, tier:{min:1,max:2}, weights:{vote:2} },
+      { share:0.20, tier:{min:1,max:2}, weights:{challenge:1} , finale:true },
+    ]},
+  ],
+  60: [
+    { id:'d60-marathon', phases:[
+      { share:0.10, tier:{min:0,max:0}, weights:{light:1, minigame:1, rule:1} },
+      { share:0.20, tier:{min:0,max:1}, weights:{challenge:2, minigame:2, vote:1} },
+      { share:0.08, tier:{min:0,max:0}, weights:{light:2} },
+      { share:0.20, tier:{min:1,max:2}, weights:{challenge:3, minigame:2, special:1} },
+      { share:0.07, tier:{min:0,max:1}, weights:{light:1, vote:1} },
+      { share:0.20, tier:{min:1,max:2}, weights:{challenge:3, minigame:2, vote:1} },
+      { share:0.15, tier:{min:1,max:2}, weights:{challenge:2, vote:1}, finale:true },
+    ]},
+    { id:'d60-grand-soir', phases:[
+      { share:0.12, tier:{min:0,max:0}, weights:{vote:1, light:1, minigame:1, rule:1} },
+      { share:0.18, tier:{min:0,max:1}, weights:{minigame:2, challenge:2, vote:1} },
+      { share:0.15, tier:{min:1,max:2}, weights:{challenge:3, special:1} },
+      { share:0.10, tier:{min:0,max:0}, weights:{light:2} },
+      { share:0.20, tier:{min:1,max:2}, weights:{challenge:2, minigame:2, vote:1} },
+      { share:0.10, tier:{min:1,max:2}, weights:{special:1, vote:1} },
+      { share:0.15, tier:{min:2,max:2}, weights:{challenge:2, vote:1}, finale:true },
+    ]},
+  ],
 };

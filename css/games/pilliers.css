@@ -1,22 +1,22 @@
 .pil-count-row{display:flex; gap:8px;}
-.pil-count-btn{flex:1; padding:14px 6px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--text-dim); font-family:'Unbounded',sans-serif; font-size:18px; text-align:center; cursor:pointer;}
-.pil-count-btn.selected{border-color:var(--accent); color:var(--accent); background:rgba(225,80,47,0.1);}
+.pil-count-btn{flex:1; padding:14px 6px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--text-dim); font-family:'Anton',sans-serif; font-size:18px; text-align:center; cursor:pointer;}
+.pil-count-btn.selected{border-color:var(--accent); color:var(--accent); background:rgba(232,255,61,0.1);}
 
 .pil-stepper{display:flex; align-items:center; justify-content:center; gap:20px;}
 .pil-step-btn{width:48px; height:48px; border-radius:50%; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:22px; line-height:1; cursor:pointer;}
 .pil-step-btn:disabled{opacity:0.35; cursor:default;}
-.pil-count-value{min-width:56px; text-align:center; font-family:'Unbounded',sans-serif; font-size:34px; color:var(--accent);}
+.pil-count-value{min-width:56px; text-align:center; font-family:'Anton',sans-serif; font-size:34px; color:var(--accent);}
 .pil-count-hint{text-align:center; font-size:12px; color:var(--text-faint); margin-top:8px;}
 
 .pil-pass-card{font-size:13px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase;}
-.pil-pass-name{font-family:'Unbounded',sans-serif; font-size:30px; color:var(--text); margin-top:8px;}
+.pil-pass-name{font-family:'Anton',sans-serif; font-size:30px; color:var(--text); margin-top:8px;}
 
 .pil-role-card{width:220px; border-radius:16px; padding:24px 18px; margin-top:16px; box-shadow:0 10px 30px rgba(0,0,0,0.4);}
 .pil-role-card.camp-pilliers{background:linear-gradient(160deg,#3a1414,#210a0a); border:1px solid var(--clay);}
 .pil-role-card.camp-village{background:linear-gradient(160deg,#20301f,#131f13); border:1px solid var(--sage);}
 .pil-role-card.camp-solo{background:linear-gradient(160deg,#2c2412,#1c160a); border:1px solid var(--accent);}
 .pil-role-camp{font-size:10px; letter-spacing:2px; text-transform:uppercase; opacity:0.7; color:#FBF4E7;}
-.pil-role-name{font-family:'Unbounded',sans-serif; font-size:24px; color:#FBF4E7; margin:8px 0 10px;}
+.pil-role-name{font-family:'Anton',sans-serif; font-size:24px; color:#FBF4E7; margin:8px 0 10px;}
 .pil-role-desc{font-size:13px; color:rgba(251,244,231,0.75); line-height:1.5;}
 
 .pil-night-bg{position:absolute; inset:0; background:radial-gradient(circle at 50% 30%, #1c1210, #050302); z-index:-1;}
@@ -28,17 +28,17 @@
 .pil-target-btn.dead{opacity:0.3; text-decoration:line-through; pointer-events:none;}
 .pil-target-btn.chosen{border-color:var(--accent); color:var(--accent);}
 
-.pil-timer-big{font-family:'Unbounded',sans-serif; font-size:64px; color:var(--accent);}
+.pil-timer-big{font-family:'Anton',sans-serif; font-size:64px; color:var(--accent);}
 .pil-timer-sub{font-size:12px; color:var(--text-faint); letter-spacing:1.5px; text-transform:uppercase; margin-top:6px;}
 
-.pil-secret-result{font-family:'Unbounded',sans-serif; font-size:26px; margin-top:14px;}
+.pil-secret-result{font-family:'Anton',sans-serif; font-size:26px; margin-top:14px;}
 .pil-secret-result.is-pillier{color:var(--clay);}
 .pil-secret-result.is-clean{color:var(--sage);}
 
 .pil-camp-tag{display:inline-block; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; padding:4px 10px; border-radius:20px; margin-top:6px;}
 .pil-camp-tag.camp-pilliers{background:rgba(163,80,58,0.2); color:var(--clay);}
 .pil-camp-tag.camp-village{background:rgba(138,154,126,0.2); color:var(--sage);}
-.pil-camp-tag.camp-solo{background:rgba(225,80,47,0.2); color:var(--accent);}
+.pil-camp-tag.camp-solo{background:rgba(232,255,61,0.2); color:var(--accent);}
 
 .pil-roster{font-size:13px; color:var(--text-dim); line-height:2; margin-top:14px; text-align:left; max-width:280px;}
 .pil-roster .dead{opacity:0.45; text-decoration:line-through;}

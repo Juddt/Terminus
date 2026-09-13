@@ -6,6 +6,14 @@ let gamesListCategoryFilter = 'all';
 // (game-difficulty-Modéré) qui posent parfois problème selon les outils/navigateurs.
 const DIFFICULTY_SLUGS = { 'Facile':'facile', 'Modéré':'modere', 'Intense':'intense' };
 
+// Teinte du halo de scène : on réutilise la première couleur du dégradé du jeu, qui
+// servait auparavant de fond plein. Le grand panneau coloré a disparu, mais chaque jeu
+// garde sa signature lumineuse.
+function stageGlow(g){
+  const m = /#([0-9A-Fa-f]{6})/.exec(g.cardGrad || '');
+  return m ? '#'+m[1] : 'var(--accent)';
+}
+
 function renderGamesList(){
   const wrap = document.getElementById('games-list-wrap');
   wrap.innerHTML = '';
@@ -19,19 +27,49 @@ function renderGamesList(){
   }
 
   filtered.forEach(g=>{
-    const card = document.createElement('div');
-    card.className = 'game-card';
-    // La carte entière lance le jeu. Avant, chaque carte portait un gros bouton « Jouer »
-    // plein : neuf boutons empilés ne laissaient voir que quatre jeux à la fois.
-    if(g.interactive) card.setAttribute('onclick', g.launchFn+'()');
-    card.innerHTML = '<div class="game-name">'+g.name+'</div>'+
-      '<div class="game-meta"><span>'+g.joueurs+'</span><span>'+g.duree+'</span>'+
-        (g.category ? '<span>'+g.category+'</span>' : '')+
-        (g.difficulty ? '<span class="game-difficulty game-difficulty-'+(DIFFICULTY_SLUGS[g.difficulty]||'')+'">'+g.difficulty+'</span>' : '')+
-        '<span class="game-rules-link" onclick="event.stopPropagation();openGameDetail(\''+g.id+'\')">Règles</span>'+
+    const stage = document.createElement('div');
+    stage.className = 'game-stage';
+    stage.setAttribute('onclick', 'openGameDetail(\''+g.id+'\')');
+    stage.innerHTML =
+      '<div class="game-stage-object" style="--stage-glow:'+stageGlow(g)+'">'+(GAME_ART[g.id]||'')+'</div>'+
+      '<div class="game-stage-body">'+
+        '<div class="game-name">'+g.name+'</div>'+
+        (g.tagline ? '<div class="game-principle">'+soberize(g.tagline)+'</div>' : '')+
+        '<div class="game-stage-meta"><span>'+g.joueurs+' joueurs</span><span>'+g.duree+'</span></div>'+
+        '<button class="btn btn-primary" onclick="event.stopPropagation();'+g.launchFn+'()">Jouer</button>'+
       '</div>';
-    wrap.appendChild(card);
+    wrap.appendChild(stage);
   });
+
+  // Index compact : retrouver immédiatement un jeu précis sans balayer la scène.
+  const index = document.getElementById('games-index');
+  if(index){
+    index.innerHTML = filtered.map(g=>
+      '<div class="games-index-row" onclick="openGameDetail(\''+g.id+'\')">'+
+        (GAME_ART[g.id]||'')+
+        '<span class="games-index-name">'+g.name+'</span>'+
+        '<span class="games-index-meta">'+g.joueurs+' · '+g.duree+'</span>'+
+      '</div>'
+    ).join('');
+  }
+}
+
+// Fait défiler la scène d'un jeu vers la gauche ou la droite : le balayage tactile n'est
+// jamais le seul moyen de naviguer (cf. accessibilité et usage à une main).
+function scrollGamesScene(dir){
+  const scene = document.getElementById('games-list-wrap');
+  if(!scene) return;
+  const card = scene.querySelector('.game-stage');
+  if(!card) return;
+  const step = card.offsetWidth + 16; // largeur d'une carte + l'écart défini en CSS
+  scene.scrollBy({ left: dir * step, behavior:'smooth' });
+}
+
+function toggleGamesIndex(){
+  const index = document.getElementById('games-index');
+  const btn = document.getElementById('games-index-toggle');
+  const open = index.classList.toggle('open');
+  btn.textContent = open ? 'Masquer l\'index' : 'Tous les jeux';
 }
 
 function setGamesListFilter(category){
@@ -61,8 +99,8 @@ function openGameDetail(id){
   document.getElementById('gd-name').textContent = g.name;
   document.getElementById('gd-desc').textContent = soberize(g.desc);
   let metaHTML = '<div class="gd-item"><b>'+g.joueurs+'</b>Joueurs</div>'+
-    '<div class="gd-item"><b>'+g.duree+'</b>Durée</div>';
-  if(g.materiel) metaHTML += '<div class="gd-item"><b>'+g.materiel+'</b>Matériel</div>';
+    '<div class="gd-item"><b>'+g.duree+'</b>Durée</div>'+
+    '<div class="gd-item"><b>'+(g.materiel || 'Aucun')+'</b>Matériel</div>';
   document.getElementById('gd-meta').innerHTML = metaHTML;
   const rulesWrap = document.getElementById('gd-rules');
   rulesWrap.innerHTML = '';
