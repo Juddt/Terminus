@@ -6,18 +6,26 @@ const fs=require('fs'), vm=require('vm');
 const store={};
 const localStorage={getItem:k=>k in store?store[k]:null,setItem:(k,v)=>{store[k]=String(v)},removeItem:k=>{delete store[k]}};
 
+function makeStyle(){
+  const st = {}; st.setProperty=(k,v)=>{st[k]=v}; st.removeProperty=k=>{delete st[k]};
+  st.getPropertyValue=k=>st[k]||''; return st;
+}
 function makeEl(id){
-  return {id, innerHTML:'', textContent:'', style:{}, dataset:{}, offsetWidth:100,
+  return {id, innerHTML:'', textContent:'', style:makeStyle(), dataset:{}, offsetWidth:100,
+    getTotalLength:()=>1000, getPointAtLength:l=>({x:50, y:560-l*0.58}),
+    removeAttribute(k){ this._attrs && delete this._attrs[k]; },
     classList:{_s:new Set(),add(c){this._s.add(c)},remove(c){this._s.delete(c)},
       toggle(c,f){f===undefined?(this._s.has(c)?this._s.delete(c):this._s.add(c)):(f?this._s.add(c):this._s.delete(c));return this._s.has(c)},
       contains(c){return this._s.has(c)}},
-    querySelectorAll:()=>[], querySelector:()=>null, appendChild(){}, setAttribute(){}, focus(){}, getAttribute:()=>null};
+    querySelectorAll:()=>[], querySelector:()=>null, appendChild(){}, focus(){},
+    _attrs:{}, setAttribute(k,v){this._attrs[k]=String(v)}, getAttribute(k){return k in this._attrs?this._attrs[k]:null}};
 }
 const els={};
 const document={getElementById:id=>els[id]||(els[id]=makeEl(id)),querySelectorAll:()=>[],querySelector:()=>makeEl('x')};
 const ctx={console,localStorage,document,navigator:{vibrate(){}},
   Sound:{play(){}},window:{matchMedia:()=>({matches:false}),fireConfetti:null},
-  setTimeout:(fn)=>{fn();return 0},clearInterval(){},setInterval:()=>0,
+  setTimeout:(fn)=>{fn();return 0},clearTimeout(){},clearInterval(){},setInterval:()=>0,
+  requestAnimationFrame:(fn)=>{fn&&fn();return 0},
   escapeHtml:v=>String(v),soberize:v=>v};
 vm.createContext(ctx);
 ['js/data/content.js','js/core/state.js'].forEach(f=>vm.runInContext(fs.readFileSync('../'+f,'utf8'),ctx,{filename:f}));
@@ -30,7 +38,7 @@ let errors=0, kinds={}, checked=0;
     vm.runInContext(`
       state.players=Array.from({length:${pc}},(_,i)=>({name:'Joueur'+i,color:'#fff',avatar:'X'}));
       state.stats={challenges:0,specials:0,rulesAdded:0,targets:{},playerChallenges:{},playerDrinks:{}};
-      state.activeRules=[]; state.durationMin=${duration}; state.sessionMode='chaos';
+      state.activeRules=[]; state.durationMin=${duration}; state.sessionMode='full';
       state.timeUp=false; state.climaxFired=false;
       var __b=buildStructuredQueue(${duration},${pc});
       state.typesQueue=__b.queue; state.queueTierWindows=__b.tierWindows; state.queueIndex=0;
@@ -53,17 +61,54 @@ let errors=0, kinds={}, checked=0;
 console.log('Activités jouées :',checked,'— erreurs :',errors);
 console.log('Compositions rencontrées :',JSON.stringify(kinds));
 
-// Progression : chemin vertical, basé sur le TEMPS écoulé (jamais sur des manches)
+// --- CHEMIN DE PROGRESSION ----------------------------------------------------------
+// Le temps restant n'est plus écrit nulle part : le chemin est le seul indicateur de
+// progression globale. On vérifie ici son contrat, pas un libellé.
 vm.runInContext("state.globalSecondsTotal=1800", ctx);
 let pathOk = true;
-[1800, 900, 60, 0].forEach(left=>{
+function trailProgress(){ return vm.runInContext('Trail.progress', ctx); }
+function setLeft(left){
   vm.runInContext("state.globalSecondsLeft="+left, ctx);
   try{ vm.runInContext('renderProgressPath()', ctx); }
-  catch(e){ console.error('PROGRESSION: exception à left='+left+' : '+e.message); pathOk=false; }
-  const rem = els['trail-remaining'] ? els['trail-remaining'].textContent : '';
-  if(left>0 && !/restantes/.test(rem)){ console.error('PROGRESSION: temps restant absent à left='+left); pathOk=false; }
+  catch(e){ console.error('CHEMIN: exception à left='+left+' : '+e.message); pathOk=false; }
+}
+vm.runInContext('Trail.reset()', ctx);
+// 1. La progression suit le temps joué, et rien d'autre.
+[[1800,0],[1350,0.25],[900,0.5],[0,1]].forEach(([left,expected])=>{
+  setLeft(left);
+  if(Math.abs(trailProgress()-expected) > 0.001){
+    console.error('CHEMIN: à left='+left+' progression='+trailProgress()+' (attendu '+expected+')'); pathOk=false;
+  }
 });
-console.log('Progression (chemin, 4 positions) :', pathOk ? 'OK' : 'ÉCHEC');
+// 2. Elle est MONOTONE : aucun recul possible, même si on la rappelle en arrière.
+setLeft(1700);
+if(trailProgress() !== 1){ console.error('CHEMIN: la progression a reculé'); pathOk=false; }
+// 3. Un changement de catégorie ne touche JAMAIS la progression ni le tracé.
+vm.runInContext('Trail.reset()', ctx);
+setLeft(900);
+const before = trailProgress();
+const builtBefore = ctx.document.getElementById('trail').dataset.built;
+['defi','duel','vote','regle','surprise','collectif','finale'].forEach(k=>{
+  vm.runInContext("Trail.signal('"+k+"')", ctx);
+  if(trailProgress() !== before){ console.error('CHEMIN: la signature "'+k+'" a déplacé la progression'); pathOk=false; }
+});
+if(ctx.document.getElementById('trail').dataset.built !== builtBefore){
+  console.error('CHEMIN: le tracé a été reconstruit'); pathOk=false;
+}
+// 4. Le tracé n'est pas recréé à chaque manche : mount() est idempotent.
+const htmlBefore = ctx.document.getElementById('trail').innerHTML;
+vm.runInContext('Trail.mount(); Trail.mount();', ctx);
+if(ctx.document.getElementById('trail').innerHTML !== htmlBefore){
+  console.error('CHEMIN: mount() a reconstruit le tracé'); pathOk=false;
+}
+// 5. Pause : la progression est figée, la reprise retrouve la position enregistrée.
+vm.runInContext('openPause()', ctx);
+const frozenAt = trailProgress();
+vm.runInContext("state.globalSecondsLeft=300; tickGlobal();", ctx);   // paused : ne décrémente pas
+if(trailProgress() !== frozenAt){ console.error('CHEMIN: la pause n\'a pas figé la progression'); pathOk=false; }
+vm.runInContext('closePause()', ctx);
+if(trailProgress() !== frozenAt){ console.error('CHEMIN: la reprise a perdu la position'); pathOk=false; }
+console.log('Chemin (progression, monotonie, catégories, pause) :', pathOk ? 'OK' : 'ÉCHEC');
 
 // Commandes : vérifier que chaque type d'activité produit les bons boutons
 const expects = {
@@ -153,3 +198,31 @@ Object.entries(cases).forEach(([expected, txt])=>{
   if(got !== expected){ console.error('SCÈNE: "'+txt.slice(0,30)+'" -> '+got+' (attendu '+expected+')'); sceneOk=false; }
 });
 console.log('Choix de mise en scène :', sceneOk ? 'OK' : 'ÉCHEC');
+
+// --- Retrait des prénoms en tête de consigne ---
+// La scène affiche déjà les prénoms en grand : les répéter alourdit. Mais retirer le
+// mauvais morceau casse la phrase — « {p1} et {p2} : bras de fer » ne doit pas devenir
+// « Et Tom : bras de fer », et « {p1}, {p2} te pose une question » doit garder « Tom ».
+const DUO=[{name:'Marie',color:'#f',avatar:'a'},{name:'Tom',color:'#f',avatar:'b'}];
+const SOLO=[{name:'Marie',color:'#f',avatar:'a'}];
+const stripCases = [
+  ['Marie et Tom : bras de fer, le perdant boit', DUO, 'Bras de fer, le perdant boit'],
+  ['Marie et Tom, regardez-vous dans les yeux 20 secondes', DUO, 'Regardez-vous dans les yeux 20 secondes'],
+  ['Marie, fais rire Tom sans le toucher', DUO, 'Fais rire Tom sans le toucher'],
+  ['Marie, Tom te pose une question', DUO, 'Tom te pose une question'],
+  ['Marie, imite quelqu\'un de la table', SOLO, 'Imite quelqu\'un de la table'],
+];
+let stripOk = true;
+stripCases.forEach(([txt, pl, expected])=>{
+  const got = vm.runInContext('stripNames('+JSON.stringify(txt)+', '+JSON.stringify(pl)+')', ctx);
+  if(got !== expected){ console.error('PRÉNOMS: '+JSON.stringify(txt)+' -> '+JSON.stringify(got)+' (attendu '+JSON.stringify(expected)+')'); stripOk=false; }
+});
+// Aucune consigne du contenu réel ne doit commencer par une conjonction orpheline.
+let orphan = 0;
+vm.runInContext('CHALLENGES', ctx).filter(c=>c.n===2).forEach(c=>{
+  const txt = vm.runInContext('fillTemplate('+JSON.stringify(c.text)+', '+JSON.stringify(DUO)+')', ctx);
+  const out = vm.runInContext('stripNames('+JSON.stringify(txt)+', '+JSON.stringify(DUO)+')', ctx);
+  if(/^(Et|Ou|,|:)\b/.test(out)){ if(orphan<3) console.error('PRÉNOMS: conjonction orpheline -> '+out); orphan++; }
+});
+if(orphan){ stripOk=false; console.error('PRÉNOMS: '+orphan+' consignes à deux joueurs commencent mal'); }
+console.log('Prénoms retirés en tête de consigne :', stripOk ? 'OK' : 'ÉCHEC');

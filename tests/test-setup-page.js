@@ -58,28 +58,26 @@ vm.runInContext("state.playerCount=1; nameDraft=['<script>x'];",ctx);
 vm.runInContext('renderNameRows()',ctx);
 check('Prénom avec HTML échappé', !/<script>x/.test(els['name-rows'].innerHTML));
 
-// 7. Un jeu précis ne se voit pas imposer durée/ambiance
+// 7. Un jeu précis ne se voit pas imposer la durée du before
 vm.runInContext("openSetupFor({type:'game',game:GAMES.find(g=>g.id==='pof')})",ctx);
 check('Durée masquée pour un jeu', els['setup-duration-block'].style.display==='none');
 check('Plus de bloc ambiance dans les réglages', els['setup-mode-block']===undefined);
 
-// 8. L'ambiance choisie à l'accueil se propage jusqu'aux réglages
-vm.runInContext("openSetupFor({type:'before',game:null,mode:'chill'})",ctx);
-check('Ambiance chill transmise', vm.runInContext('state.sessionMode',ctx)==='chill');
-
-check('Bouton mentionne chill', /chill$/.test(els['setup-launch-btn'].textContent),
-  els['setup-launch-btn'].textContent);
-vm.runInContext("openSetupFor({type:'before',game:null,mode:'chaos'})",ctx);
-check('Ambiance chaos transmise', vm.runInContext('state.sessionMode',ctx)==='chaos');
-check('Bouton mentionne chaos', /chaos$/.test(els['setup-launch-btn'].textContent),
-  els['setup-launch-btn'].textContent);
+// 8. Une seule entrée "Lancer le before" : l'ambiance n'est plus un choix du joueur,
+//    donc ni l'accueil ni les réglages ne la nomment. L'intensité est pilotée par la
+//    trame du moteur (voir updateIntensityForIndex).
+vm.runInContext("openSetupFor({type:'before',game:null})",ctx);
+check('Bouton = "Lancer le before", sans ambiance',
+  els['setup-launch-btn'].textContent==='Lancer le before', els['setup-launch-btn'].textContent);
+check('Aucune ambiance nommée dans les réglages',
+  !/chill|chaos/i.test(els['setup-launch-btn'].textContent));
 vm.runInContext("openSetupFor({type:'game',game:GAMES.find(g=>g.id==='pof')})",ctx);
 check('Bouton = Jouer à …', /^Jouer à /.test(els['setup-launch-btn'].textContent), els['setup-launch-btn'].textContent);
 
 
 // 9. Les champs de prénoms restent VIDES par défaut
 store['soiree_last_players_v1']=JSON.stringify([{name:'Alice'},{name:'Bob'}]);
-vm.runInContext("nameDraft=[]; openSetupFor({type:'before',game:null,mode:'chaos'})",ctx);
+vm.runInContext("nameDraft=[]; openSetupFor({type:'before',game:null})",ctx);
 const draftVide=vm.runInContext('JSON.stringify(nameDraft)',ctx);
 check('Aucun prénom prérempli', draftVide==='[]', draftVide);
 check('Repère "Prénom 1" présent', /placeholder="Prénom 1"/.test(els['name-rows'].innerHTML));

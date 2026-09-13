@@ -4,12 +4,21 @@
 // bloqués sur une vieille version jusqu'à un rechargement supplémentaire après chaque
 // mise à jour — gênant tant que l'app change encore souvent. Bumper CACHE_NAME force
 // quand même le remplacement complet du cache au prochain déploiement.
-const CACHE_NAME = 'soiree-cache-v24';
+const CACHE_NAME = 'soiree-cache-v25';
 
 const PRECACHE_URLS = [
   './',
   './index.html',
   './manifest.json',
+  './css/fonts.css',
+  './fonts/anton-400-latin.woff2',
+  './fonts/anton-400-latin-ext.woff2',
+  './fonts/work-sans-latin.woff2',
+  './fonts/work-sans-latin-ext.woff2',
+  './fonts/ibm-plex-mono-400-latin.woff2',
+  './fonts/ibm-plex-mono-400-latin-ext.woff2',
+  './fonts/ibm-plex-mono-500-latin.woff2',
+  './fonts/ibm-plex-mono-500-latin-ext.woff2',
   './css/base.css',
   './css/app.css',
   './css/games-shared.css',
@@ -35,7 +44,6 @@ const PRECACHE_URLS = [
   './js/core/scenes.js',
   './js/core/session-engine.js',
   './js/core/persistence.js',
-  './js/core/history.js',
   './js/core/display-mode.js',
   './js/core/legal.js',
   './js/lib/qrcode.js',

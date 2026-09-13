@@ -83,9 +83,16 @@ function resumeSession(){
   state.stats.playerChallenges = state.stats.playerChallenges || {};
   state.stats.playerDrinks = state.stats.playerDrinks || {};
 
-  document.getElementById('frame').classList.toggle('chaos-mode', state.sessionMode !== 'chill' && state.intensityValue >= 85);
   goTo('main');
+  // Le chemin est repositionné SANS transition : une reprise doit retrouver la position
+  // enregistrée telle quelle, pas la rejouer depuis le départ en glissant sous les yeux
+  // du groupe. On fige, on pose la position, on rend la transition.
+  if(window.Trail){
+    Trail.freeze();
+    Trail.setProgress(0, true);
+  }
   if(typeof renderProgressPath === 'function') renderProgressPath();
+  if(window.Trail) Trail.unfreeze();
   renderRulesBanner();
   renderChallengeCounter();
 

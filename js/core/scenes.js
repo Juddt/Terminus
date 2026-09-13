@@ -25,108 +25,214 @@
 const REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // --- CHEMIN DE PROGRESSION (décor d'arrière-plan) -----------------------------------
-// Remplace la barre horizontale par un tracé vertical sinueux qui monte au fil de la
-// soirée. C'est un DÉCOR, pas un écran de sélection : aucun jalon n'est cliquable, rien
-// n'est verrouillé, rien ne se collectionne, et le conteneur est en pointer-events:none
-// pour ne jamais capter un geste destiné à la scène.
+// Le chemin est le SEUL indicateur de progression globale : le temps restant n'est plus
+// écrit nulle part. C'est un décor — rien n'y est cliquable, rien ne s'y collectionne, et
+// le conteneur est en pointer-events:none pour ne jamais capter un geste de la scène.
 //
-// L'avancement suit le temps réellement joué (globalSecondsLeft / globalSecondsTotal).
-// Comme tickGlobal ne décrémente pas quand state.paused est vrai, les pauses sont
-// naturellement exclues, et une reprise de session retrouve la bonne position puisque
-// globalSecondsLeft fait partie de la snapshot.
+// Trois choses sont tenues séparées, et c'est le point important :
+//
+//   1. LA PROGRESSION RÉELLE — `Trail.progress`, dérivée du temps activement joué
+//      (globalSecondsLeft / globalSecondsTotal). tickGlobal ne décrémente pas pendant une
+//      pause, donc les pauses n'avancent pas le chemin ; globalSecondsLeft fait partie de
+//      la snapshot, donc une reprise retrouve exactement la position enregistrée.
+//      Elle est MONOTONE : setProgress refuse tout recul (voir le garde-fou), ce qui rend
+//      structurellement impossible le « saut en arrière » observé auparavant.
+//
+//   2. LE DÉPLACEMENT DU DÉCOR — la translation de #trail-world. Le repère reste à
+//      hauteur fixe à l'écran (HEAD_SCREEN_Y) et c'est le paysage qui descend : on a la
+//      sensation de monter, sans jamais faire défiler la page, et le mouvement est
+//      continu (une transition linéaire d'une seconde, calée sur le tic du moteur).
+//
+//   3. LES EFFETS DE CATÉGORIE — Trail.signal(kind), de brèves signatures lumineuses.
+//      Elles n'écrivent JAMAIS ni sur 1 ni sur 2 : changer de catégorie ne peut donc pas
+//      faire sauter, reculer ou réinitialiser la progression.
+//
+// Le tracé lui-même est construit UNE SEULE FOIS par session (Trail.mount est idempotent,
+// Trail.reset ne le reconstruit pas) : il n'est pas recréé à chaque manche.
 
-// Tracé en coordonnées SVG (viewBox 0 0 100 420) : il serpente d'un bord à l'autre en
-// restant sur les côtés, et évite la bande centrale où se trouvent les consignes.
-const TRAIL_D = 'M 78 420 C 78 384, 22 372, 22 336 C 22 300, 80 292, 80 256 C 80 220, 20 212, 20 176 C 20 140, 78 132, 78 96 C 78 60, 24 52, 24 16 C 24 4, 26 -2, 26 -12';
+// Géométrie, en unités SVG. La zone visible fait TRAIL_VIEW (100 × 200) ; le tracé
+// complet est bien plus haut (TRAIL_SPAN) et défile au travers.
+const TRAIL_VIEW_W = 100, TRAIL_VIEW_H = 200;
+const TRAIL_BOTTOM = 560;   // y du départ, tout en bas du tracé
+const TRAIL_TOP    = -20;   // y de l'arrivée, au-delà du haut
+const TRAIL_SPAN   = TRAIL_BOTTOM - TRAIL_TOP;
+const HEAD_SCREEN_Y = 150;  // hauteur du repère à l'écran : sous la bande de lecture
+                            // atténuée, au-dessus des commandes — il reste visible sans
+                            // jamais concurrencer la consigne.
 
-function buildTrail(){
-  const wrap = document.getElementById('trail');
-  if(!wrap || wrap.dataset.built) return;
-  wrap.innerHTML =
-    '<svg class="trail-svg" viewBox="0 0 100 420" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">'+
-      '<defs>'+
-        '<linearGradient id="trailDone" x1="0" y1="1" x2="0" y2="0">'+
-          '<stop offset="0" stop-color="#E8FF3D" stop-opacity="0.10"/>'+
-          '<stop offset="0.75" stop-color="#E8FF3D" stop-opacity="0.55"/>'+
-          '<stop offset="1" stop-color="#FFFFFF" stop-opacity="0.85"/>'+
-        '</linearGradient>'+
-        '<filter id="trailBlur" x="-60%" y="-20%" width="220%" height="140%">'+
-          '<feGaussianBlur stdDeviation="3.2"/>'+
-        '</filter>'+
-      '</defs>'+
-      '<g id="trail-shift">'+
-        '<path class="trail-todo" d="'+TRAIL_D+'"/>'+
-        '<path class="trail-done-glow" id="trail-done-glow" d="'+TRAIL_D+'" filter="url(#trailBlur)"/>'+
-        '<path class="trail-done" id="trail-done" d="'+TRAIL_D+'"/>'+
-        '<g id="trail-marks"></g>'+
-        '<g id="trail-head"><circle class="trail-head-halo" r="9"/><circle class="trail-head-core" r="3.2"/></g>'+
-      '</g>'+
-    '</svg>';
-  wrap.dataset.built = '1';
-}
+// Serpentin régulier : il reste sur les côtés et traverse peu la bande centrale, où se
+// trouvent les consignes.
+const TRAIL_D = (function(){
+  let d = 'M 74 ' + TRAIL_BOTTOM;
+  let y = TRAIL_BOTTOM, left = true;
+  while(y > TRAIL_TOP){
+    const ny = y - 70;
+    const x  = left ? 26 : 74;
+    d += ' C ' + (left ? 74 : 26) + ' ' + (y - 34) + ', ' + x + ' ' + (ny + 34) + ', ' + x + ' ' + ny;
+    y = ny; left = !left;
+  }
+  return d;
+})();
 
+const Trail = {
+  progress: 0,
+  built: false,
+  frozen: false,
+  _len: 0,
+  _signalTimer: null,
+
+  el(){ return document.getElementById('trail'); },
+
+  // Construit le tracé. Idempotent : appelé à chaque rendu de scène sans rien recréer.
+  mount(){
+    const wrap = this.el();
+    if(!wrap) return false;
+    if(this.built && wrap.dataset.built === '1') return true;
+    wrap.innerHTML =
+      '<svg class="trail-svg" viewBox="0 0 '+TRAIL_VIEW_W+' '+TRAIL_VIEW_H+'" '+
+           'preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">'+
+        '<g id="trail-world">'+
+          '<path class="trail-todo" d="'+TRAIL_D+'"/>'+
+          '<path class="trail-done-glow" id="trail-done-glow" d="'+TRAIL_D+'"/>'+
+          '<path class="trail-done" id="trail-done" d="'+TRAIL_D+'"/>'+
+          '<path class="fx fx-impulse" id="fx-impulse" d="'+TRAIL_D+'"/>'+
+          '<g id="trail-marks"></g>'+
+          '<g id="trail-finish" transform="translate(0 '+TRAIL_TOP+')">'+
+            '<circle class="trail-finish-glow" id="trail-finish-glow" cx="74" cy="0" r="16"/>'+
+            '<path class="trail-finish" d="M 58 0 L 90 0"/>'+
+          '</g>'+
+          '<g id="trail-head">'+
+            '<circle class="fx fx-wide" id="fx-wide" r="30"/>'+
+            '<circle class="fx fx-calm" id="fx-calm" r="17"/>'+
+            '<circle class="fx fx-spark" id="fx-spark" r="13"/>'+
+            '<circle class="fx fx-duel fx-duel-a" id="fx-duel-a" r="5"/>'+
+            '<circle class="fx fx-duel fx-duel-b" id="fx-duel-b" r="5"/>'+
+            '<circle class="trail-head-halo" r="9"/>'+
+            '<circle class="trail-head-core" r="3.1"/>'+
+          '</g>'+
+        '</g>'+
+      '</svg>';
+    wrap.dataset.built = '1';
+    this.built = true;
+
+    const path = document.getElementById('trail-done');
+    this._len = (path && path.getTotalLength) ? path.getTotalLength() : 0;
+
+    if(this._len){
+      // Jalons discrets, posés une fois pour toutes.
+      const marks = document.getElementById('trail-marks');
+      let html = '';
+      for(let k=1; k<=7; k++){
+        const pt = path.getPointAtLength(this._len * (k/8));
+        html += '<circle class="trail-mark" cx="'+pt.x.toFixed(1)+'" cy="'+pt.y.toFixed(1)+'" r="1.6"/>';
+      }
+      if(marks) marks.innerHTML = html;
+      // L'impulsion du défi est un court segment qui parcourt le tracé : on lui donne
+      // un pointillé « un tiret puis du vide » et on anime son décalage.
+      const imp = document.getElementById('fx-impulse');
+      if(imp){
+        imp.style.strokeDasharray = '40 ' + this._len;
+        imp.style.setProperty('--imp-len', this._len);
+      }
+    }
+    this.apply();
+    return true;
+  },
+
+  // Progression réelle. Monotone par construction : `force` n'est utilisé que par reset().
+  setProgress(ratio, force){
+    const r = Math.max(0, Math.min(1, ratio || 0));
+    if(!force && r < this.progress) return;   // jamais de recul
+    this.progress = r;
+    this.apply();
+  },
+
+  // Écrit la progression et le déplacement du décor dans le SVG. Ne touche à aucun effet.
+  apply(){
+    const wrap = this.el();
+    if(!wrap || !this.built) return;
+    const p = this.progress;
+
+    // Portion parcourue : on dévoile le tracé depuis le bas.
+    if(this._len){
+      const off = this._len * (1 - p);
+      ['trail-done','trail-done-glow'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.style.strokeDasharray = this._len;
+        el.style.strokeDashoffset = off;
+      });
+      const head = document.getElementById('trail-head');
+      if(head){
+        const pt = document.getElementById('trail-done').getPointAtLength(this._len * p);
+        head.setAttribute('transform', 'translate('+pt.x.toFixed(2)+' '+pt.y.toFixed(2)+')');
+      }
+    }
+
+    // Déplacement du décor : le monde descend, le repère reste à hauteur constante.
+    const world = document.getElementById('trail-world');
+    if(world){
+      const headY = TRAIL_BOTTOM - p * TRAIL_SPAN;
+      const ty = REDUCED_MOTION ? 0 : (HEAD_SCREEN_Y - headY);
+      world.setAttribute('transform', 'translate(0 '+ty.toFixed(2)+')');
+    }
+
+    // L'arrivée s'allume sur la fin, une fois, sans changer la couleur de tout le tracé.
+    wrap.classList.toggle('near-end', p >= 0.94);
+  },
+
+  // Signature de catégorie : brève, non répétée, sans effet sur la progression.
+  signal(kind){
+    const wrap = this.el();
+    if(!wrap || !kind) return;
+    clearTimeout(this._signalTimer);
+    wrap.removeAttribute('data-signal');
+    // Un reflow force le redémarrage de l'animation même si la même signature revient.
+    void wrap.offsetWidth;
+    wrap.setAttribute('data-signal', kind);
+    this._signalTimer = setTimeout(()=>{
+      // Retirer l'attribut garantit qu'aucun effet ne reste affiché en permanence.
+      if(wrap.getAttribute('data-signal') === kind) wrap.removeAttribute('data-signal');
+    }, kind === 'regle' || kind === 'finale' ? 1700 : 1300);
+  },
+
+  // Pause : la progression est figée telle quelle, sans transition qui « rattrape »
+  // au retour. La reprise repart de la position enregistrée.
+  freeze(){ this.frozen = true; const w = this.el(); if(w) w.classList.add('frozen'); },
+  unfreeze(){
+    this.frozen = false;
+    const w = this.el();
+    if(!w) return;
+    this.apply();
+    // On rend la transition après avoir réappliqué la position : pas de glissement.
+    requestAnimationFrame(()=> w.classList.remove('frozen'));
+  },
+
+  // Nouvelle soirée : seule occasion où la progression revient à zéro.
+  reset(){
+    const w = this.el();
+    if(w) w.classList.add('frozen');
+    this.setProgress(0, true);
+    if(w){ w.removeAttribute('data-signal'); requestAnimationFrame(()=> w.classList.remove('frozen')); }
+  }
+};
+window.Trail = Trail;
+
+// Appelé chaque seconde par tickGlobal, et à chaque nouvelle scène. Ne fait plus qu'une
+// chose : convertir le temps joué en progression. Tout le reste vit dans Trail.
 function renderProgressPath(){
-  const wrap = document.getElementById('trail');
-  if(!wrap) return;
-  buildTrail();
+  if(!Trail.mount()) return;
   const total = state.globalSecondsTotal || 1;
   const left = Math.max(0, Math.min(total, state.globalSecondsLeft));
-  const ratio = (total - left) / total;
-
-  // Le temps restant est mis à jour en premier : il ne doit pas dépendre de la
-  // disponibilité du tracé SVG (getTotalLength n'existe pas tant que le path n'est pas
-  // mesurable, ce qui gelait l'affichage du temps).
-  const mins0 = Math.floor(left / 60), secs0 = left % 60;
-  const remaining0 = document.getElementById('trail-remaining');
-  if(remaining0) remaining0.textContent = (mins0 > 0 ? mins0 + ' min' : secs0 + ' s') + ' restantes';
-  wrap.classList.toggle('near-end', left <= 60);
-
-  const pathEl = document.getElementById('trail-done');
-  if(!pathEl || !pathEl.getTotalLength) return;
-
-  const len = pathEl.getTotalLength();
-  // Le tracé est dessiné depuis le BAS : on dévoile la portion parcourue en réduisant
-  // l'offset du pointillé, ce qui fait « monter » la lumière.
-  [pathEl, document.getElementById('trail-done-glow')].forEach(el=>{
-    if(!el) return;
-    el.style.strokeDasharray = len;
-    el.style.strokeDashoffset = len * (1 - ratio);
-  });
-
-  // Jalons discrets : de simples entailles perpendiculaires au tracé, pas des pastilles.
-  const marks = document.getElementById('trail-marks');
-  if(marks && !marks.dataset.built){
-    let html = '';
-    for(let i=1; i<=5; i++){
-      const p = pathEl.getPointAtLength(len * (i/6));
-      html += '<circle class="trail-mark" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="1.7"/>';
-    }
-    marks.innerHTML = html;
-    marks.dataset.built = '1';
-  }
-
-  // Repère lumineux : notre position exacte sur le tracé.
-  const head = document.getElementById('trail-head');
-  if(head){
-    const p = pathEl.getPointAtLength(len * ratio);
-    head.setAttribute('transform', 'translate('+p.x.toFixed(2)+' '+p.y.toFixed(2)+')');
-  }
-
-  // Déplacement doux du décor : le tracé glisse vers le bas à mesure qu'on avance, ce
-  // qui donne la sensation de monter sans jamais faire défiler la page.
-  const shift = document.getElementById('trail-shift');
-  if(shift && !REDUCED_MOTION) shift.setAttribute('transform', 'translate(0 '+(ratio*86).toFixed(1)+')');
-
+  Trail.setProgress((total - left) / total);
 }
 
-// Avancée légère du chemin au changement de manche, puis arrivée du contenu.
-function playPathTransition(){
-  const wrap = document.getElementById('trail');
-  if(!wrap || REDUCED_MOTION) return 0;
-  wrap.classList.add('advancing');
-  setTimeout(()=> wrap.classList.remove('advancing'), 560);
-  return 300;
-}
+// Correspondance scène → signature lumineuse. Le vote reçoit sa confirmation plus tard,
+// à la révélation (voir voteFor) : ici, seulement l'éclairage calme.
+const SCENE_SIGNAL = {
+  defi:'defi', duel:'duel', vote:'vote', regle:'regle',
+  surprise:'surprise', collectif:'collectif', coop:'collectif', adresse:'defi'
+};
 
 // --- Compositions ------------------------------------------------------------------
 // Chaque moment choisit sa composition. Le type est déduit du libellé fourni par le
@@ -155,15 +261,32 @@ function pickSceneKind(eyebrow, players, text){
 }
 
 // Les prénoms figurent déjà en grand au-dessus de la consigne : les répéter dans la
-// phrase alourdit la lecture. On les remplace par un pronom court quand la phrase
-// commence par eux, sinon on les laisse (retirer un prénom en milieu de phrase casserait
-// la grammaire).
+// phrase alourdit la lecture. On retire donc l'adresse qui ouvre la phrase — mais
+// seulement l'ouverture : un prénom en milieu de phrase (« fais rire Marie sans la
+// toucher ») porte la grammaire et doit rester.
+//
+// Deux formes existent dans le contenu, et les confondre cassait la phrase :
+//   « {p1}, fais rire {p2} »            -> « Fais rire Marie »                  (un acteur)
+//   « {p1} et {p2} : bras de fer »      -> « Bras de fer »                      (les deux)
+// Sur la seconde forme, ne retirer que le premier prénom laissait un « Et Marie : bras
+// de fer » agrammatical à l'écran, alors que la scène affiche déjà les deux prénoms.
 function stripNames(html, players){
   let out = html;
-  players.forEach((p,i)=>{
-    const n = escapeHtml(p.name);
-    if(i === 0) out = out.replace(new RegExp('^'+n+',?\\s*', 'i'), '');
-  });
+  if(!players || !players.length) return out;
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const n1 = esc(escapeHtml(players[0].name));
+
+  if(players.length >= 2){
+    const n2 = esc(escapeHtml(players[1].name));
+    // Seulement une CONJONCTION explicite (« X et Y », « X & Y ») : la virgule est
+    // ambiguë — « Marie, Tom te pose une question » adresse la phrase à Marie et garde
+    // Tom comme sujet, retirer les deux donnerait « Te pose une question ».
+    const both = new RegExp('^'+n1+'\\s*(?:et|&amp;|&)\\s+'+n2+'\\s*[,:\u2014-]?\\s*', 'i');
+    if(both.test(out)) out = out.replace(both, '');
+    else out = out.replace(new RegExp('^'+n1+'\\s*[,:]?\\s*', 'i'), '');
+  } else {
+    out = out.replace(new RegExp('^'+n1+'\\s*[,:]?\\s*', 'i'), '');
+  }
   return out.charAt(0).toUpperCase() + out.slice(1);
 }
 
@@ -269,17 +392,19 @@ function renderScene(eyebrow, text, players, seconds){
   screen.dataset.scene = kind;
 
   state.sceneKind = kind;
-  const delay = playPathTransition();
-  setTimeout(()=>{
-    scene.innerHTML = buildSceneHTML(kind, text, players);
-    scene.classList.remove('entering');
-    void scene.offsetWidth; // force le redémarrage de l'animation d'entrée
-    scene.classList.add('entering');
-    renderProgressPath();
-  }, delay);
 
-  if(state.sessionMode !== 'chill' && kind === 'duel' && navigator.vibrate) navigator.vibrate([30,40,30]);
-  if(kind === 'surprise' && window.fireConfetti && !REDUCED_MOTION) setTimeout(()=> window.fireConfetti('small'), delay + 120);
+  scene.innerHTML = buildSceneHTML(kind, text, players);
+  scene.classList.remove('entering');
+  void scene.offsetWidth; // force le redémarrage de l'animation d'entrée
+  scene.classList.add('entering');
+
+  // La progression est relue (elle n'a pas changé du fait de la scène), puis la
+  // catégorie pose sa signature lumineuse — deux opérations distinctes, dans cet ordre.
+  renderProgressPath();
+  Trail.signal(SCENE_SIGNAL[kind] || 'defi');
+
+  if(kind === 'duel' && navigator.vibrate) navigator.vibrate([30,40,30]);
+  if(kind === 'surprise' && window.fireConfetti && !REDUCED_MOTION) setTimeout(()=> window.fireConfetti('small'), 120);
 }
 
 // Vote : marque le joueur désigné, révèle le résultat, et laisse le groupe avancer.
@@ -294,6 +419,7 @@ function voteFor(idx){
   state.stats.targets[p.name] = (state.stats.targets[p.name]||0) + 1;
   reveal.innerHTML = '<span class="vote-reveal-name">'+escapeHtml(p.name)+'</span><span class="vote-reveal-tag">désigné·e par le groupe</span>';
   reveal.classList.add('shown');
+  Trail.signal('vote-done');
   Sound.play('ding');
   saveSessionSnapshot();
 }

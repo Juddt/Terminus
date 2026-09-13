@@ -48,7 +48,6 @@ function playerBounds(){
 // Point d'entrée : depuis l'accueil (before) ou depuis un jeu de la bibliothèque.
 function openSetupFor(context){
   setupContext = context || { type:'before', game:null };
-  // L'ambiance vient du bouton pressé à l'accueil (chill ou chaos).
   if(setupContext.mode) state.sessionMode = setupContext.mode;
   const bounds = playerBounds();
   // Les champs restent VIDES par défaut : préremplir avec l'ancien groupe obligeait à
@@ -64,20 +63,13 @@ function renderSetupPage(){
   const isBefore = setupContext.type === 'before';
   const game = setupContext.game;
 
-  // Le bandeau "mode choisi / Modifier" a été retiré : pour changer de mode, on repasse
-  // par Accueil. Le bouton de lancement rappelle déjà ce qu'on s'apprête à lancer.
-
-  // Un jeu précis n'a ni ambiance ni durée de before : on ne lui impose pas des
-  // réglages qui ne concernent pas ses règles.
-  // L'ambiance (chill/chaos) est choisie à l'accueil : plus de bloc ici. Un jeu précis
-  // n'a pas de durée de before : on ne lui impose pas ce réglage.
+  // Un jeu précis n'a pas de durée de before : on ne lui impose pas ce réglage.
   const durBlock = document.getElementById('setup-duration-block');
   if(durBlock) durBlock.style.display = isBefore ? '' : 'none';
+  // Un seul libellé de lancement : l'ambiance n'est plus un choix du joueur (voir
+  // setSessionMode), donc le bouton ne la mentionne plus.
   const launchBtn = document.getElementById('setup-launch-btn');
-  launchBtn.textContent = isBefore
-    ? 'Lancer le before ' + (state.sessionMode === 'chill' ? 'chill' : 'chaos')
-    : 'Jouer à ' + game.name;
-  launchBtn.classList.toggle('is-chill', isBefore && state.sessionMode === 'chill');
+  launchBtn.textContent = isBefore ? 'Lancer le before' : 'Jouer à ' + game.name;
 
   if(isBefore) renderDurationChoices();
   renderCounter();

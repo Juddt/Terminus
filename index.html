@@ -5,16 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Soirée</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#F3EAD6">
+<meta name="theme-color" content="#0D0D0D">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <!-- Sans ces deux balises, « Ajouter à l'écran d'accueil » sur iPhone ouvre l'app
      dans une fenêtre Safari avec sa barre d'adresse, au lieu du plein écran. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Soirée">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Polices auto-hébergées (voir css/fonts.css) : une PWA doit garder sa typographie
+     hors connexion, et les requêtes vers fonts.googleapis.com échouaient hors ligne. -->
+<link rel="preload" href="fonts/anton-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/work-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/games-shared.css">
@@ -49,19 +51,17 @@
       <div style="width:100%;">
         <!-- Le before se lance directement dans son ambiance : le choix Chill/Chaos se
              fait ici, plus dans la page de réglages. -->
-        <div class="launch-split">
-          <button class="launch-half launch-chill" onclick="openLaunchEntry('chill')">
-            <span class="launch-half-name">CHILL</span>
-            <span class="launch-half-tag">Tranquille, on chauffe</span>
-          </button>
-          <button class="launch-half launch-chaos" onclick="openLaunchEntry('chaos')">
-            <span class="launch-half-name">CHAOS</span>
-            <span class="launch-half-tag">Ça part tout de suite</span>
-          </button>
-        </div>
-        <button class="mode-card" onclick="openGamesList()">
-          <div class="mode-name">Choisir un jeu</div>
-          <div class="mode-tag">Votre jeu préféré, quand vous voulez.</div>
+        <!-- Deux entrées, pas plus. L'intensité du before n'est plus un choix offert au
+             joueur : elle est pilotée par la trame du moteur (voir STRUCTURES et
+             updateIntensityForIndex), qui fait monter et redescendre la pression toute
+             seule au fil de la soirée. -->
+        <button class="entry entry-primary" onclick="openLaunchEntry()">
+          <span class="entry-name">Lancer le before</span>
+          <span class="entry-tag">L&rsquo;app enchaîne tout. Vous jouez.</span>
+        </button>
+        <button class="entry" onclick="openGamesList()">
+          <span class="entry-name">Choisir un jeu</span>
+          <span class="entry-tag">Votre jeu préféré, quand vous voulez.</span>
         </button>
         <div class="home-links">
           <span onclick="openCustomScreen()">Mes ajouts</span>
@@ -128,21 +128,25 @@
           <button class="top-btn icon-only" id="sound-inline-btn" onclick="Sound.toggle()" aria-label="Son">♪</button>
         </div>
       </div>
+      <!-- Le temps restant n'est plus affiché : le chemin est le seul indicateur de
+           progression globale. Seul le compteur de règles actives subsiste ici. -->
       <div class="topbar-secondary">
         <div id="rules-count-btn" class="rules-count-btn" style="display:none;" onclick="openRulesSheet()"></div>
-        <div class="trail-remaining" id="trail-remaining"></div>
       </div>
     </div>
     <div class="scene-wrap"><div class="scene" id="scene"></div></div>
+    <!-- Commandes : une colonne stable, jamais recouverte par le décor.
+         Le minuteur de manche n'apparaît que pour les activités qui imposent
+         réellement un temps limite (voir renderItem). -->
     <div class="main-footer">
-      <div class="ring-wrap" id="ring-wrap">
-        <svg width="48" height="48" viewBox="0 0 48 48">
+      <div class="footer-timer" id="ring-wrap">
+        <svg width="44" height="44" viewBox="0 0 48 48" aria-hidden="true">
           <circle class="ring-bg" cx="24" cy="24" r="20"></circle>
           <circle class="ring-fg" id="ring-fg" cx="24" cy="24" r="20" stroke-dasharray="125.6" stroke-dashoffset="0"></circle>
         </svg>
         <div class="ring-label" id="ring-label">10</div>
       </div>
-      <div class="footer-buttons" id="footer-buttons"></div>
+      <div class="footer-controls" id="footer-buttons"></div>
     </div>
   </div>
 

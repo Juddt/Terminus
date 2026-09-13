@@ -2,7 +2,7 @@ let creatorsGlasses = 0;
 
 let state = {
   step:0, playerCount:4, players:[],
-  durationMin:30, intensityValue:50, sessionMode:'chaos',
+  durationMin:30, intensityValue:50, sessionMode:'full',
   globalSecondsTotal:0, globalSecondsLeft:0, globalInterval:null,
   ringInterval:null, activeRules:[],
   ringTotal:10, ringLeft:10,
@@ -43,4 +43,9 @@ function goTo(name){
   });
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
+  // L'écran courant est exposé sur #frame : le CSS peut ainsi masquer un contrôle
+  // global là où l'écran propose déjà le sien (ex. le bouton son flottant pendant le
+  // before, dont la barre supérieure porte déjà sa propre commande audio).
+  const frame = document.getElementById('frame');
+  if(frame) frame.dataset.screen = name;
 }

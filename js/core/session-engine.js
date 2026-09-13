@@ -36,7 +36,7 @@ function drawFromBag(bagKey, sourceArr){
 
 // Correspondance entre la fenêtre de tiers d'une phase et une intensité numérique
 // représentative, réutilisée par speedFactor() (rythme) et le mode Chaos visuel
-// (#frame.chaos-mode, seuil >=85) — voir updateIntensityForIndex.
+// — voir updateIntensityForIndex. L'intensité ne pilote plus que le contenu et le rythme.
 const TIER_TO_INTENSITY = {0:20, 1:55, 2:90};
 
 // Assouplit ou renforce certains types de contenu selon le nombre de joueurs : un vote
@@ -167,14 +167,21 @@ function updateIntensityForIndex(idx){
   const tw = { min: Math.min(raw.min, cap), max: Math.min(raw.max, cap) };
   state.currentTierWindow = tw;
   state.intensityValue = TIER_TO_INTENSITY[tw.max] != null ? TIER_TO_INTENSITY[tw.max] : 55;
-  const frame = document.getElementById('frame');
-  if(frame) frame.classList.toggle('chaos-mode', state.sessionMode !== 'chill' && state.intensityValue >= 85);
+  // L'intensité reste INTERNE : elle règle le contenu tiré et le rythme (speedFactor),
+  // sans traitement visuel propre. Les bandeaux rayés « mode Chaos » ont été retirés —
+  // ils recouvraient les commandes et clignotaient en permanence. C'est le chemin qui
+  // porte l'ambiance désormais (voir Trail.signal).
 }
 
-// L'ambiance est choisie à l'accueil (boutons CHILL / CHAOS), plus par un sélecteur
-// dans les réglages. Point d'entrée unique pour la définir.
+// L'accueil ne propose plus qu'une seule porte d'entrée vers le before : l'intensité
+// n'est plus un réglage offert au joueur. Elle monte et redescend toute seule, phase
+// après phase, au fil de la trame choisie (voir STRUCTURES et updateIntensityForIndex),
+// ce qui donne des vagues au sein d'une même soirée plutôt qu'un niveau constant choisi
+// à l'avance. `sessionMode` reste dans l'état, en interne : 'full' laisse au moteur toute
+// l'amplitude de la trame, 'chill' la plafonne au tier 1 (réservé à un éventuel réglage
+// d'accessibilité, plus exposé dans l'interface).
 function setSessionMode(mode){
-  state.sessionMode = (mode === 'chill') ? 'chill' : 'chaos';
+  state.sessionMode = (mode === 'chill') ? 'chill' : 'full';
 }
 
 function launchSession(){
@@ -225,7 +232,7 @@ function playAgainSameConfig(){ launchSession(); }
 // Si une soirée existe déjà, on demande explicitement quoi faire plutôt que de reprendre
 // ou d'écraser en silence.
 function openLaunchEntry(mode){
-  state.pendingLaunchMode = mode;
+  state.pendingLaunchMode = mode || state.sessionMode || 'full';
   const snapshot = loadSessionSnapshot();
   if(snapshot){
     const minutesLeft = Math.max(1, Math.round(snapshot.globalSecondsLeft / 60));
@@ -257,7 +264,8 @@ function quitSessionToHome(){
   clearInterval(state.globalInterval);
   clearInterval(state.ringInterval);
   saveSessionSnapshot();
-  document.getElementById('frame').classList.remove('chaos-mode');
+  // Le chemin est figé sur sa position : revenir à l'accueil met en pause, ne termine pas.
+  if(window.Trail) Trail.freeze();
   goTo('home');
   checkForResumableSession();
 }
@@ -293,6 +301,8 @@ function pickPlayers(n){
 // D\u00e9marre la boucle principale apr\u00e8s le compte \u00e0 rebours de lancement.
 function startMainLoop(){
   goTo('main');
+  // Seule occasion où la progression du chemin repart de zéro : une nouvelle soirée.
+  if(window.Trail) Trail.reset();
   clearInterval(state.globalInterval);
   state.globalInterval = setInterval(tickGlobal, 1000);
   if(typeof renderProgressPath === 'function') renderProgressPath();
@@ -485,7 +495,7 @@ function renderItem(eyebrow, text, players, seconds){
   const timed = /minuteur|seconde|chrono|avant la fin/i.test(text);
   const ring = document.getElementById('ring-wrap');
   if(timed && seconds > 0){
-    if(ring) ring.style.display = '';
+    if(ring) ring.style.display = 'block';
     startRing(Math.max(4, seconds));
   } else {
     clearInterval(state.ringInterval);
@@ -503,26 +513,27 @@ function renderMainFooter(isChallenge){
   const kind = state.sceneKind;
   let main;
   if(kind === 'regle'){
-    main = '<button class="btn btn-primary footer-btn" onclick="advanceManually()">C\'est not\u00e9</button>';
+    main = '<button class="ctrl ctrl-primary" onclick="advanceManually()">C\'est not\u00e9</button>';
   } else if(kind === 'vote'){
     // Le libell\u00e9 suit l'\u00e9tat du vote : tant que personne n'est d\u00e9sign\u00e9, on valide le
     // vote ; une fois le r\u00e9sultat r\u00e9v\u00e9l\u00e9, on continue. Jamais deux validations pour
     // la m\u00eame action.
-    main = '<button class="btn btn-primary footer-btn" id="vote-main-btn" onclick="advanceManually()">Valider le vote</button>';
+    main = '<button class="ctrl ctrl-primary" id="vote-main-btn" onclick="advanceManually()">Valider le vote</button>';
   } else if(isChallenge){
-    // Ordre fixe : Rat\u00e9 \u00e0 gauche, R\u00e9ussi \u00e0 droite, m\u00eame taille, d'une manche \u00e0 l'autre.
-    main = '<button class="btn btn-ghost footer-btn challenge-btn-fail" onclick="markChallengeResult(false)">Rat\u00e9</button>'+
-      '<button class="btn btn-primary footer-btn challenge-btn-done" onclick="markChallengeResult(true)">R\u00e9ussi</button>';
+    // Deux boutons de m\u00eame taille (flex:1 1 0 sur .ctrl), toujours dans le m\u00eame ordre :
+    // Rat\u00e9 \u00e0 gauche, R\u00e9ussi \u00e0 droite, d'une manche \u00e0 l'autre.
+    main = '<button class="ctrl ctrl-neutral challenge-btn-fail" onclick="markChallengeResult(false)">Rat\u00e9</button>'+
+      '<button class="ctrl ctrl-primary challenge-btn-done" onclick="markChallengeResult(true)">R\u00e9ussi</button>';
   } else {
-    main = '<button class="btn btn-primary footer-btn" onclick="advanceManually()">Continuer</button>';
+    main = '<button class="ctrl ctrl-primary" onclick="advanceManually()">Continuer</button>';
   }
+  // Deuxi\u00e8me ligne : deux rectangles identiques, jamais des liens de texte dispers\u00e9s.
   wrap.innerHTML = '<div class="footer-main">'+main+'</div>'+
     '<div class="footer-aside">'+
-      '<button onclick="openPause()">Pause</button>'+
-      '<button onclick="skipActivity()">Passer</button>'+
+      '<button class="ctrl" onclick="openPause()">Pause</button>'+
+      '<button class="ctrl" onclick="skipActivity()">Passer</button>'+
     '</div>';
 }
-
 
 function renderChallengeCounter(){
   // Volontairement vide pendant la partie : ces compteurs encombraient l'en-t\u00eate \u00e0
@@ -638,6 +649,9 @@ function showSpecialEvent(){
 
 function fireClimax(){
   state.climaxFired = true;
+  // Signature de la finale : l'arrivée du chemin s'illumine. Posée avant le passage à
+  // l'écran de moment, elle est visible au retour sur la scène.
+  if(window.Trail) Trail.signal('finale');
   const text = drawFromBag('climax', CLIMAX_EVENTS);
   const screen = document.getElementById('screen-special');
   screen.classList.add('climax');
@@ -663,8 +677,10 @@ function fireClimax(){
   setTimeout(()=>{ goTo('main'); advanceQueue(); }, 5200);
 }
 
-function openPause(){ state.paused = true; goTo('pause'); }
-function closePause(){ state.paused = false; goTo('main'); }
+// Pause : le chemin se fige sur sa position exacte. La reprise la retrouve telle quelle,
+// sans glissement de rattrapage (voir Trail.freeze/unfreeze).
+function openPause(){ state.paused = true; if(window.Trail) Trail.freeze(); goTo('pause'); }
+function closePause(){ state.paused = false; goTo('main'); if(window.Trail) Trail.unfreeze(); }
 
 // Classe les joueurs par nombre de fois ciblés (state.stats.targets) pour le podium
 // MVP/Loser de fin de soirée. Renvoie null si aucun défi n'a ciblé personne (rien à
@@ -736,7 +752,6 @@ function endSession(){
   clearInterval(state.ringInterval);
   state.sessionActive = false;
   clearSessionSnapshot();
-  document.getElementById('frame').classList.remove('chaos-mode');
   goTo('end');
   Sound.play('win');
   if(window.fireConfetti) window.fireConfetti('huge');

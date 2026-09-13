@@ -1,11 +1,14 @@
 /* Sound toggle */
 #sound-toggle-btn{position:absolute; top:14px; right:14px; z-index:999; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:rgba(30,24,48,0.72); color:var(--text-dim); font-size:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(4px);}
 #sound-toggle-btn:active{transform:scale(0.92);}
+/* Pas de doublon : la barre du before a sa propre commande audio (#sound-inline-btn). */
+#frame[data-screen="main"] #sound-toggle-btn{display:none;}
 
 /* Home */
 #screen-home{padding:0; overflow:hidden;}
-#screen-home::before{content:''; position:absolute; top:-70px; right:-70px; width:230px; height:230px; border-radius:50%; background:repeating-linear-gradient(45deg, var(--accent) 0 14px, transparent 14px 28px); opacity:0.14; pointer-events:none; z-index:0;}
-#screen-home::after{content:''; position:absolute; bottom:-50px; left:-50px; width:170px; height:170px; border-radius:50%; background:repeating-linear-gradient(-45deg, var(--clay) 0 10px, transparent 10px 20px); opacity:0.12; pointer-events:none; z-index:0;}
+/* Éclairage rasant plutôt que des disques rayés : la lumière vient du haut, le bas
+   reste dans le noir charbon. Aucune forme dure, rien qui découpe l'écran. */
+#screen-home::before{content:''; position:absolute; top:-30%; left:50%; transform:translateX(-50%); width:150%; height:70%; background:radial-gradient(ellipse at center, var(--accent) 0%, transparent 62%); opacity:0.10; filter:blur(30px); pointer-events:none; z-index:0;}
 .home-content{position:relative; z-index:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:64px 24px 40px; box-sizing:border-box; text-align:center;}
 .hero-title{font-family:'Anton', sans-serif; font-weight:400; font-size:52px; letter-spacing:1px; color:var(--text); line-height:0.95;}
 .hero-tag{font-size:14px; letter-spacing:0; text-transform:none; color:var(--text-dim); margin-top:10px; text-align:center; font-family:'Work Sans',sans-serif;}
@@ -55,7 +58,7 @@
 .game-stage .game-name{font-family:'Anton', sans-serif; font-size:30px; letter-spacing:0.4px; color:var(--text); line-height:1.04; margin-bottom:8px;}
 .game-stage .game-principle{font-size:14px; color:var(--text-dim); line-height:1.45; margin-bottom:14px; max-width:300px; margin-left:auto; margin-right:auto;}
 .game-stage-meta{display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:16px;}
-.game-stage-meta span{font-size:11px; letter-spacing:0.4px; color:var(--text-faint); background:rgba(255,255,255,0.05); border:1px solid var(--line); border-radius:20px; padding:6px 13px;}
+.game-stage-meta span{font-size:11px; letter-spacing:0.4px; color:var(--text-faint); background:rgba(255,255,255,0.05); border:1px solid var(--line); border-radius:10px; padding:6px 12px;}
 .game-stage .btn{padding:16px; max-width:300px; margin:0 auto;}
 
 /* Commandes stables : elles ne bougent pas d'un jeu à l'autre. */
@@ -133,7 +136,7 @@
 .topbar{display:flex; flex-direction:column; gap:14px; margin-bottom:14px;}
 
 /* Bouton compteur de règles + panneau coulissant (remplace le bandeau permanent) */
-.rules-count-btn{align-self:flex-start; align-items:center; gap:7px; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); border:1px solid var(--line); border-radius:30px; padding:7px 13px; cursor:pointer;}
+.rules-count-btn{align-self:flex-start; align-items:center; gap:7px; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); border:1px solid var(--line); border-radius:11px; padding:7px 12px; cursor:pointer;}
 .rules-count-num{background:var(--accent); color:var(--ink-on-light); border-radius:20px; min-width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-family:'Anton',sans-serif; font-size:11px; padding:0 5px;}
 .rules-sheet{position:fixed; inset:0; z-index:120; background:rgba(0,0,0,0.6); display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity .2s ease;}
 .rules-sheet.open{opacity:1; pointer-events:auto;}
@@ -197,9 +200,15 @@
 
 /* Vote : zones tactiles, puis révélation centrale. */
 .vote-zones{display:flex; flex-wrap:wrap; gap:9px; justify-content:center; max-width:340px;}
-.vote-zone{display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:30px; padding:9px 15px 9px 9px; color:var(--text); font-size:14px; cursor:pointer; transition:transform .12s cubic-bezier(.34,1.56,.64,1), border-color .15s;}
-.vote-zone:active{transform:scale(0.94);}
-.vote-zone .scene-avatar{width:30px; height:30px; font-size:15px;}
+/* Même famille que les commandes : rectangle aux angles modérément arrondis, contour
+   fin, hauteur identique d'une zone à l'autre. */
+.vote-zone{display:flex; align-items:center; gap:9px; min-height:48px; background:var(--surface-2);
+  border:1px solid var(--line); border-radius:14px; padding:8px 14px 8px 8px; color:var(--text);
+  font-size:14.5px; cursor:pointer;
+  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 4px 12px rgba(0,0,0,0.35);
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), border-color .15s, background .15s;}
+.vote-zone:active{transform:scale(0.965);}
+.vote-zone .scene-avatar{width:32px; height:32px; font-size:16px; border-radius:10px;}
 .vote-zone-name{overflow-wrap:anywhere;}
 .vote-zones.done .vote-zone{opacity:0.3;}
 .vote-zones.done .vote-zone.chosen{opacity:1; border-color:var(--accent); background:var(--surface-2);}
@@ -223,43 +232,116 @@
 }
 
 /* --- CHEMIN DE PROGRESSION (décor d'arrière-plan) ----------------------------------
-   Tracé vertical sinueux qui monte : la portion parcourue est lumineuse, celle à venir
-   reste sourde. Purement décoratif — pointer-events:none garantit qu'il ne capte aucun
-   geste destiné à la scène, et il ne provoque jamais de défilement (position absolue). */
+   Un tracé vertical sinueux qui monte pendant toute la soirée. Trois choses distinctes,
+   volontairement séparées (voir Trail dans scenes.js) :
+     1. la PROGRESSION RÉELLE  → longueur de la portion allumée (--p, temps actif joué) ;
+     2. le DÉPLACEMENT DU DÉCOR → la translation de #trail-world, qui fait défiler le
+        paysage pendant que le repère reste à hauteur fixe ;
+     3. les EFFETS DE CATÉGORIE → de brèves signatures lumineuses (data-signal), qui ne
+        touchent jamais 1 ni 2 : changer de catégorie ne peut donc ni faire sauter, ni
+        reculer, ni réinitialiser la progression.
+   Décor pur : pointer-events:none garantit qu'aucun geste destiné à la scène n'est
+   intercepté, et rien n'y est cliquable. */
 .trail{position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
 .trail svg{width:100%; height:100%; display:block;}
-.trail-bg{fill:none; stroke:rgba(255,255,255,0.07); stroke-width:2.4; stroke-linecap:round;}
-.trail-done{fill:none; stroke:var(--accent); stroke-width:2.2; stroke-linecap:round; opacity:0.85;
-  transition:stroke-dashoffset 1s linear;}
-.trail-done-glow{fill:none; stroke:var(--accent); stroke-width:7; stroke-linecap:round; opacity:0.20;
-  filter:blur(6px); transition:stroke-dashoffset 1s linear;}
-.trail-mark{fill:rgba(255,255,255,0.22);}
-.trail-head-halo{fill:var(--accent); opacity:0.28; filter:blur(4px);}
+
+/* Le monde défile ; le repère, lui, ne bouge pas. Une seule transition, linéaire et
+   calée sur le tic d'une seconde du moteur : le mouvement est continu, jamais saccadé. */
+#trail-world{transition:transform 1s linear;}
+.trail.frozen #trail-world{transition:none;}
+
+.trail-todo{fill:none; stroke:rgba(255,255,255,0.07); stroke-width:1.3; stroke-linecap:round;}
+.trail-done{fill:none; stroke:var(--trail-hue, var(--accent)); stroke-width:1.35; stroke-linecap:round;
+  opacity:0.78; transition:stroke-dashoffset 1s linear, stroke .5s ease, opacity .5s ease;}
+.trail-done-glow{fill:none; stroke:var(--trail-hue, var(--accent)); stroke-width:3.4; stroke-linecap:round;
+  opacity:0.16; filter:blur(2.6px); transition:stroke-dashoffset 1s linear, stroke .5s ease, opacity .5s ease;}
+.trail.frozen .trail-done, .trail.frozen .trail-done-glow{transition:stroke .5s ease, opacity .5s ease;}
+.trail-mark{fill:rgba(255,255,255,0.17);}
+
+/* Repère : sa position à l'écran est fixe, c'est le décor qui se déplace dessous. */
+.trail-head-halo{fill:var(--trail-hue, var(--accent)); opacity:0.34; filter:blur(2.2px);}
 .trail-head-core{fill:#FFFFFF;}
-#trail-head{transition:transform 1s linear;}
-#trail-shift{transition:transform 1.2s cubic-bezier(.22,1,.36,1);}
-/* Le chemin s'efface derrière la zone centrale pour ne jamais gêner la lecture. */
-.trail::after{content:''; position:absolute; left:0; right:0; top:24%; height:52%;
-  background:radial-gradient(ellipse at center, var(--bg) 42%, rgba(13,13,13,0) 78%); }
-.trail.near-end .trail-done{stroke:var(--clay);}
-.trail.near-end .trail-done-glow{stroke:var(--clay);}
-.trail.near-end .trail-head-halo{fill:var(--clay);}
-.trail.advancing .trail-head-halo{opacity:0.55;}
+
+/* Arrivée : un palier posé en haut du tracé, éteint jusqu'à la finale. */
+.trail-finish{fill:none; stroke:rgba(255,255,255,0.22); stroke-width:1.4; stroke-linecap:round;
+  transition:stroke .6s ease, opacity .6s ease; opacity:0.6;}
+.trail-finish-glow{fill:var(--accent); opacity:0; filter:blur(7px); transition:opacity .6s ease;}
+
+/* Deux voiles, deux rôles distincts.
+   ::after — la BANDE DE LECTURE : le chemin s'atténue derrière la consigne, sans
+   disparaître. Il s'arrête au-dessus du repère (qui se tient à HEAD_SCREEN_Y), pour ne
+   pas éteindre la seule chose qui dit où l'on en est.
+   ::before — le PIED D'ÉCRAN : le tracé s'efface en approchant des commandes, pour ne
+   jamais venir zébrer les boutons. */
+.trail::after{content:''; position:absolute; left:-10%; right:-10%; top:11%; height:49%;
+  background:radial-gradient(ellipse at center, rgba(13,13,13,0.9) 28%, rgba(13,13,13,0.62) 56%, rgba(13,13,13,0) 82%);}
+.trail::before{content:''; position:absolute; left:0; right:0; bottom:0; height:24%; z-index:1;
+  background:linear-gradient(to top, var(--bg) 34%, rgba(13,13,13,0.82) 62%, rgba(13,13,13,0) 100%);}
+
+/* --- SIGNATURES DE CATÉGORIE -------------------------------------------------------
+   Chacune est BRÈVE et ne joue qu'une fois (animation non répétée, fill-mode both puis
+   attribut retiré par le script). Aucune n'est permanente, aucune ne clignote, et
+   aucune ne déplace le repère : elles ajoutent seulement de la lumière. */
+.fx{opacity:0; pointer-events:none;}
+
+/* Défi : une impulsion qui part du repère et file vers l'avant, le long du tracé. */
+.fx-impulse{fill:none; stroke:var(--accent); stroke-width:2.1; stroke-linecap:round;
+  filter:blur(0.8px); opacity:0;}
+/* Duel : deux lumières convergent sur le repère, qui ne bouge pas. */
+.fx-duel{fill:var(--accent); opacity:0;}
+.fx-duel-b{fill:var(--clay);}
+/* Vote : halo calme, puis confirmation nette à la révélation. */
+.fx-calm{fill:#5AA0F0; opacity:0; filter:blur(8px);}
+/* Collectif : une lumière ample et basse, qui ne cherche pas l'attention. */
+.fx-wide{fill:var(--accent); opacity:0; filter:blur(14px);}
+/* Surprise : l'accent rose, ponctuel — la seule apparition autorisée de cette couleur. */
+.fx-spark{fill:var(--clay); opacity:0; filter:blur(5px);}
+
+@media (prefers-reduced-motion: no-preference){
+  .trail[data-signal="defi"] .fx-impulse{animation:fxImpulse .62s cubic-bezier(.3,.7,.4,1) both;}
+  .trail[data-signal="duel"] .fx-duel-a{animation:fxDuelA .68s cubic-bezier(.3,.8,.35,1) both;}
+  .trail[data-signal="duel"] .fx-duel-b{animation:fxDuelB .68s cubic-bezier(.3,.8,.35,1) both;}
+  .trail[data-signal="vote"] .fx-calm{animation:fxCalm 1.1s ease-out both;}
+  .trail[data-signal="vote-done"] .fx-calm{animation:fxConfirm .5s cubic-bezier(.3,.8,.35,1) both;}
+  .trail[data-signal="collectif"] .fx-wide{animation:fxWide 1.2s ease-out both;}
+  .trail[data-signal="surprise"] .fx-spark{animation:fxSpark .7s cubic-bezier(.3,.8,.35,1) both;}
+  /* Règle : le tracé s'illumine progressivement, puis se stabilise un cran au-dessus. */
+  .trail[data-signal="regle"] .trail-done{animation:fxRule 1.5s ease-out both;}
+  .trail[data-signal="regle"] .trail-done-glow{animation:fxRuleGlow 1.5s ease-out both;}
+  /* Finale : l'arrivée s'allume. */
+  .trail[data-signal="finale"] .trail-finish-glow{animation:fxFinish 1.6s ease-out both;}
+
+  @keyframes fxImpulse{ 0%{opacity:0; stroke-dashoffset:var(--imp-len);} 22%{opacity:0.8;} 100%{opacity:0; stroke-dashoffset:calc(var(--imp-len) * -1);} }
+  @keyframes fxDuelA{ 0%{opacity:0; transform:translateX(-38px);} 30%{opacity:0.85;} 100%{opacity:0; transform:translateX(0);} }
+  @keyframes fxDuelB{ 0%{opacity:0; transform:translateX(38px);} 30%{opacity:0.85;} 100%{opacity:0; transform:translateX(0);} }
+  @keyframes fxCalm{ 0%{opacity:0; transform:scale(0.7);} 45%{opacity:0.34;} 100%{opacity:0.18; transform:scale(1);} }
+  @keyframes fxConfirm{ 0%{opacity:0.18; transform:scale(1);} 40%{opacity:0.6; transform:scale(1.22);} 100%{opacity:0; transform:scale(1.3);} }
+  @keyframes fxWide{ 0%{opacity:0; transform:scale(0.55);} 40%{opacity:0.16;} 100%{opacity:0; transform:scale(1.15);} }
+  @keyframes fxSpark{ 0%{opacity:0; transform:scale(0.3);} 28%{opacity:0.55;} 100%{opacity:0; transform:scale(1.5);} }
+  @keyframes fxRule{ 0%{opacity:0.9;} 55%{opacity:1;} 100%{opacity:0.9;} }
+  @keyframes fxRuleGlow{ 0%{opacity:0.18;} 55%{opacity:0.42;} 100%{opacity:0.24;} }
+  @keyframes fxFinish{ 0%{opacity:0;} 40%{opacity:0.55;} 100%{opacity:0.3;} }
+}
+
+/* Réduction des animations : le chemin reste entièrement lisible — la portion parcourue,
+   le repère et l'arrivée sont des états, pas des mouvements. Seuls les déplacements et
+   les signatures sont neutralisés. */
 @media (prefers-reduced-motion: reduce){
-  /* Sans animation, le tracé reste compréhensible : la portion parcourue est visible,
-     seuls les déplacements progressifs sont neutralisés. */
-  .trail-done, .trail-done-glow, #trail-head, #trail-shift{transition:none;}
+  #trail-world, .trail-done, .trail-done-glow{transition:none;}
+  .trail[data-signal="regle"] .trail-done-glow{opacity:0.24;}
+  .trail[data-signal="finale"] .trail-finish-glow{opacity:0.3;}
 }
 
 /* --- BARRE SUPÉRIEURE -------------------------------------------------------------- */
 .topbar-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
 .topbar-right{display:flex; align-items:center; gap:8px; flex-shrink:0;}
 .top-btn{background:var(--surface); border:1px solid var(--line); color:var(--text-dim);
-  font-family:'Work Sans',sans-serif; font-size:12.5px; font-weight:500; border-radius:30px;
-  padding:10px 15px; cursor:pointer; white-space:nowrap; min-height:40px;
+  font-family:'Work Sans',sans-serif; font-size:12.5px; font-weight:500; border-radius:12px;
+  padding:10px 14px; cursor:pointer; white-space:nowrap; min-height:40px;
+  box-shadow:0 1px 0 rgba(255,255,255,0.04) inset;
   transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
 .top-btn:active{transform:scale(0.94);}
-.top-btn.icon-only{padding:10px 0; width:40px; display:flex; align-items:center; justify-content:center; font-size:15px;}
+.top-btn.icon-only{padding:10px 0; width:40px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:15px;}
 /* Petits écrans : on raccourcit le libellé plutôt que de le laisser déborder ou se
    faire couper (le "+" seul n'est pas assez explicite, on garde donc "Joueurs"). */
 @media (max-width:360px){
@@ -275,30 +357,51 @@
    l'écran petit — le contenu défile, jamais les commandes. */
 .scene-wrap{position:relative; z-index:1; flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex;}
 
-/* --- ZONE DE COMMANDES (toujours au même endroit) ---------------------------------
-   Pas de grand panneau visible : juste une zone stable, avec l'action principale en
-   première ligne et les utilitaires en seconde. Respecte la zone de sécurité iOS. */
-.main-footer{position:relative; z-index:2; flex-shrink:0; padding:10px 24px calc(14px + env(safe-area-inset-bottom));}
-.footer-main{display:flex; gap:10px;}
-.footer-main .btn{flex:1; width:auto !important; min-height:58px;}
-/* Réussi / Raté : même taille, toujours dans le même ordre (Raté puis Réussi). */
-.footer-main .challenge-btn-fail, .footer-main .challenge-btn-done{flex:1 1 0;}
-.footer-aside{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:8px;}
-.footer-aside button{flex:1; background:none; border:none; color:var(--text-faint);
-  font-family:'Work Sans',sans-serif; font-size:13px; cursor:pointer; padding:13px 6px;
-  min-height:46px; border-radius:12px;}
-.footer-aside button:active{background:rgba(255,255,255,0.05);}
+/* --- ZONE DE COMMANDES ------------------------------------------------------------
+   Une colonne, toujours au même endroit, toujours au-dessus du décor (z-index) :
+     — le minuteur de manche, seulement si l'activité impose un temps limite ;
+     — l'action principale, large (ou deux boutons STRICTEMENT de même taille pour
+       Raté / Réussi) ;
+     — une seconde ligne équilibrée : Pause et Passer, deux rectangles identiques.
+   Tous les boutons partagent la même famille : rectangle aux angles modérément
+   arrondis, contour fin, relief donné par un liseré clair en haut et une ombre portée.
+   Plus de pilules de tailles différentes, plus de liens de texte dispersés. */
+.main-footer{position:relative; z-index:2; flex-shrink:0; display:flex; flex-direction:column;
+  gap:9px; padding:8px 20px calc(12px + env(safe-area-inset-bottom));}
 
-.player-tag{display:flex; align-items:center; gap:8px; border:2px solid currentColor; border-radius:30px; padding:9px 16px; font-size:15px; font-family:'Anton', sans-serif; letter-spacing:0.3px; color:inherit; font-weight:400;}
-.player-tag .avatar-badge-sm{width:24px; height:24px; font-size:13px;}
-.main-footer{display:flex; flex-direction:column; align-items:center; gap:14px;}
-.footer-buttons{display:flex; gap:12px; width:100%;}
-.footer-btn{flex:1; padding:14px 10px !important; width:auto !important;}
-.ring-wrap{position:relative; width:74px; height:74px;}
-.ring-wrap svg{width:74px; height:74px; transform:rotate(-90deg);}
+/* Minuteur de manche : centré au-dessus des commandes, retiré du flux quand inutile. */
+.footer-timer{align-self:center; position:relative; width:44px; height:44px; margin-bottom:1px;}
+.footer-timer svg{width:44px; height:44px; transform:rotate(-90deg); display:block;}
 .ring-bg{fill:none; stroke:var(--line); stroke-width:3;}
 .ring-fg{fill:none; stroke:var(--accent); stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset .3s linear;}
-.ring-label{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Anton', sans-serif; font-size:24px; font-weight:600; color:var(--text);}
+.ring-label{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:500; color:var(--text);}
+
+.footer-controls{display:flex; flex-direction:column; gap:9px;}
+.footer-main{display:flex; gap:9px;}
+.footer-aside{display:flex; gap:9px;}
+
+/* Base commune à tous les boutons de commande : c'est elle qui rend l'ensemble
+   cohérent (mêmes angles, même contour, même relief). Seule la hauteur distingue
+   l'action principale des utilitaires. */
+.ctrl{flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:center;
+  font-family:'Work Sans',sans-serif; font-size:16px; font-weight:600; letter-spacing:0.1px;
+  border:1px solid var(--line); border-radius:15px; background:var(--surface-2); color:var(--text);
+  cursor:pointer; padding:0 14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 6px 16px rgba(0,0,0,0.4);
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), background .15s ease;}
+.ctrl:active{transform:scale(0.975);}
+.footer-main .ctrl{height:56px;}
+.footer-aside .ctrl{height:46px; font-size:14px; font-weight:500; color:var(--text-dim);
+  background:rgba(255,255,255,0.035); box-shadow:0 1px 0 rgba(255,255,255,0.04) inset;}
+.footer-aside .ctrl:active{background:rgba(255,255,255,0.08);}
+
+/* L'action principale porte le jaune signature ; son contre-choix (Raté) reste sombre,
+   mais exactement de la même taille — c'est un choix, pas une hiérarchie. */
+.ctrl-primary{background:linear-gradient(178deg, var(--accent-bright), var(--accent) 62%, var(--accent-deep));
+  border-color:transparent; color:var(--ink-on-light); font-weight:700;
+  box-shadow:0 1px 0 rgba(255,255,255,0.5) inset, 0 8px 20px rgba(232,255,61,0.18);}
+.ctrl-neutral{background:var(--surface-2);}
 
 /* Moment & Finale : rupture d'ambiance sur le fond charbon (halo + lumière rasante),
    au lieu d'un aplat de couleur plein écran. La finale (.climax) pousse l'intensité et
@@ -405,10 +508,10 @@
 #frame.tv-mode .scene-question{font-size:40px;}
 #frame.tv-mode .scene-kicker{font-size:14px;}
 #frame.tv-mode .scene-who-name{font-size:48px;}
-#frame.tv-mode .player-tag{font-size:16px; padding:10px 18px;}
-#frame.tv-mode .ring-wrap{width:100px; height:100px;}
-#frame.tv-mode .ring-wrap svg{width:100px; height:100px;}
-#frame.tv-mode .ring-label{font-size:36px;}
+#frame.tv-mode .footer-timer{width:72px; height:72px;}
+#frame.tv-mode .footer-timer svg{width:72px; height:72px;}
+#frame.tv-mode .ring-label{font-size:22px;}
+#frame.tv-mode .footer-main .ctrl{height:68px; font-size:19px;}
 
 /* Le bouton son (position absolue, haut-droite du cadre) recouvrait le bouton grand
    écran de la session et le dernier badge des mini-jeux. */
@@ -428,36 +531,11 @@
 .legal-footer{font-size:11px; color:var(--text-faint); line-height:1.5; text-align:center; margin:26px 0 8px;}
 .legal-erase-armed{border-color:var(--clay) !important; color:var(--clay) !important;}
 
-/* --- Mode Chaos : traitement visuel délibérément plus agressif --------------
-   Activé sur #frame quand intensityValue >= 85 (voir launchSession/resumeSession).
-   Un bandeau de danger en haut/bas, le ticket défi qui vire à l'alarme et pulse,
-   le texte en capitales. Les animations respectent prefers-reduced-motion : la
-   pulsation disparaît, le bandeau et les couleurs restent (le signal ne dépend
-   jamais du mouvement seul). */
-#frame.chaos-mode::before, #frame.chaos-mode::after{
-  content:''; position:absolute; left:0; right:0; height:7px; z-index:500; pointer-events:none;
-  background:repeating-linear-gradient(135deg, var(--clay) 0 10px, var(--bg) 10px 20px);
-  background-size:200% 100%;
-}
-#frame.chaos-mode::before{top:0;}
-#frame.chaos-mode::after{bottom:0;}
-@media (prefers-reduced-motion: no-preference){
-  #frame.chaos-mode::before, #frame.chaos-mode::after{ animation:hazardMarch 1.1s linear infinite; }
-}
-@keyframes hazardMarch{ from{background-position:0 0;} to{background-position:-40px 0;} }
-
-#frame.chaos-mode #screen-main[data-scene="defi"] .scene{--scene-accent:var(--clay);}
-#frame.chaos-mode #screen-main[data-scene="defi"] .scene::before{opacity:0.24;}
-#frame.chaos-mode #screen-main[data-scene="defi"] .scene-instruction.big{text-transform:uppercase;}
-#frame.chaos-mode #screen-main[data-scene="defi"] .scene-who-name{color:var(--clay);}
-#frame.chaos-mode #screen-main .ring-fg{stroke:var(--clay);}
-@media (prefers-reduced-motion: no-preference){
-  #frame.chaos-mode #screen-main[data-scene="defi"] .scene-avatar.big{ animation:chaosPulse 1.3s ease-in-out infinite; }
-}
-@keyframes chaosPulse{
-  0%,100%{ box-shadow:0 10px 26px rgba(0,0,0,0.55), 0 0 0 0 rgba(255,59,92,0.6); }
-  50%{ box-shadow:0 10px 26px rgba(0,0,0,0.55), 0 0 0 10px rgba(255,59,92,0); }
-}
+/* Le traitement visuel « mode Chaos » (bandes rayées animées en haut et en bas,
+   pulsation permanente de l'avatar, ticket en alarme) a été retiré : il recouvrait les
+   commandes, ne respectait pas la consigne « aucun effet permanent », et l'ambiance est
+   désormais portée par le chemin (voir Trail.signal dans scenes.js). L'intensité reste
+   pilotée par le moteur, en interne — elle n'a plus de signalétique propre. */
 
 /* Panneau joueurs : indice d'état + distinction des prénoms identiques */
 .players-sheet-hint{font-size:12px; color:var(--text-faint); letter-spacing:0.3px;}
@@ -528,27 +606,24 @@
 /* --- ACCUEIL : lancement divisé en deux ambiances ---------------------------------
    Le choix chill/chaos se fait ici, pas dans les réglages. Chaque moitié porte son
    ambiance : le chaos en jaune acide plein, le chill en surface sombre et verte. */
-.launch-split{display:flex; gap:10px; margin-bottom:14px;}
-.launch-half{flex:1; min-width:0; display:flex; flex-direction:column; align-items:flex-start;
-  gap:5px; border:none; border-radius:22px; padding:24px 18px; cursor:pointer; text-align:left;
+/* --- LES DEUX ENTRÉES DE L'ACCUEIL ------------------------------------------------
+   Deux rectangles de même famille (mêmes angles, même contour fin), différenciés par
+   la matière : le before prend le jaune signature, la bibliothèque reste sur la
+   surface sombre. Plus de partage Chill/Chaos : l'intensité est pilotée par le moteur. */
+.entry{width:100%; display:flex; flex-direction:column; align-items:flex-start; gap:6px;
+  border:1px solid var(--line); border-radius:18px; padding:22px 22px; margin-bottom:12px;
+  background:var(--surface); text-align:left; cursor:pointer;
+  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 10px 26px rgba(0,0,0,0.45);
   transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
-.launch-half:active{transform:scale(0.95);}
-.launch-half-name{font-family:'Anton',sans-serif; font-size:25px; letter-spacing:1px; line-height:1;}
-.launch-half-tag{font-family:'Work Sans',sans-serif; font-size:11.5px; line-height:1.3; opacity:0.72;}
+.entry:active{transform:scale(0.975);}
+.entry-name{font-family:'Anton',sans-serif; font-size:25px; letter-spacing:0.6px; line-height:1; color:var(--text);}
+.entry-tag{font-family:'Work Sans',sans-serif; font-size:13px; line-height:1.35; color:var(--text-dim);}
+.entry-primary{border-color:transparent;
+  background:linear-gradient(168deg, var(--accent-bright), var(--accent) 58%, var(--accent-deep));
+  box-shadow:0 1px 0 rgba(255,255,255,0.55) inset, 0 14px 32px rgba(232,255,61,0.20);}
+.entry-primary .entry-name{color:var(--ink-on-light);}
+.entry-primary .entry-tag{color:rgba(13,13,13,0.72);}
 
-.launch-chaos{background:linear-gradient(150deg, var(--accent-bright), var(--accent) 55%, var(--accent-deep));
-  box-shadow:0 8px 24px rgba(232,255,61,0.32);}
-.launch-chaos .launch-half-name{color:var(--ink-on-light);}
-.launch-chaos .launch-half-tag{color:rgba(13,13,13,0.75);}
-
-.launch-chill{background:linear-gradient(150deg, #1F2A24, var(--surface) 60%);
-  border:1px solid rgba(143,232,168,0.34); box-shadow:0 6px 20px rgba(0,0,0,0.35);}
-.launch-chill .launch-half-name{color:var(--sage);}
-.launch-chill .launch-half-tag{color:var(--text-faint);}
-
-/* Le bouton de lancement des réglages reprend l'ambiance choisie. */
-#setup-launch-btn.is-chill{background:var(--sage); color:var(--ink-on-light);
-  box-shadow:0 6px 18px rgba(143,232,168,0.28);}
 
 /* Sous-titre des réglages : dit d'emblée que c'est court */
 .setup-subtitle{font-size:13.5px; color:var(--text-dim); margin:-14px 0 24px;}
