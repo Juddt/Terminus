@@ -206,134 +206,160 @@
   <!-- Palmier Setup -->
   <!-- Palmier Game -->
   <div class="screen" id="screen-palmier">
-    <div class="palm-header">
-      <div>
-        <div class="back-link" onclick="palmierQuit()" style="font-size:13px;">✕ Quitter</div>
-        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+    <div class="game-topbar">
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="palmierQuit()">Quitter</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn icon-only" onclick="showRulesOverlay('palmier')" aria-label="Règles">?</button>
+        </div>
       </div>
-      <div class="palm-badges">
+      <div class="game-badges">
         <div class="badge"><span class="bv" id="palm-cards-left">52</span>cartes</div>
         <div class="badge"><span class="bv" id="palm-kings-count">0</span>/4 Rois</div>
         <div class="badge"><span class="bv" id="palm-collapse-count">0</span>/5 chutes</div>
-        <div class="badge" onclick="showRulesOverlay('palmier')" style="cursor:pointer;">?</div>
+        
       </div>
     </div>
-    <div id="palm-status-bar" class="palm-status-bar"></div>
-    <div class="palm-body" id="palm-body">
+    <div id="palm-status-bar" class="game-status"></div>
+    <div class="game-board" id="palm-body">
       <!-- Dynamic content injected here -->
     </div>
-    <div class="palm-footer" id="palm-footer"></div>
+    <div class="game-footer" id="palm-footer"></div>
   </div>
 
   <!-- Bus Setup -->
   <!-- Bus Game -->
   <div class="screen" id="screen-bus">
-    <div class="palm-header">
-      <div>
-        <div class="back-link" onclick="busQuit()" style="font-size:13px;">✕ Quitter</div>
-        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+    <div class="game-topbar">
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="busQuit()">Quitter</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn icon-only" onclick="showRulesOverlay('bus')" aria-label="Règles">?</button>
+        </div>
       </div>
-      <div style="display:flex;gap:4px;align-items:center;">
+      <div class="game-badges">
         <div class="palm-badges" id="bus-header-info"></div>
-        <div class="badge" onclick="showRulesOverlay('bus')" style="cursor:pointer;">?</div>
       </div>
     </div>
-    <div class="palm-body" id="bus-body"></div>
-    <div class="palm-footer" id="bus-footer"></div>
+    <div class="game-board" id="bus-body"></div>
+    <div class="game-footer" id="bus-footer"></div>
   </div>
 
   <!-- Cible Setup -->
   <!-- Cible Game -->
   <div class="screen" id="screen-cible">
-    <div class="palm-header">
-      <div>
-        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">✕ Quitter</div>
-        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+    <div class="game-topbar">
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="goTo('games-list')">Quitter</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn icon-only" onclick="showRulesOverlay('cible')" aria-label="Règles">?</button>
+        </div>
       </div>
-      <div style="display:flex;gap:4px;align-items:center;">
+      <div class="game-badges">
         <div class="palm-badges" id="cible-header"></div>
-        <div class="badge" onclick="showRulesOverlay('cible')" style="cursor:pointer;">?</div>
       </div>
     </div>
-    <div class="palm-body" id="cible-body"></div>
-    <div class="palm-footer" id="cible-footer"></div>
+    <div class="game-board" id="cible-body"></div>
+    <div class="game-footer" id="cible-footer"></div>
   </div>
 
   <!-- Purple Setup -->
   <!-- Purple Game -->
   <div class="screen" id="screen-purple">
-    <div class="palm-header">
-      <div>
-        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">✕ Quitter</div>
-        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+    <div class="game-topbar">
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="goTo('games-list')">Quitter</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn icon-only" onclick="showRulesOverlay('purple')" aria-label="Règles">?</button>
+        </div>
       </div>
-      <div style="display:flex;gap:4px;align-items:center;">
+      <div class="game-badges">
         <div class="palm-badges" id="purple-header"></div>
-        <div class="badge" onclick="showRulesOverlay('purple')" style="cursor:pointer;">?</div>
       </div>
     </div>
-    <div class="palm-body" id="purple-body"></div>
-    <div class="palm-footer" id="purple-footer"></div>
+    <div class="game-board" id="purple-body"></div>
+    <div class="game-footer" id="purple-footer"></div>
   </div>
 
   <!-- PMU Setup -->
   <!-- PMU Betting -->
   <div class="screen" id="screen-pmu-bet">
-    <div class="palm-header">
-      <div class="back-link" onclick="pmuSetup()" style="font-size:13px;">← Retour</div>
-      <div></div>
+    <div class="game-topbar">
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="pmuSetup()">← Retour</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        </div>
+      </div>
     </div>
-    <div class="palm-body" id="pmu-bet-body"></div>
-    <div class="palm-footer" id="pmu-bet-footer"></div>
+    <div class="game-board" id="pmu-bet-body"></div>
+    <div class="game-footer" id="pmu-bet-footer"></div>
   </div>
 
   <!-- PMU Race -->
   <div class="screen" id="screen-pmu">
-    <div class="palm-header">
-      <div>
-        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">✕ Quitter</div>
-        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+    <div class="game-topbar">
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="goTo('games-list')">Quitter</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn icon-only" onclick="showRulesOverlay('pmu')" aria-label="Règles">?</button>
+        </div>
       </div>
-      <div style="display:flex;gap:4px;align-items:center;">
+      <div class="game-badges">
         <div class="palm-badges" id="pmu-header"></div>
-        <div class="badge" onclick="showRulesOverlay('pmu')" style="cursor:pointer;">?</div>
       </div>
     </div>
-    <div class="palm-body" id="pmu-body" style="padding:0 10px;"></div>
-    <div class="palm-footer" id="pmu-footer"></div>
+    <div class="game-board" id="pmu-body" style="padding:0 10px;"></div>
+    <div class="game-footer" id="pmu-footer"></div>
   </div>
 
   <!-- Pile ou Face Mode Selection -->
   <div class="screen" id="screen-pof-mode">
-    <div class="topnav"><div class="back-link" onclick="pofSetup()">← Retour</div></div>
-    <div class="palm-body" id="pof-mode-body"></div>
-    <div class="palm-footer" id="pof-mode-footer"></div>
+    <div class="game-topbar">
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="pofSetup()">← Retour</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        </div>
+      </div>
+    </div>
+    <div class="game-board" id="pof-mode-body"></div>
+    <div class="game-footer" id="pof-mode-footer"></div>
   </div>
 
   <!-- Pile ou Face Game -->
   <div class="screen" id="screen-pof">
-    <div class="palm-header">
-      <div>
-        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">✕ Quitter</div>
-        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+    <div class="game-topbar">
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="goTo('games-list')">Quitter</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn icon-only" onclick="showRulesOverlay('pof')" aria-label="Règles">?</button>
+        </div>
       </div>
-      <div style="display:flex;gap:4px;align-items:center;">
+      <div class="game-badges">
         <div class="palm-badges" id="pof-header"></div>
-        <div class="badge" onclick="showRulesOverlay('pof')" style="cursor:pointer;">?</div>
       </div>
     </div>
-    <div class="palm-body" id="pof-body"></div>
-    <div class="palm-footer" id="pof-footer"></div>
+    <div class="game-board" id="pof-body"></div>
+    <div class="game-footer" id="pof-footer"></div>
   </div>
 
   <!-- Duel de Dés — la saisie passe par la page de configuration unique (bornes 2-2
        lues dans le catalogue), il n'y a donc plus d'écran de prénoms dédié ici. -->
   <div class="screen" id="screen-des">
     <div class="game-topbar">
-      <button class="top-btn" onclick="desQuit()">Quitter</button>
-      <div class="game-topbar-right">
-        <button class="top-btn" onclick="goTo('home')">Accueil</button>
-        <button class="top-btn icon-only" onclick="showRulesOverlay('des')" aria-label="Règles">?</button>
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="desQuit()">Quitter</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn icon-only" onclick="showRulesOverlay('des')" aria-label="Règles">?</button>
+        </div>
       </div>
     </div>
     <div class="duel" id="des-body"></div>
@@ -343,35 +369,39 @@
   <!-- UnderDicateur Setup -->
   <!-- UnderDicateur -->
   <div class="screen" id="screen-und">
-    <div class="palm-header">
-      <div>
-        <div class="back-link" onclick="goTo('games-list')" style="font-size:13px;">&#10005; Quitter</div>
-        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+    <div class="game-topbar">
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="goTo('games-list')">Quitter</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn icon-only" onclick="showRulesOverlay('underdicateur')" aria-label="Règles">?</button>
+        </div>
       </div>
-      <div style="display:flex;gap:4px;align-items:center;">
+      <div class="game-badges">
         <div class="palm-badges" id="und-header"></div>
-        <div class="badge" onclick="showRulesOverlay('underdicateur')" style="cursor:pointer;">?</div>
       </div>
     </div>
-    <div class="palm-body" id="und-body"></div>
-    <div class="palm-footer" id="und-footer"></div>
+    <div class="game-board" id="und-body"></div>
+    <div class="game-footer" id="und-footer"></div>
   </div>
 
   <!-- Les Pilliers Setup -->
   <!-- Les Pilliers Game -->
   <div class="screen" id="screen-pilliers">
-    <div class="palm-header">
-      <div>
-        <div class="back-link" onclick="pilQuit()" style="font-size:13px;">✕ Quitter</div>
-        <div class="game-home-btn" onclick="goTo('home')">Accueil</div>
+    <div class="game-topbar">
+      <div class="game-topbar-row">
+        <button class="top-btn" onclick="pilQuit()">Quitter</button>
+        <div class="game-topbar-right">
+          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn icon-only" onclick="showRulesOverlay('pilliers')" aria-label="Règles">?</button>
+        </div>
       </div>
-      <div style="display:flex;gap:4px;align-items:center;">
+      <div class="game-badges">
         <div class="palm-badges" id="pil-header"></div>
-        <div class="badge" onclick="showRulesOverlay('pilliers')" style="cursor:pointer;">?</div>
       </div>
     </div>
-    <div class="palm-body" id="pil-body"></div>
-    <div class="palm-footer" id="pil-footer"></div>
+    <div class="game-board" id="pil-body"></div>
+    <div class="game-footer" id="pil-footer"></div>
   </div>
 
   <!-- Mentions l&eacute;gales, donn&eacute;es et conditions -->

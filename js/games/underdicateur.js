@@ -54,7 +54,9 @@ function underdicateurSetup(){
 // Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
 // ce jeu ne manipule que des prénoms.
 function undStart(players){
-  und.players = (players || []).map(p => p.name);
+  // UnderDicateur garde un objet par joueur : rôle, mot secret, vivant ou éliminé,
+  // et le fait d'être le Dictateur (voir undDealRoles).
+  und.players = (players || []).map(p => ({ name: p.name }));
   undShowConfig();
 }
 

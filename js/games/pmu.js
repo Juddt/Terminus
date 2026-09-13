@@ -19,7 +19,8 @@ function pmuSetup(){
 // Reçoit les joueurs collectés par la page de configuration (objets {name, uid, …}) ;
 // ce jeu ne manipule que des prénoms.
 function pmuStartFromSetup(players){
-  pmu.players = (players || []).map(p => p.name);
+  // Le PMU garde un objet par joueur : il y range le cheval choisi et la mise.
+  pmu.players = (players || []).map(p => ({ name: p.name, horse: null, bet: 1 }));
   pmuBettingPhase();
 }
 

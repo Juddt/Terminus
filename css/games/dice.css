@@ -20,11 +20,6 @@
   radial-gradient(ellipse 120% 60% at 50% 50%, #171717 0%, var(--bg) 72%);}
 #screen-des.active{display:flex; flex-direction:column;}
 
-/* Barre de jeu : même famille de boutons que le before. */
-.game-topbar{display:flex; align-items:center; justify-content:space-between; gap:10px;
-  padding:calc(14px + env(safe-area-inset-top)) 18px 8px; flex-shrink:0;}
-.game-topbar-right{display:flex; align-items:center; gap:8px;}
-
 .duel{flex:1; min-height:0; display:flex; flex-direction:column; padding:4px 18px 0;}
 
 /* Une moitié par joueur. Elles sont strictement symétriques : même hauteur, même
