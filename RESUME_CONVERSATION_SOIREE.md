@@ -93,6 +93,17 @@ sw.js                       Service worker — PENSEZ À BUMPER CACHE_NAME
 - Jamais de couleur en dur : tout passe par les variables de `css/base.css`.
 - Aucune animation permanente ni stroboscopique ; `prefers-reduced-motion` respecté
   partout — et **testé**, parce qu'il a déjà bloqué une partie.
+- **Du relief, jamais d'aplat.** L'accueil porte un décor (`.home-decor`) fait de halos
+  flous très lents, d'un faisceau rasant, d'éclats sphériques et d'un grain fin. Il est
+  entièrement décoratif : `z-index:0`, `pointer-events:none`, clippé par
+  `overflow:hidden` — rien ne peut recouvrir un bouton ni intercepter un geste.
+- **Pas de confettis.** Les moments forts passent par des effets de lumière
+  (`js/core/confetti.js`) : flash, onde de choc, barres néon, braises, glitch court. Le
+  point d'entrée garde son nom historique `window.fireConfetti(taille)` pour ne pas
+  toucher aux appels existants ; `window.fireGlitch()` marque les échecs.
+- **Le prénom du joueur actif se lit à un seul endroit**, en grand, au même endroit d'un
+  écran à l'autre d'un même tour. Une phrase placée sous ce prénom ne le répète jamais :
+  elle s'adresse au joueur à la deuxième personne.
 
 ---
 
@@ -189,6 +200,23 @@ manipulera en jouant, posé dans une scène avec sol, lumière rasante et ombre 
 Pas d'icônes dessinées à part : la bibliothèque tient ainsi une promesse exacte, les
 objets sont nets à toutes les densités, et une retouche du jeu se répercute sur l'affiche.
 
+Les jeux sont classés par **niveau de défi**, pas par mécanique — à une table, personne
+ne se dit « je veux de la devinette », la question est « on part sur quoi, là ? ». Les
+paliers sont définis dans `GAME_TIERS` (`js/core/navigation.js`), rangés dans l'ordre où
+une soirée monte, et chacun porte sa promesse en une ligne :
+
+| Palier | Promesse | Jeux |
+|---|---|---|
+| **Soft** | On se chauffe. Personne ne se met en danger. | Palmier, Cible |
+| **Malin** | Il faut réfléchir, observer, démasquer. | Bus, UnderDicateur, Pilliers |
+| **Culotté** | Il faut annoncer, parier, assumer. | Purple, PMU |
+| **Chaos** | Ça va vite et ça tape fort. | Duel de Dés, Pile ou Face |
+
+Le palier d'un jeu est son champ `category` dans `games-catalog.js` ; `GAME_TIERS` et ce
+champ doivent rester alignés (un palier sans jeu n'affiche pas de puce). Chaque affiche
+porte **« Jouer » et « Règles »** : la fiche de règles reprend telle quelle la liste
+`rules` du catalogue — elle n'est jamais réécrite ailleurs.
+
 ---
 
 ## 7. Pièges — chacun a coûté un bug réel
@@ -214,6 +242,22 @@ objets sont nets à toutes les densités, et une retouche du jeu se répercute s
 8. **Les minuteurs survivent à la sortie d'un écran.** Chaque jeu a un jeton
    d'invalidation et un `registerScreenCleanup` : sans cela, une relance programmée
    continue d'écrire dans un écran déjà quitté.
+9. **Reconstruire le HTML d'une piste tue son animation.** Le navigateur n'interpole
+   rien entre deux éléments qu'il vient de créer : les as du PMU se replaçaient d'un
+   bond alors que la transition CSS était bien là. Pour qu'un mouvement se voie, mettre
+   à jour la **position** d'un élément existant (`pmuSyncRace`), pas son parent.
+10. **`background-clip:text` ne peint que la boîte de l'élément.** Avec un
+    `line-height` inférieur à 1, l'accent d'une capitale sort de cette boîte, ne reçoit
+    aucun fond et devient invisible : « SOIRÉE » s'affichait « SOIREE ».
+11. **`min-width:auto` empêche un élément flex de se réduire sous son contenu.** Une
+    colonne à `width:88px; flex-shrink:0` s'élargissait quand même pour loger le prénom
+    le plus long, et mangeait la piste. Ajouter `min-width:0` pour que la troncature
+    (`text-overflow`) puisse opérer.
+12. **Un test qui ne connaît qu'une partie des cas ne teste pas le reste — il l'accuse.**
+    `test-content-engine.js` ne couvrait que six types ; les huit familles ajoutées
+    ensuite remontaient toutes en « drawFromBag a renvoyé undefined ». Un tableau de
+    correspondance explicite (`BAG_SOURCES`) et un refus net du type inconnu valent
+    mieux qu'une chaîne de `else if` qui retombe silencieusement sur `undefined`.
 
 ---
 
