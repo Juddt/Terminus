@@ -3,8 +3,40 @@
 Objectif : `https://juddt.github.io/Terminus/`, testable depuis un téléphone.
 
 **Il n'y a aucune étape de build.** Le projet est du HTML/CSS/JS simple : les fichiers du
-ZIP sont exactement ceux qui sont servis au navigateur. Pas de `npm install`, pas de
+dépôt sont exactement ceux qui sont servis au navigateur. Pas de `npm install`, pas de
 `npm run build`, pas de dossier `dist/` à générer.
+
+---
+
+## 0. Le chemin le plus court : le code est déjà sur GitHub
+
+Le ZIP décrit plus bas date du moment où l'envoi direct vers GitHub était bloqué. Ce
+n'est plus le cas : **tout le travail est poussé sur la branche
+`claude/gracious-johnson-om0ejw`**. Il ne reste qu'à l'amener sur la branche que
+GitHub Pages publie.
+
+### Depuis le site de GitHub
+
+1. Ouvrez https://github.com/Juddt/Terminus/compare/main...claude/gracious-johnson-om0ejw
+2. **« Create pull request »**, puis **« Merge pull request »**.
+
+### En ligne de commande
+
+```bash
+git fetch origin
+git checkout main
+git merge origin/claude/gracious-johnson-om0ejw
+git push origin main
+```
+
+Puis passez directement au **§ 3 (activer GitHub Pages)** — ou, si Pages est déjà
+activé sur `main` / `/ (root)`, à rien du tout : le site se republie tout seul en une
+à deux minutes.
+
+> `main` porte encore une version antérieure, sans le dossier `fonts/`. Tant que la
+> fusion n'est pas faite, l'adresse publique sert cette ancienne version.
+
+Les sections suivantes ne servent que si vous préférez passer par un ZIP.
 
 ---
 
@@ -91,7 +123,7 @@ Ouvrez `https://juddt.github.io/Terminus/` dans Safari ou Chrome.
 Le service worker garde une copie du site pour le mode hors connexion. Il est réglé en
 « réseau d'abord », donc une nouvelle version arrive normalement au rechargement suivant.
 Si un écran reste obstinément ancien, incrémentez `CACHE_NAME` dans `sw.js`
-(`soiree-cache-v29` → `v30`) : cela force le remplacement complet du cache.
+(actuellement `soiree-cache-v30`) : cela force le remplacement complet du cache.
 
 ---
 
@@ -106,7 +138,14 @@ Pages, et parcouru dans un navigateur mobile (390×844) :
 - le service worker s'enregistre bien avec la portée `/Terminus/` ;
 - le manifeste et ses icônes se résolvent sous `/Terminus/` ;
 - les polices auto-hébergées se chargent ;
-- une soirée a été réellement jouée, et un mini-jeu lancé.
+- une soirée a été réellement jouée, et un mini-jeu lancé ;
+- la **reprise de partie** a été vérifiée : soirée lancée, quelques manches jouées,
+  page rechargée, bandeau « Soirée en cours » proposé avec le bon nombre de joueurs et
+  le bon temps restant, reprise effective ;
+- le **mode hors connexion** a été vérifié réseau coupé : l'accueil se recharge depuis
+  le cache du service worker (56 entrées) ;
+- les **neuf mini-jeux** ont été ouverts à 360 px et 390 px de large : aucun
+  débordement horizontal, aucun élément hors cadre, aucune erreur console.
 
 ---
 
