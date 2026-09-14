@@ -62,7 +62,7 @@
            le bouton : on ne peut pas la confondre avec une zone à remplir. -->
       <div id="resume-banner" class="resume-block hidden">
         <button class="resume-card" onclick="resumeSession()">
-          <span class="resume-card-action">Reprendre le before</span>
+          <span class="resume-card-action">Reprendre le before en cours</span>
           <span class="resume-card-meta" id="resume-banner-text"></span>
         </button>
       </div>
@@ -491,15 +491,6 @@
   </div>
 
   <!-- Soirée déjà en cours : choix explicite plutôt qu'une reprise silencieuse -->
-  <div id="session-conflict-overlay" class="rules-overlay hidden">
-    <div class="rules-modal" onclick="event.stopPropagation()" style="text-align:center;">
-      <div style="font-family:Anton,sans-serif;font-size:19px;margin-bottom:10px;">Soirée en cours</div>
-      <p id="session-conflict-text" style="color:var(--text-dim);font-size:14px;line-height:1.5;margin:0 0 22px;"></p>
-      <button class="btn btn-primary" style="margin-bottom:10px;" onclick="conflictResume()">Reprendre cette soirée</button>
-      <button class="btn btn-ghost" onclick="conflictRestart()">Recommencer une nouvelle</button>
-    </div>
-  </div>
-
   <!-- Gérer les joueurs en cours de partie (bouton + de la topbar) -->
   <!-- Ajout de joueurs : panneau depuis le bas, partie suspendue pendant la saisie -->
   <div id="players-sheet" class="rules-sheet" onclick="closeAddPlayerOverlay()">

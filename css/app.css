@@ -283,12 +283,30 @@
 /* Reprendre : l'action de sortie, pleine largeur, détachée de la saisie. */
 #players-sheet .btn-primary{margin-top:14px; padding:16px; border-radius:16px; font-size:15px;}
 
+/* --- LA MOSAÏQUE DES JEUX -----------------------------------------------------------
+   Une tuile par jeu : son objet et son nom, rien d'autre. Les affiches sont construites
+   en pixels fixes (le cercle du Palmier fait 186 px) : on les met à l'échelle dans un
+   cadre de taille connue plutôt que de les laisser déborder, et le cadre porte le halo
+   teinté du jeu — on reconnaît la fiche qu'on vient de voir. */
 .games-index{display:none; margin-top:12px;}
-.games-index.open{display:block;}
-.games-index-row{display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--line); cursor:pointer;}
-.games-index-row svg{width:34px; height:34px; flex-shrink:0;}
-.games-index-name{font-family:'Anton',sans-serif; font-size:15px; color:var(--text); letter-spacing:0.3px;}
-.games-index-meta{margin-left:auto; font-size:11px; color:var(--text-faint);}
+.games-index.open{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;}
+.games-tile{min-width:0; display:flex; flex-direction:column; align-items:center; gap:7px; padding:0 0 9px;
+  border:1px solid var(--line); border-radius:16px; cursor:pointer;
+  background:linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 6px 16px rgba(0,0,0,0.4);
+  transition:transform .14s cubic-bezier(.34,1.56,.64,1), border-color .15s ease;}
+.games-tile:active{transform:scale(0.95); border-color:rgba(232,255,61,0.4);}
+.games-tile-art{position:relative; width:100%; height:76px; overflow:hidden;
+  border-radius:15px 15px 0 0; display:flex; align-items:center; justify-content:center;}
+.games-tile-art::before{content:''; position:absolute; inset:0;
+  background:var(--stage-glow, var(--accent)); opacity:0.12; filter:blur(18px);}
+.games-tile-poster{position:absolute; top:50%; left:50%; z-index:1;
+  display:flex; align-items:center; justify-content:center;
+  transform:translate(-50%, -50%) scale(0.34); transform-origin:center;}
+.games-tile-name{font-family:'Anton',sans-serif; font-size:12px; line-height:1.1;
+  color:var(--text); letter-spacing:0.2px; text-align:center; padding:0 6px;
+  overflow-wrap:anywhere;}
+@media (max-width: 340px){ .games-index.open{grid-template-columns:repeat(2, 1fr);} }
 
 /* Sur écran large, on recompose (objet à gauche, texte à droite) plutôt que d'étirer
    la mise en page mobile. */
@@ -786,8 +804,9 @@
 .resume-card:active{transform:scale(0.975); border-color:var(--accent);}
 .resume-card-action{font-family:'Anton',sans-serif; font-size:19px; letter-spacing:0.4px;
   line-height:1.05; color:var(--accent);}
-.resume-card-meta{font-size:11px; line-height:1.3; color:var(--text-dim); margin-top:3px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+.resume-card-meta{display:flex; flex-wrap:wrap; gap:1px 12px; font-size:11px; line-height:1.35;
+  color:var(--text-dim); margin-top:3px; max-width:100%;}
+.rcm-part{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
 .resume-dismiss{background:none; border:none; padding:4px 6px; cursor:pointer;
   font-family:'Work Sans',sans-serif; font-size:11.5px; color:var(--text-faint);
   text-decoration:underline; text-underline-offset:3px;}

@@ -78,27 +78,27 @@ function pofUpdateHeader(){
   el.innerHTML = '<div class="badge">'+pofRoundLabel()+'</div>';
 }
 
-// « Manche 3 / 5 · 4 gorgées en jeu » : la position dans la partie, puis l'enjeu.
 function pofRoundLabel(){
   const n = pof.round + 1;
   const manche = pof.mode === 'prison'
     ? 'Manche <span class="bv">'+Math.min(n, 5)+'</span>/5'
     : 'Manche <span class="bv">'+n+'</span>';
-  return manche + ' &middot; ' + pofStakeText(pofGetStake()).toLowerCase() + ' en jeu';
+  return manche + ' &middot; ' + pofStakeText(pofGetStake()).toLowerCase();
 }
 
-// Les deux rôles de la manche, dits explicitement : l'un appelle et mise, l'autre
-// encaisse. Sans ça, « Joueur 1 contre Joueur 2 » ne disait pas qui fait quoi.
+// Deux rôles, deux mots. « appelle et mise » / « encaisse si c'est juste » disaient la
+// règle au lieu de dire qui fait quoi : à une table on a besoin de savoir en un coup
+// d'œil qui tient le téléphone et qui attend le verdict.
 function pofRolesHTML(){
   return '<div class="pof-roles">'+
       '<div class="pof-role caller">'+
         '<span class="pof-role-name">'+escapeHtml(pofPlayer())+'</span>'+
-        '<span class="pof-role-what">appelle et mise</span>'+
+        '<span class="pof-role-what">choisit</span>'+
       '</div>'+
       '<span class="pof-role-vs">contre</span>'+
       '<div class="pof-role">'+
         '<span class="pof-role-name">'+escapeHtml(pofOpponent())+'</span>'+
-        '<span class="pof-role-what">encaisse si c\'est juste</span>'+
+        '<span class="pof-role-what">subit</span>'+
       '</div>'+
     '</div>';
 }
@@ -145,12 +145,11 @@ function pofShowTurn(){
     pofCoinHTML(-68)+
     (pof.mode === 'fun'
       ? '<div class="pof-bets">'+
-          '<span class="pof-bets-label">Tu mises</span>'+
           [1,2,3].map(n =>
             '<div class="pof-bet-btn'+(pof.currentBet === n ? ' selected' : '')+'" '+
                  'onclick="pofSetBet('+n+')">'+n+'</div>').join('')+
         '</div>'
-      : '<div class="pof-forced">Enjeu imposé &middot; '+pofStakeText(stake)+'</div>');
+      : '');
 
   // Appeler Pile ou Face n'est pas un choix hiérarchisé : deux boutons strictement
   // identiques, chacun portant sa face. Le jaune sur l'un des deux laissait croire
@@ -186,13 +185,10 @@ function pofFlip(choice){
   const footer = document.getElementById('pof-footer');
 
   body.innerHTML =
-    '<div class="pof-duel">'+
-      '<div class="pof-name">'+escapeHtml(pofPlayer())+'</div>'+
-      '<div class="pof-vs">appelle</div>'+
-      '<div class="pof-opp">'+(choice === 'pile' ? 'Pile' : 'Face')+'</div>'+
-    '</div>'+
+    pofRolesHTML()+
     pofCoinHTML(-14)+
-    '<div class="pof-forced">'+pofStakeText(stake)+' en jeu</div>';
+    '<div class="pof-called">'+escapeHtml(pofPlayer())+' annonce <b>'+
+      (choice === 'pile' ? 'Pile' : 'Face')+'</b></div>';
   footer.innerHTML = '<div class="duel-hint">La pièce est en l\'air…</div>';
 
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -68,15 +68,16 @@ function renderGamesList(){
 
   renderGamesDots(filtered.length);
 
-  // Index compact : retrouver immédiatement un jeu précis sans balayer la scène.
+  // Mosaïque : retrouver un jeu d'un coup d'œil, avec son objet — le même que la fiche.
   const index = document.getElementById('games-index');
   if(index){
-    index.innerHTML = filtered.map(g=>
-      '<div class="games-index-row" onclick="openGameDetail(\''+g.id+'\')">'+
-        (GAME_ART[g.id]||'')+
-        '<span class="games-index-name">'+g.name+'</span>'+
-        '<span class="games-index-meta">'+g.joueurs+' · '+g.duree+'</span>'+
-      '</div>'
+    index.innerHTML = filtered.map((g, i)=>
+      '<button class="games-tile" onclick="pickGameFromIndex('+i+')">'+
+        '<span class="games-tile-art" style="--stage-glow:'+stageGlow(g)+'">'+
+          '<span class="games-tile-poster">'+(GAME_POSTERS[g.id] || GAME_ART[g.id] || '')+'</span>'+
+        '</span>'+
+        '<span class="games-tile-name">'+g.name+'</span>'+
+      '</button>'
     ).join('');
   }
 }
@@ -112,6 +113,18 @@ function syncGamesDots(){
   if(!card || !card.offsetWidth) return;
   const idx = Math.round(scene.scrollLeft / card.offsetWidth);
   [...wrap.children].forEach((d, i) => d.classList.toggle('current', i === idx));
+}
+
+// Toucher une tuile amène à ce jeu dans la scène et referme la mosaïque : on repart de
+// la fiche complète, avec « Jouer » et « Règles » sous la main.
+function pickGameFromIndex(i){
+  goToGameIndex(i);
+  const index = document.getElementById('games-index');
+  const btn = document.getElementById('games-index-toggle');
+  if(index) index.classList.remove('open');
+  if(btn) btn.textContent = 'Tous les jeux';
+  const scene = document.getElementById('games-list-wrap');
+  if(scene) scene.scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
 
 function toggleGamesIndex(){

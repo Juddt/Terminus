@@ -18,6 +18,7 @@ function makeEl(id){
       toggle(c,f){f===undefined?(this._s.has(c)?this._s.delete(c):this._s.add(c)):(f?this._s.add(c):this._s.delete(c));return this._s.has(c)},
       contains(c){return this._s.has(c)}},
     querySelectorAll:()=>[], querySelector:()=>null, appendChild(){}, focus(){},
+    addEventListener(){}, removeEventListener(){},
     _attrs:{}, setAttribute(k,v){this._attrs[k]=String(v)}, getAttribute(k){return k in this._attrs?this._attrs[k]:null}};
 }
 const els={};
@@ -30,7 +31,7 @@ const ctx={console,localStorage,document,navigator:{vibrate(){}},
 vm.createContext(ctx);
 ['js/data/content.js','js/core/state.js'].forEach(f=>vm.runInContext(fs.readFileSync('../'+f,'utf8'),ctx,{filename:f}));
 vm.runInContext('function getEffectiveRules(){return RULES} function getEffectiveChallenges(){return CHALLENGES}',ctx);
-['js/core/persistence.js','js/core/session-engine.js','js/core/scenes.js'].forEach(f=>vm.runInContext(fs.readFileSync('../'+f,'utf8'),ctx,{filename:f}));
+['js/games/shared-cards.js','js/core/persistence.js','js/core/session-engine.js','js/core/scenes.js'].forEach(f=>vm.runInContext(fs.readFileSync('../'+f,'utf8'),ctx,{filename:f}));
 
 let errors=0, kinds={}, checked=0;
 [10,30,60].forEach(duration=>{

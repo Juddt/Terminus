@@ -62,18 +62,17 @@
 .pof-role{display:flex; flex-direction:column; align-items:center; gap:3px; max-width:132px;}
 .pof-role-name{font-family:'Anton',sans-serif; font-size:21px; line-height:1;
   color:var(--text-dim); overflow-wrap:anywhere; text-align:center;}
-.pof-role-what{font-size:10.5px; letter-spacing:0.3px; color:var(--text-faint); text-align:center;
-  line-height:1.25;}
+.pof-role-what{font-size:10px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--text-faint); text-align:center; line-height:1.25;}
 .pof-role.caller .pof-role-name{font-size:26px; color:var(--accent);}
 .pof-role.caller .pof-role-what{color:var(--text-dim);}
 .pof-role-vs{font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
 
-/* Enjeu imposé (mode Prison) ou rappel pendant le lancer : une ligne, pas un bloc. */
-.pof-forced{font-size:12.5px; letter-spacing:0.3px; color:var(--text-dim);}
+/* L'annonce, pendant que la pièce tourne. */
+.pof-called{font-size:13px; color:var(--text-dim); letter-spacing:0.2px;}
+.pof-called b{font-family:'Anton',sans-serif; font-weight:400; font-size:17px; color:var(--text);}
 
-.pof-bets{display:flex; gap:9px; align-items:center;}
-.pof-bets-label{font-size:11px; letter-spacing:1.6px; text-transform:uppercase;
-  color:var(--text-faint); margin-right:2px;}
+.pof-bets{display:flex; gap:9px; align-items:center; justify-content:center;}
 .pof-bet-btn{width:52px; height:48px; border-radius:13px; display:flex; align-items:center;
   justify-content:center; font-family:'Anton',sans-serif; font-size:19px; cursor:pointer;
   border:1px solid var(--line); background:var(--surface-2); color:var(--text-dim);

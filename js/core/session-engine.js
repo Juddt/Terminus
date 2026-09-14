@@ -284,34 +284,10 @@ function playAgainSameConfig(){ launchSession(); }
 
 // --- Entrée "Lancer le before" et gestion des joueurs en cours de partie -----------
 
-// Si une soirée existe déjà, on demande explicitement quoi faire plutôt que de reprendre
-// ou d'écraser en silence.
 function openLaunchEntry(mode){
   state.pendingLaunchMode = mode || state.sessionMode || 'full';
-  const snapshot = loadSessionSnapshot();
-  if(snapshot){
-    const minutesLeft = Math.max(1, Math.round(snapshot.globalSecondsLeft / 60));
-    document.getElementById('session-conflict-text').textContent =
-      'Une soirée est en cours avec '+snapshot.players.length+' joueur'+(snapshot.players.length>1?'s':'')+' (~'+minutesLeft+' min restantes).';
-    document.getElementById('session-conflict-overlay').classList.remove('hidden');
-  } else {
-    startNewSessionWizard();
-  }
+  startNewSessionWizard();
 }
-function startNewSessionWizard(mode){
-  // Ouvre la page de configuration unique (voir setup-wizard.js). L'ancien code
-  // manipulait les .step[data-step] du tunnel, qui n'existent plus.
-  openSetupFor({ type:'before', game:null, mode: mode || state.pendingLaunchMode || state.sessionMode });
-}
-function closeSessionConflictModal(){ document.getElementById('session-conflict-overlay').classList.add('hidden'); }
-function conflictResume(){ closeSessionConflictModal(); resumeSession(); }
-function conflictRestart(){
-  closeSessionConflictModal();
-  clearSessionSnapshot();
-  document.getElementById('resume-banner').classList.add('hidden');
-  startNewSessionWizard(state.pendingLaunchMode);
-}
-
 // Retour \u00e0 l'accueil depuis une partie : quitter n'est PAS terminer. On fige les
 // minuteurs, on sauvegarde l'\u00e9tat exact, la soir\u00e9e reste reprenable.
 function quitSessionToHome(){
@@ -323,6 +299,12 @@ function quitSessionToHome(){
   if(window.Trail) Trail.freeze();
   goTo('home');
   checkForResumableSession();
+}
+
+function startNewSessionWizard(mode){
+  // Ouvre la page de configuration unique (voir setup-wizard.js). L'ancien code
+  // manipulait les .step[data-step] du tunnel, qui n'existent plus.
+  openSetupFor({ type:'before', game:null, mode: mode || state.pendingLaunchMode || state.sessionMode });
 }
 
 function openAddPlayerOverlay(){

@@ -62,8 +62,9 @@ function checkForResumableSession(){
   const groupe = noms.length > 3
     ? noms.slice(0, 3).join(', ') + ' +' + (noms.length - 3)
     : noms.join(', ');
-  document.getElementById('resume-banner-text').textContent =
-    'En cours : ' + groupe + ' · ~' + minutesLeft + ' min restantes';
+  document.getElementById('resume-banner-text').innerHTML =
+    '<span class="rcm-part">Joueurs : ' + escapeHtml(groupe) + '</span>' +
+    '<span class="rcm-part">Temps restant : ~' + minutesLeft + ' min</span>';
   banner.classList.remove('hidden');
 }
 
