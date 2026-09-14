@@ -734,7 +734,28 @@
 .podium-count{font-family:'Anton', sans-serif; font-size:20px; color:var(--accent);}
 
 /* Home : bandeau de reprise + liens utilitaires */
-.resume-banner{width:100%; background:var(--surface); border:1px solid var(--accent); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; font-size:13px; text-align:left;}
+/* --- REPRENDRE UNE SOIRÉE -----------------------------------------------------------
+   L'ancien bandeau alignait une ligne de texte et deux boutons : posé sur l'accueil, il
+   se lisait comme un encadré d'information. Ici la carte ENTIÈRE est le bouton — même
+   relief, même réponse à l'appui que les deux entrées juste en dessous — et la seule
+   autre commande est un abandon discret, en retrait. */
+.resume-block{width:100%; display:flex; flex-direction:column; align-items:center; gap:8px;
+  margin-bottom:4px;}
+.resume-card{width:100%; display:flex; flex-direction:column; align-items:flex-start; gap:2px;
+  padding:15px 18px; border-radius:18px; text-align:left; cursor:pointer;
+  border:1px solid rgba(232,255,61,0.4);
+  background:linear-gradient(158deg, rgba(232,255,61,0.13), rgba(232,255,61,0.04));
+  box-shadow:0 1px 0 rgba(255,255,255,0.08) inset, 0 10px 26px rgba(0,0,0,0.45);
+  transition:transform .14s cubic-bezier(.34,1.56,.64,1), border-color .15s ease;}
+.resume-card:active{transform:scale(0.975); border-color:var(--accent);}
+.resume-card-kicker{font-size:10px; letter-spacing:2.4px; text-transform:uppercase;
+  color:rgba(232,255,61,0.75);}
+.resume-card-action{font-family:'Anton',sans-serif; font-size:22px; letter-spacing:0.4px;
+  line-height:1.05; color:var(--accent); margin-top:3px;}
+.resume-card-meta{font-size:11.5px; line-height:1.35; color:var(--text-dim); margin-top:4px;}
+.resume-dismiss{background:none; border:none; padding:4px 6px; cursor:pointer;
+  font-family:'Work Sans',sans-serif; font-size:11.5px; color:var(--text-faint);
+  text-decoration:underline; text-underline-offset:3px;}
 .home-links{display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:18px;}
 .home-links span{font-size:12px; color:var(--text-faint); cursor:pointer; letter-spacing:0.3px;}
 .home-links span.active{color:var(--accent);}
@@ -917,7 +938,7 @@
    prend le jaune signature ; la bibliothèque reste sombre mais reçoit son propre
    éclairage pour ne pas passer pour une option de second rang. */
 .entry{position:relative; width:100%; display:flex; flex-direction:column; align-items:flex-start;
-  gap:3px; border:1px solid var(--line); border-radius:20px; padding:18px 20px 17px;
+  gap:3px; border:1px solid var(--line); border-radius:20px; padding:20px 20px 19px;
   margin-bottom:12px; background:var(--surface); text-align:left; cursor:pointer;
   overflow:hidden; isolation:isolate;
   box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 14px 34px rgba(0,0,0,0.5);
@@ -931,23 +952,17 @@
   background:linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);}
 .entry > *:not(.entry-glint){position:relative; z-index:2;}
 
-.entry-kicker{font-size:10px; letter-spacing:2.6px; text-transform:uppercase;
-  color:var(--text-faint); margin-bottom:2px;}
-.entry-name{font-family:'Anton',sans-serif; font-size:29px; letter-spacing:0.4px;
+.entry-name{font-family:'Anton',sans-serif; font-size:31px; letter-spacing:0.4px;
   line-height:1; color:var(--text);}
 .entry-tag{font-family:'Work Sans',sans-serif; font-size:13.5px; line-height:1.35;
-  color:var(--text-dim); margin-top:5px;}
-.entry-meta{font-size:11px; letter-spacing:0.3px; color:var(--text-faint); margin-top:7px;
-  padding-top:7px; border-top:1px solid var(--line); width:100%;}
+  color:var(--text-dim); margin-top:7px;}
 
 /* Le before : jaune plein, la seule surface vraiment lumineuse de l'écran. */
 .entry-primary{border-color:transparent;
   background:linear-gradient(168deg, var(--accent-bright), var(--accent) 56%, var(--accent-deep));
   box-shadow:0 1px 0 rgba(255,255,255,0.6) inset, 0 16px 40px rgba(232,255,61,0.24);}
-.entry-primary .entry-kicker{color:rgba(13,13,13,0.58);}
 .entry-primary .entry-name{color:var(--ink-on-light);}
 .entry-primary .entry-tag{color:rgba(13,13,13,0.8); font-weight:500;}
-.entry-primary .entry-meta{color:rgba(13,13,13,0.6); border-top-color:rgba(13,13,13,0.18);}
 
 /* La bibliothèque : sombre, mais éclairée par en dessous — pas une option grise. */
 .entry-games{background:
@@ -970,11 +985,6 @@
 .setup-subtitle{font-size:13.5px; color:var(--text-dim); margin:-14px 0 24px;}
 
 /* Reprise du groupe précédent : proposée, jamais imposée */
-.reuse-group{width:100%; background:none; border:1px dashed var(--line); border-radius:14px;
-  color:var(--text-dim); font-family:'Work Sans',sans-serif; font-size:12.5px; padding:13px 14px;
-  margin-bottom:10px; cursor:pointer; text-align:left; overflow:hidden; text-overflow:ellipsis;
-  white-space:nowrap;}
-.reuse-group:active{transform:scale(0.98);}
 
 /* --- LE GROUPE, EN PASTILLES -------------------------------------------------------
    Une pile de champs pleine largeur, c'était un formulaire : on devait le lire ligne à

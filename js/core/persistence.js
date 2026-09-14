@@ -58,8 +58,12 @@ function checkForResumableSession(){
     return;
   }
   const minutesLeft = Math.max(1, Math.round(snapshot.globalSecondsLeft / 60));
+  const noms = snapshot.players.map(p => p.name);
+  const groupe = noms.length > 4
+    ? noms.slice(0, 4).join(', ') + ' +' + (noms.length - 4)
+    : noms.join(', ');
   document.getElementById('resume-banner-text').textContent =
-    'Soirée en cours · ' + snapshot.players.length + ' joueurs · ~' + minutesLeft + ' min restantes';
+    groupe + ' · ~' + minutesLeft + ' min restantes';
   banner.classList.remove('hidden');
 }
 

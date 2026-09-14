@@ -51,8 +51,7 @@ function openSetupFor(context){
   if(setupContext.mode) state.sessionMode = setupContext.mode;
   const bounds = playerBounds();
   // Les champs restent VIDES par défaut : préremplir avec l'ancien groupe obligeait à
-  // effacer des prénoms qu'on ne voulait pas. Le groupe précédent reste rappelable en un
-  // geste via le bouton dédié (voir reusePreviousGroup).
+  // effacer des prénoms qu'on ne voulait pas.
   state.playerCount = Math.min(bounds.max, Math.max(bounds.min, state.playerCount || 4));
   state.durationMin = loadLastDuration();
   renderSetupPage();
@@ -132,29 +131,9 @@ function captureNameDraft(){
   });
 }
 
-// Rappelle le groupe de la dernière soirée dans les champs, sur demande explicite.
-function reusePreviousGroup(){
-  const last = loadLastPlayers();
-  if(!last || !last.length) return;
-  nameDraft = last.map(p => p.name);
-  state.playerCount = Math.min(playerBounds().max, Math.max(playerBounds().min, last.length));
-  Sound.play('tick');
-  renderCounter();
-  renderNameRows();
-}
-
 function renderNameRows(){
   const wrap = document.getElementById('name-rows');
   if(!wrap) return;
-  // Bouton de reprise affiché seulement s'il y a un groupe précédent ET que rien n'a
-  // encore été saisi : il ne doit jamais écraser une saisie en cours.
-  const reuse = document.getElementById('reuse-group');
-  if(reuse){
-    const last = loadLastPlayers();
-    const vierge = !nameDraft.some(n => (n||'').trim());
-    reuse.style.display = (last && last.length && vierge) ? '' : 'none';
-    if(last && last.length) reuse.textContent = 'Reprendre : ' + last.map(p=>p.name).join(', ');
-  }
   const n = state.playerCount;
   let html = '';
   for(let i = 0; i < n; i++){
@@ -206,6 +185,11 @@ function collectPlayers(){
   return players;
 }
 
+// Le groupe de la dernière soirée reste enregistré (et reste effaçable depuis les
+// mentions légales, voir legal.js), mais il n'est plus proposé nulle part dans les
+// réglages : le bandeau « Reprendre : … » se tenait au milieu des pastilles de saisie
+// et se lisait comme un champ de plus. La seule reprise de l'application est celle de
+// l'accueil, et elle ne concerne qu'une soirée réellement lancée.
 function saveLastPlayers(){
   try{
     localStorage.setItem(LAST_PLAYERS_KEY, JSON.stringify(

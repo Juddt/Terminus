@@ -82,9 +82,12 @@ const draftVide=vm.runInContext('JSON.stringify(nameDraft)',ctx);
 check('Aucun prénom prérempli', draftVide==='[]', draftVide);
 check('Repère du prénom par défaut présent', /placeholder="Joueur 1"/.test(els['name-rows'].innerHTML));
 
-// 10. Reprise du groupe précédent sur demande explicite
-vm.runInContext('reusePreviousGroup()',ctx);
-check('Reprise sur demande', vm.runInContext('JSON.stringify(nameDraft)',ctx)==='["Alice","Bob"]');
+// 10. Aucune reprise de groupe dans les réglages : la seule reprise de l'application est
+//     celle de l'accueil, et elle porte sur une soirée lancée, pas sur une liste de
+//     prénoms. Un groupe précédent enregistré ne doit donc RIEN changer à cet écran.
+check('Aucune reprise de groupe dans les réglages',
+  vm.runInContext('typeof reusePreviousGroup',ctx)==='undefined' &&
+  !/reuse-group/.test(els['name-rows'].innerHTML));
 
 // 11. Lancement sans aucune saisie => Joueur 1..N
 vm.runInContext("nameDraft=[]; state.playerCount=3;",ctx);
