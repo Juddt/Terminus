@@ -1,7 +1,7 @@
 // Test fonctionnel des scènes : on simule un DOM minimal et on rejoue des soirées
 // entières (les 3 durées), en vérifiant que chaque type de moment produit bien sa
 // composition, que le parcours reste cohérent et qu'aucun marqueur {p1} ne fuit.
-const fs=require('fs'), vm=require('vm');
+const fs=require('fs'), vm=require('vm'), path=require('path');
 
 const store={};
 const localStorage={getItem:k=>k in store?store[k]:null,setItem:(k,v)=>{store[k]=String(v)},removeItem:k=>{delete store[k]}};
@@ -178,6 +178,17 @@ const statsKept = vm.runInContext('state.stats.targets.Julie', ctx);
 console.log('Ajout joueurs -> pause pendant:', pausedDuring, '| total:', n, '| uid uniques:', uidsUniques,
   '| pause levée:', !pausedAfter, '| stats gardées:', statsKept,
   (pausedDuring && n===4 && !pausedAfter && statsKept===3) ? 'OK' : 'ÉCHEC');
+
+// La fonction marchait parfaitement — mais RIEN dans la page ne l'appelait : le champ
+// annonçait « puis Entrée » sans que la touche soit écoutée, et il n'y avait aucun
+// bouton. Saisir un prénom en cours de partie ne faisait donc rien du tout. Appeler
+// addSessionPlayer() depuis un test ne prouve pas que l'interface y mène : on vérifie
+// ici que la page la déclenche vraiment, par la touche Entrée ET par un bouton.
+const pageHTML = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const champ = /id="add-player-field"[^>]*onkeydown="[^"]*addSessionPlayer\(\)/.test(pageHTML);
+const bouton = /<button[^>]*onclick="addSessionPlayer\(\)"/.test(pageHTML);
+console.log('Ajout joueurs relié à l\'interface -> touche Entrée:', champ, '| bouton:', bouton,
+  (champ && bouton) ? 'OK' : 'ÉCHEC');
 
 // --- Consignes : taille adaptée à la longueur ---
 const court = vm.runInContext("instructionClass('Bois une gorg\u00e9e')", ctx);

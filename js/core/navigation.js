@@ -102,13 +102,6 @@ function setGamesListFilter(category){
   document.querySelectorAll('.games-filter-chip').forEach(el=>{
     el.classList.toggle('selected', el.dataset.category === category);
   });
-  // Le palier choisi dit ce qu'il promet, en une ligne, sous les puces : on comprend
-  // ce qu'on vient de sélectionner sans avoir à parcourir les jeux pour le déduire.
-  const hintEl = document.getElementById('games-filter-hint');
-  if(hintEl){
-    const tier = GAME_TIERS.find(t => t.key === category);
-    hintEl.textContent = tier ? tier.hint : 'Les neuf jeux, du plus doux au plus brutal.';
-  }
   renderGamesList();
 }
 
