@@ -3,8 +3,16 @@ const pmu = {
   deck:[], obstacles:[], // 7 obstacle cards
   horses:{'♥':0,'♦':0,'♣':0,'♠':0},
   currentCard:null, winner:null,
-  betPlayerIdx:0
+  betPlayerIdx:0,
+  // La course se déroule seule : `timer` porte le prochain retournement, `running` dit
+  // qu'elle est en cours. Les deux doivent être remis à zéro dès qu'on quitte l'écran,
+  // sinon la course continue de tourner dans le vide pour le reste de la soirée.
+  timer:null, running:false
 };
+
+// Suffixes ASCII pour les identifiants : les symboles de couleur ne font pas des id
+// utilisables.
+const PMU_SLUG = {'♥':'h', '♦':'d', '♣':'c', '♠':'s'};
 
 const PMU_SUITS = ['♥','♦','♣','♠'];
 
@@ -41,6 +49,7 @@ function pmuShowBet(){
   const footer = document.getElementById('pmu-bet-footer');
 
   body.innerHTML =
+    '<div class="pmu-bet-step">Paris &middot; joueur '+(pmu.betPlayerIdx+1)+' sur '+pmu.players.length+'</div>'+
     '<div class="pmu-bet-who">'+escapeHtml(p.name)+'</div>'+
     '<div class="pmu-bet-prompt">Sur quel as tu mises ?</div>'+
     '<div class="pmu-horses">'+ PMU_SUITS.map(suit =>
@@ -55,7 +64,7 @@ function pmuShowBet(){
 
   footer.innerHTML = '<button class="btn btn-primary" onclick="pmuConfirmBet()" '+
     (p.horse ? '' : 'disabled')+'>'+
-    (pmu.betPlayerIdx === pmu.players.length - 1 ? 'Lancer la course' : 'Joueur suivant')+'</button>';
+    (pmu.betPlayerIdx === pmu.players.length - 1 ? 'Tout le monde a misé — au départ' : 'Joueur suivant')+'</button>';
 }
 
 function pmuSelectHorse(suit){
@@ -90,6 +99,60 @@ function pmuStartRace(){
   goTo('pmu');
   pmuUpdateHeader();
   pmuRenderRace();
+  // Les paris sont faits : plus rien à décider, donc plus rien à cliquer. On laisse un
+  // battement au départ — le temps de voir les quatre as alignés — puis ça part.
+  pmuLater(pmuRunRace, 900);
+}
+
+/* --- LA COURSE, TOUTE SEULE --------------------------------------------------------
+   Il fallait appuyer sur « Retourner une carte » à chaque case : une course de 20 à 30
+   clics, où l'on regardait son pouce au lieu de la piste. Elle se déroule maintenant
+   d'elle-même, et le rythme fait la tension — les cartes tombent vite au milieu du
+   peloton, puis la cadence se casse dès qu'un as approche de l'arrivée.             */
+const PMU_TICK_FAST = 560;   // rythme de croisière
+const PMU_TICK_NEAR = 820;   // un as à deux cases de l'arrivée
+const PMU_TICK_EDGE = 1150;  // un as sur le point de gagner
+
+function pmuRaceDelay(){
+  const lead = PMU_SUITS.reduce((m, s) => Math.max(m, pmu.horses[s]), 0);
+  if(lead >= PMU_FINISH - 1) return PMU_TICK_EDGE;
+  if(lead >= PMU_FINISH - 2) return PMU_TICK_NEAR;
+  return PMU_TICK_FAST;
+}
+
+function pmuRunRace(){
+  if(pmu.winner) return;
+  pmu.running = true;
+  pmuRenderFooter();
+  pmuStepRace();
+}
+
+function pmuStepRace(){
+  if(!pmu.running || pmu.winner) return;
+  if(!pmu.deck.length){ pmu.running = false; pmuRenderFooter(); return; }
+  pmuFlipCard();
+  if(pmu.winner || !pmu.running) return;
+  pmu.timer = pmuLater(pmuStepRace, pmuRaceDelay());
+}
+
+// Pour les impatients : le seul clic utile pendant la course. On déroule le reste sans
+// animation et on arrive directement au verdict.
+function pmuSkipToFinish(){
+  pmuStopRace();
+  let guard = 0;
+  while(!pmu.winner && pmu.deck.length && guard++ < 400) pmuFlipCard();
+  pmuRenderRace();
+}
+
+function pmuStopRace(){
+  pmu.running = false;
+  if(pmu.timer){ clearTimeout(pmu.timer); pmu.timer = null; }
+}
+
+function pmuLater(fn, ms){
+  const t = setTimeout(fn, ms);
+  pmu.timer = t;
+  return t;
 }
 
 // ===================================================================================
@@ -112,8 +175,11 @@ function pmuUpdateHeader(){
   const el = document.getElementById('pmu-header');
   if(!el) return;
   const lead = PMU_SUITS.reduce((a, s) => pmu.horses[s] > pmu.horses[a] ? s : a, PMU_SUITS[0]);
-  el.innerHTML = '<div class="badge"><span class="bv">'+pmu.deck.length+'</span> cartes</div>'+
-    (pmu.winner ? '' : '<div class="badge">En tête <span class="bv">'+lead+'</span></div>');
+  const ex = PMU_SUITS.filter(s => pmu.horses[s] === pmu.horses[lead]).length > 1;
+  el.innerHTML = pmu.winner
+    ? '<div class="badge">Arrivée <span class="bv">'+pmu.winner+'</span></div>'
+    : '<div class="badge">'+(ex ? 'À égalité' : 'En tête <span class="bv">'+lead+'</span>')+'</div>'+
+      '<div class="badge"><span class="bv">'+pmu.horses[lead]+'</span>/'+PMU_FINISH+'</div>';
 }
 
 function pmuRenderRace(){
@@ -127,14 +193,23 @@ function pmuRenderRace(){
     const pct = (pos / PMU_FINISH) * 100;
     const red = palmIsRed(suit);
     const isWinner = pmu.winner === suit;
-    return '<div class="pmu-lane'+(isWinner ? ' winner' : '')+'">'+
-        '<div class="pmu-lane-suit '+(red ? 'red' : 'black')+'">'+suit+'</div>'+
+    const backers = pmu.players.filter(p => p.horse === suit);
+    const names = backers.length
+      ? backers.map(p => '<span class="pmu-backer">'+escapeHtml(p.name)+
+          '<i>'+p.bet+'</i></span>').join('')
+      : '<span class="pmu-backer empty">personne</span>';
+    return '<div class="pmu-lane'+(isWinner ? ' winner' : '')+'" id="pmu-lane-'+PMU_SLUG[suit]+'">'+
+        '<div class="pmu-lane-head">'+
+          '<div class="pmu-lane-suit '+(red ? 'red' : 'black')+'">'+suit+'</div>'+
+          '<div class="pmu-lane-backers">'+names+'</div>'+
+        '</div>'+
         '<div class="pmu-rail">'+
           '<div class="pmu-rail-marks">'+
             Array.from({length: PMU_FINISH - 1}, (_, i) =>
               '<span style="left:'+(((i + 1) / PMU_FINISH) * 100).toFixed(2)+'%"></span>').join('')+
           '</div>'+
-          '<div class="pmu-runner '+(red ? 'red' : 'black')+'" style="left:'+pct.toFixed(2)+'%">'+
+          '<div class="pmu-runner '+(red ? 'red' : 'black')+'" id="pmu-runner-'+PMU_SLUG[suit]+'" '+
+            'style="left:'+pct.toFixed(2)+'%">'+
             '<span class="pmu-runner-rank">A</span>'+
             '<span class="pmu-runner-suit">'+suit+'</span>'+
           '</div>'+
@@ -149,33 +224,26 @@ function pmuRenderRace(){
         pmu.obstacles.map((o, i) => {
           const pct = (((i + 1) / PMU_FINISH) * 100).toFixed(2);
           if(!o.flipped){
-            return '<div class="pmu-obs" style="left:'+pct+'%"><span>?</span></div>';
+            return '<div class="pmu-obs" id="pmu-obs-'+i+'" style="left:'+pct+'%"><span>?</span></div>';
           }
           const red = palmIsRed(o.suit);
-          return '<div class="pmu-obs flipped '+(red ? 'red' : 'black')+'" style="left:'+pct+'%">'+
-              '<span>'+o.value+o.suit+'</span></div>';
+          return '<div class="pmu-obs flipped '+(red ? 'red' : 'black')+'" id="pmu-obs-'+i+'" '+
+              'style="left:'+pct+'%"><span>'+o.value+o.suit+'</span></div>';
         }).join('')+
       '</div>'+
     '</div>';
 
-  // Qui a misé sur quoi : c'est ce qui donne son enjeu à chaque carte retournée.
-  const bets = '<div class="pmu-bets">'+ pmu.players.map(p =>
-      '<div class="pmu-bet'+(pmu.winner && p.horse === pmu.winner ? ' won' : '')+
-        (pmu.winner && p.horse !== pmu.winner ? ' lost' : '')+'">'+
-        '<span class="pmu-bet-name">'+escapeHtml(p.name)+'</span>'+
-        '<span class="pmu-bet-horse '+(palmIsRed(p.horse) ? 'red' : 'black')+'">'+p.horse+'</span>'+
-        '<span class="pmu-bet-amount">'+p.bet+'</span>'+
-      '</div>').join('')+'</div>';
-
   // La dernière carte retournée, en évidence : c'est elle qui vient de faire avancer.
-  const last = pmu.currentCard
-    ? '<div class="pmu-last">'+cardHTML(pmu.currentCard, { width:52, revealed:true })+'</div>'
-    : '<div class="pmu-last pmu-last-empty">Retourne la première carte</div>';
+  const last = '<div class="pmu-last" id="pmu-last">'+
+    (pmu.currentCard
+      ? cardHTML(pmu.currentCard, { width:52, revealed:true })
+      : '<span class="pmu-last-empty">Les as sont au départ…</span>')+
+    '</div>';
 
   body.innerHTML = last +
     '<div class="pmu-track">'+lanes+obstacles+
       '<div class="pmu-finish-label">Arrivée</div>'+
-    '</div>' + bets;
+    '</div>';
 
   if(pmu.winner){
     const winners = pmu.players.filter(p => p.horse === pmu.winner);
@@ -184,21 +252,41 @@ function pmuRenderRace(){
       '<div class="pmu-result">'+
         '<div class="pmu-result-title">'+pmu.winner+' l\'emporte</div>'+
         (winners.length
-          ? '<div class="pmu-result-line win">'+winners.map(p => escapeHtml(p.name)+' distribue '+(p.bet * 2)).join(' · ')+' gorgées</div>'
+          ? '<div class="pmu-result-line win">'+winners.map(p => escapeHtml(p.name)+' distribue '+(p.bet * 2)+' gorgées').join(' · ')+'</div>'
           : '<div class="pmu-result-line">Personne n\'avait misé dessus</div>')+
         (losers.length
-          ? '<div class="pmu-result-line lose">'+losers.map(p => escapeHtml(p.name)+' boit '+p.bet).join(' · ')+'</div>'
+          ? '<div class="pmu-result-line lose">'+losers.map(p => escapeHtml(p.name)+' boit '+p.bet+(p.bet > 1 ? ' gorgées' : ' gorgée')).join(' · ')+'</div>'
           : '')+
       '</div>';
+  }
+  pmuRenderFooter();
+}
+
+// Le pied d'écran suit l'état de la course : rien à faire pendant qu'elle court (sinon
+// abréger si l'on n'a pas la patience), tout à faire une fois qu'elle est finie.
+function pmuRenderFooter(){
+  const footer = document.getElementById('pmu-footer');
+  if(!footer) return;
+  if(pmu.winner){
     footer.innerHTML =
       '<button class="btn btn-primary" onclick="pmuBettingPhase()">Rejouer</button>'+
       '<button class="btn btn-ghost" onclick="pmuQuit()">Quitter</button>';
+  } else if(pmu.running){
+    footer.innerHTML =
+      '<div class="duel-hint">La course est lancée…</div>'+
+      '<button class="btn btn-ghost" onclick="pmuSkipToFinish()">Aller à l\'arrivée</button>';
+  } else if(!pmu.deck.length){
+    footer.innerHTML = '<button class="btn btn-primary" onclick="pmuBettingPhase()">Paquet épuisé — rejouer</button>';
   } else {
-    footer.innerHTML = '<button class="btn btn-primary" onclick="pmuFlipCard()">Retourner une carte</button>';
+    footer.innerHTML = '<div class="duel-hint">Les as prennent le départ…</div>';
   }
 }
 
-function pmuQuit(){ goTo('games-list'); }
+function pmuQuit(){ pmuStopRace(); goTo('games-list'); }
+
+// Sans cela, une course quittée en cours continuait de retourner des cartes et d'écrire
+// dans un écran qu'on avait déjà remplacé.
+registerScreenCleanup('pmu', function(){ pmuStopRace(); });
 
 function pmuFlipCard(){
   if(pmu.deck.length===0 || pmu.winner) return;
@@ -234,5 +322,33 @@ function pmuFlipCard(){
   if(!hadWinner && pmu.winner) Sound.play('win');
 
   pmuUpdateHeader();
-  pmuRenderRace();
+  // Reconstruire toute la piste à chaque carte replaçait les as d'un bond : le
+  // navigateur n'a rien à interpoler entre deux éléments qu'il vient de créer. On met
+  // donc à jour les positions SUR PLACE, et la transition CSS fait enfin voir la
+  // course — les dépassements, les reculs sur obstacle, le sprint final.
+  if(pmu.winner){
+    pmuStopRace();
+    pmuRenderRace();
+    if(window.fireConfetti) window.fireConfetti('big');
+  } else {
+    pmuSyncRace();
+  }
+}
+
+// Met à jour ce qui a bougé, sans toucher à la structure de la piste.
+function pmuSyncRace(){
+  PMU_SUITS.forEach(suit => {
+    const el = document.getElementById('pmu-runner-' + PMU_SLUG[suit]);
+    if(el) el.style.left = ((pmu.horses[suit] / PMU_FINISH) * 100).toFixed(2) + '%';
+  });
+  pmu.obstacles.forEach((o, i) => {
+    const el = document.getElementById('pmu-obs-' + i);
+    if(!el || !o.flipped || el.classList.contains('flipped')) return;
+    el.classList.add('flipped', palmIsRed(o.suit) ? 'red' : 'black');
+    el.innerHTML = '<span>' + o.value + o.suit + '</span>';
+  });
+  const last = document.getElementById('pmu-last');
+  if(last && pmu.currentCard){
+    last.innerHTML = cardHTML(pmu.currentCard, { width:52, revealed:true });
+  }
 }

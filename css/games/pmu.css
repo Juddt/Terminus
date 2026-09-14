@@ -24,7 +24,29 @@
   border:1px solid var(--line);}
 
 .pmu-lane{display:flex; align-items:center; gap:8px;}
-.pmu-lane-suit{width:18px; flex-shrink:0; text-align:center; font-size:15px; color:var(--text-dim);}
+.pmu-lane-head{width:88px; min-width:0; flex-shrink:0; display:flex; align-items:center; gap:5px;}
+.pmu-lane-suit{width:16px; flex-shrink:0; text-align:center; font-size:15px; color:var(--text-dim);}
+
+/* --- QUI COURT POUR QUI -------------------------------------------------------------
+   Les mises vivaient dans une liste séparée sous la piste : pour savoir sur qui on
+   criait, il fallait faire l'aller-retour entre le couloir et la liste. Chaque parieur
+   est écrit contre son as — on suit son cheval sans quitter la piste des yeux. */
+.pmu-lane-backers{display:flex; flex-direction:column; gap:1px; min-width:0; flex:1 1 auto;}
+.pmu-backer{font-size:10px; line-height:1.25; color:var(--text-dim); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis;}
+.pmu-backer i{font-style:normal; font-family:'IBM Plex Mono',monospace; font-size:9px;
+  color:var(--text-faint); margin-left:3px;}
+.pmu-backer.empty{color:var(--text-faint); font-style:italic;}
+.pmu-lane.winner .pmu-backer{color:var(--accent);}
+
+/* Pied d'écran de la course : une annonce, puis le seul raccourci utile. */
+#screen-pmu .game-footer{flex-direction:column; align-items:stretch;}
+#screen-pmu .game-footer .duel-hint{text-align:center; margin-bottom:2px;}
+#screen-pmu .game-footer:has(.btn + .btn){flex-direction:row;}
+
+/* Étape des paris : on sait combien de joueurs ont déjà misé. */
+.pmu-bet-step{font-size:10.5px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--text-faint); margin-bottom:6px;}
 .pmu-lane-suit.red{color:#D8515C;}
 .pmu-lane-suit.dim{color:var(--text-faint); font-size:12px;}
 
@@ -62,18 +84,6 @@
 
 .pmu-finish-label{position:absolute; right:8px; top:-8px; font-size:9px; letter-spacing:1.6px;
   text-transform:uppercase; color:var(--text-faint); background:var(--bg); padding:0 5px;}
-
-/* --- Les paris ----------------------------------------------------------------------- */
-.pmu-bets{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; max-width:330px; margin-top:4px;}
-.pmu-bet{display:flex; align-items:center; gap:6px; padding:5px 10px; border-radius:10px;
-  border:1px solid var(--line); background:rgba(255,255,255,0.035); font-size:12.5px; color:var(--text-dim);}
-.pmu-bet-name{overflow-wrap:anywhere; max-width:90px;}
-.pmu-bet-horse{font-size:13px;}
-.pmu-bet-horse.red{color:#D8515C;}
-.pmu-bet-amount{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-faint);}
-.pmu-bet.won{border-color:var(--accent); color:var(--accent); background:rgba(232,255,61,0.08);}
-.pmu-bet.won .pmu-bet-amount{color:var(--accent);}
-.pmu-bet.lost{opacity:0.5;}
 
 /* --- Résultat ------------------------------------------------------------------------ */
 .pmu-result{display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:6px;}

@@ -32,6 +32,26 @@ function makePlayers(n){
   return arr;
 }
 
+// Chaque type que buildStructuredQueue peut produire, et le stock où renderItem va
+// puiser (voir les branches `type === …` de session-engine.js). Les deux listes doivent
+// rester alignées : c'est ce que vérifie la garde ci-dessous.
+const BAG_SOURCES = {
+  rule:       'getEffectiveRules()',
+  challenge:  'getEffectiveChallenges()',
+  minigame:   'MINIGAMES',
+  vote:       'VOTES',
+  light:      'LIGHT_EVENTS',
+  special:    'SPECIAL_EVENTS',
+  quiz:       'QUIZ',
+  dilemme:    'DILEMMAS',
+  mission:    'MISSIONS',
+  prediction: 'PREDICTIONS',
+  destin:     'DESTINS',
+  barman:     'BARMAN',
+  tribunal:   'TRIBUNAL',
+  roulette:   'ROULETTE',
+};
+
 let totalRuns = 0, errors = 0;
 [10,30,60].forEach(duration=>{
   [2,4,6,9,14].forEach(playerCount=>{
@@ -52,13 +72,15 @@ let totalRuns = 0, errors = 0;
         ctx.state.queueTierWindows = tierWindows;
         queue.forEach((type, idx)=>{
           vm.runInContext(`updateIntensityForIndex(${idx})`, ctx);
-          let item;
-          if(type==='rule') item = vm.runInContext(`drawFromBag('rule', getEffectiveRules())`, ctx);
-          else if(type==='challenge') item = vm.runInContext(`drawFromBag('challenge', getEffectiveChallenges())`, ctx);
-          else if(type==='minigame') item = vm.runInContext(`drawFromBag('minigame', MINIGAMES)`, ctx);
-          else if(type==='vote') item = vm.runInContext(`drawFromBag('vote', VOTES)`, ctx);
-          else if(type==='light') item = vm.runInContext(`drawFromBag('light', LIGHT_EVENTS)`, ctx);
-          else if(type==='special') item = vm.runInContext(`drawFromBag('special', SPECIAL_EVENTS)`, ctx);
+          const source = BAG_SOURCES[type];
+          // Un type sorti de la file sans source connue ici, c'est une famille ajoutée
+          // au moteur sans être ajoutée au test : on le dit, au lieu de le confondre
+          // avec un stock vide. C'est exactement ce qui s'était passé pour les huit
+          // familles ajoutées après coup — le test croyait tester quiz, dilemme,
+          // mission, destin, barman, tribunal, prediction et roulette, et il les
+          // signalait tous comme « undefined ».
+          if(!source) throw new Error('type sans source déclarée dans BAG_SOURCES : '+type);
+          const item = vm.runInContext(`drawFromBag('${type}', ${source})`, ctx);
           if(!item) throw new Error('drawFromBag a renvoyé '+item+' pour le type '+type);
           const players = vm.runInContext(`pickPlayers(${item.n||0})`, ctx);
           if(players.length !== (item.n||0)) throw new Error('pickPlayers a renvoyé '+players.length+' au lieu de '+(item.n||0));
