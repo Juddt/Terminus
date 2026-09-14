@@ -65,7 +65,6 @@
           <span class="resume-card-action">Reprendre le before</span>
           <span class="resume-card-meta" id="resume-banner-text"></span>
         </button>
-        <button class="resume-dismiss" onclick="dismissResumableSession()">Ignorer et repartir de zéro</button>
       </div>
       <div class="home-mark">
         <div class="hero-title">TERMINUS</div>
@@ -207,10 +206,11 @@
     <h2 style="font-size:22px; margin-bottom:4px;">Choisir un jeu</h2>
     <div id="games-filter-wrap" class="games-filter-wrap"></div>
     <div id="games-list-wrap" class="games-scene"></div>
-    <div class="games-nav">
-      <div class="games-nav-btn" onclick="scrollGamesScene(-1)" aria-label="Jeu précédent">←</div>
-      <div class="games-nav-btn" onclick="scrollGamesScene(1)" aria-label="Jeu suivant">→</div>
-    </div>
+    <!-- Position dans la bibliothèque. Les flèches vivaient ici et décalaient la mise
+         en page à chaque changement de jeu ; les pastilles gardent une hauteur fixe et
+         disent d'un coup d'œil où l'on en est. Elles restent cliquables : le balayage
+         n'est jamais le seul moyen de naviguer. -->
+    <div class="games-dots" id="games-dots"></div>
     <button class="games-index-toggle" id="games-index-toggle" onclick="toggleGamesIndex()">Tous les jeux</button>
     <div id="games-index" class="games-index"></div>
   </div>
@@ -505,8 +505,10 @@
   <div id="players-sheet" class="rules-sheet" onclick="closeAddPlayerOverlay()">
     <div class="rules-sheet-panel" onclick="event.stopPropagation()">
       <div class="rules-sheet-grab"></div>
-      <div class="rules-sheet-title">Joueurs</div>
-      <div class="players-sheet-hint" id="players-sheet-hint"></div>
+      <div class="sheet-head">
+        <div class="rules-sheet-title">Joueurs</div>
+        <div class="players-sheet-hint" id="players-sheet-hint"></div>
+      </div>
       <div id="session-players-list" style="margin:14px 0 16px;"></div>
       <div class="add-player-row">
         <input class="name-input" id="add-player-field" placeholder="Prénom du nouveau joueur"

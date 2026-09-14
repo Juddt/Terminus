@@ -376,13 +376,24 @@ function renderSessionPlayersList(){
   wrap.innerHTML = state.players.map((p,i)=>{
     seen[p.name] = (seen[p.name]||0) + 1;
     const suffix = counts[p.name] > 1 ? ' <span class="dup-tag">'+seen[p.name]+'</span>' : '';
-    return '<div class="session-player-row">'+
-      '<span><span class="name-row-dot" style="background:'+p.color+'"></span>'+escapeHtml(p.name)+suffix+'</span>'+
-      (state.players.length > 2 ? '<span class="remove-player-x" onclick="removeSessionPlayer('+i+')">\u2715</span>' : '')+
+    return '<div class="session-player-row" style="--pc:'+p.color+'">'+
+      '<span class="spr-id">'+
+        '<span class="spr-av">'+(p.avatar || '')+'</span>'+
+        '<span class="spr-name">'+escapeHtml(p.name)+suffix+'</span>'+
+      '</span>'+
+      (state.players.length > 2
+        ? '<button class="spr-remove" aria-label="Retirer '+escapeHtml(p.name)+'" '+
+            'onclick="removeSessionPlayer('+i+')">'+
+            '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">'+
+              '<path d="M4 4 L12 12 M12 4 L4 12" stroke="currentColor" stroke-width="1.7" '+
+                'stroke-linecap="round" fill="none"/>'+
+            '</svg>'+
+          '</button>'
+        : '')+
     '</div>';
   }).join('');
   const hint = document.getElementById('players-sheet-hint');
-  if(hint) hint.textContent = state.players.length + ' joueur' + (state.players.length>1?'s':'') + ' \u00b7 la partie est en pause';
+  if(hint) hint.textContent = state.players.length + ' joueur' + (state.players.length>1?'s':'') + ' \u00b7 partie en pause';
 }
 
 function addSessionPlayer(){

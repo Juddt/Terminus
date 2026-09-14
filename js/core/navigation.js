@@ -66,6 +66,8 @@ function renderGamesList(){
     wrap.appendChild(stage);
   });
 
+  renderGamesDots(filtered.length);
+
   // Index compact : retrouver immédiatement un jeu précis sans balayer la scène.
   const index = document.getElementById('games-index');
   if(index){
@@ -79,15 +81,37 @@ function renderGamesList(){
   }
 }
 
-// Fait défiler la scène d'un jeu vers la gauche ou la droite : le balayage tactile n'est
-// jamais le seul moyen de naviguer (cf. accessibilité et usage à une main).
-function scrollGamesScene(dir){
+// Une pastille par jeu de la sélection courante. Elles remplacent les deux flèches, qui
+// occupaient une ligne entière et faisaient bouger la mise en page d'un jeu à l'autre.
+function renderGamesDots(total){
+  const wrap = document.getElementById('games-dots');
+  if(!wrap) return;
+  if(total < 2){ wrap.innerHTML = ''; return; }
+  wrap.innerHTML = Array.from({length: total}, (_, i) =>
+    '<button class="games-dot'+(i === 0 ? ' current' : '')+'" data-i="'+i+'" '+
+      'aria-label="Jeu '+(i+1)+' sur '+total+'" onclick="goToGameIndex('+i+')"></button>'
+  ).join('');
+}
+
+// Le balayage tactile n'est jamais le seul moyen de naviguer : on peut toucher une
+// pastille pour sauter directement à un jeu.
+function goToGameIndex(i){
   const scene = document.getElementById('games-list-wrap');
-  if(!scene) return;
-  const card = scene.querySelector('.game-stage');
+  const card = scene && scene.querySelector('.game-stage');
   if(!card) return;
-  const step = card.offsetWidth + 16; // largeur d'une carte + l'écart défini en CSS
-  scene.scrollBy({ left: dir * step, behavior:'smooth' });
+  scene.scrollTo({ left: i * card.offsetWidth, behavior:'smooth' });
+}
+
+// La pastille active suit le défilement réel — y compris un balayage à mi-chemin, qui
+// se recale sur le jeu le plus proche.
+function syncGamesDots(){
+  const scene = document.getElementById('games-list-wrap');
+  const wrap = document.getElementById('games-dots');
+  if(!scene || !wrap || !wrap.children.length) return;
+  const card = scene.querySelector('.game-stage');
+  if(!card || !card.offsetWidth) return;
+  const idx = Math.round(scene.scrollLeft / card.offsetWidth);
+  [...wrap.children].forEach((d, i) => d.classList.toggle('current', i === idx));
 }
 
 function toggleGamesIndex(){
@@ -120,6 +144,13 @@ function openGamesList(){
     filterWrap.dataset.built = '1';
   }
   setGamesListFilter(gamesListCategoryFilter);
+  // Un seul écouteur, posé une fois pour toutes : la scène est reconstruite à chaque
+  // changement de filtre, pas son conteneur.
+  const scene = document.getElementById('games-list-wrap');
+  if(scene && !scene.dataset.dotsBound){
+    scene.addEventListener('scroll', syncGamesDots, { passive:true });
+    scene.dataset.dotsBound = '1';
+  }
   goTo('games-list');
 }
 

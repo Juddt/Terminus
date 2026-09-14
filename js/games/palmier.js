@@ -81,6 +81,7 @@ function palmPlayer(){ return palm.players[palm.currentIdx % palm.players.length
 function palmTreeHTML(falling){
   const cards = palm.stack;
   let h = '<div class="palm-scene'+(falling ? ' falling' : '')+'">'+
+      '<span class="palm-glow" aria-hidden="true"></span>'+
       '<div class="palm-bottle">'+
         '<div class="palm-bottle-neck"></div>'+
         '<div class="palm-bottle-body"><span class="palm-bottle-shine"></span></div>'+
@@ -100,7 +101,7 @@ function palmTreeHTML(falling){
         '<span class="psc-val">'+c.value+'</span><span class="psc-suit">'+c.suit+'</span>'+
       '</div>';
   });
-  h += '<div class="palm-height">'+cards.length+'</div></div>';
+  h += '</div>';
   return h;
 }
 
@@ -274,11 +275,42 @@ function palmCardPlaced(){
 
   body.innerHTML =
     '<div class="palm-verdict win">Posée</div>'+
-    '<div class="palm-height-line">'+palm.palmHeight+' carte'+(palm.palmHeight > 1 ? 's' : '')+' en équilibre</div>'+
     palmTreeHTML(false);
 
+  palmMilestone(palm.palmHeight);
   palm.currentIdx++;
   footer.innerHTML = '<button class="btn btn-primary" onclick="palmNextTurn()">Suivant</button>';
+}
+
+/* --- LES PALIERS -------------------------------------------------------------------
+   Tous les cinq étages, la tour manifeste sa tension — et de plus en plus fort :
+     5  → un halo court, la tour se signale
+     10 → le halo s'installe, la tour tremble légèrement
+     15 → flash, vibration nette, la scène s'incline
+     20+ → tout à la fois, au maximum
+   L'effet est posé sur la scène (jamais sur le texte ni les commandes), dure moins
+   d'une seconde et se retire tout seul : rien ne clignote en continu, rien ne gêne la
+   lecture de la consigne suivante. */
+const PALM_TIERS = [
+  { at:20, cls:'palm-t4', ms:1100, buzz:[40,60,40,60,120], fx:'big'  },
+  { at:15, cls:'palm-t3', ms:900,  buzz:[30,50,90],        fx:'small'},
+  { at:10, cls:'palm-t2', ms:760,  buzz:[25,45,60],        fx:null   },
+  { at:5,  cls:'palm-t1', ms:620,  buzz:[35],              fx:null   },
+];
+
+function palmMilestone(n){
+  if(n < 5 || n % 5 !== 0) return;
+  const tier = PALM_TIERS.find(t => n >= t.at);
+  if(!tier) return;
+  const scene = document.querySelector('.palm-scene');
+  if(scene){
+    scene.classList.add('palm-tier', tier.cls);
+    // Retiré après coup : sans cela l'animation ne rejouerait pas au palier suivant.
+    setTimeout(()=>{ scene.classList.remove('palm-tier', tier.cls); }, tier.ms);
+  }
+  if(tier.fx && window.fireConfetti) window.fireConfetti(tier.fx);
+  if(navigator.vibrate) navigator.vibrate(tier.buzz);
+  Sound.play(n >= 15 ? 'win' : 'tick');
 }
 
 function palmCollapse(){

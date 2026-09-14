@@ -184,6 +184,9 @@
    les fait rayonner au lieu de s'empiler, et qui garantit qu'aucune n'en recouvre une
    autre quelle que soit leur taille. */
 .poster-ring{position:relative; width:186px; height:186px;}
+.poster-ring .ring-face{z-index:2;}
+.poster-ring .ring-card .pc-back, .poster-ring .ring-card .pc-face{
+  box-shadow:0 4px 12px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07) inset;}
 .poster-ring .ring-card{position:absolute; left:50%; top:50%;
   margin:calc(var(--pc-w) * 0.7 * -1) 0 0 calc(var(--pc-w) * -0.5);}
 /* Le centre : la lumière de la table, pas un objet. */
@@ -239,29 +242,46 @@
 
 .game-stage-body{padding:2px 0 0; width:100%;}
 .game-stage .game-name{font-family:'Anton', sans-serif; font-size:28px; letter-spacing:0.4px; color:var(--text); line-height:1.04; margin-bottom:6px;}
-.game-stage .game-principle{font-size:13.5px; color:var(--text-dim); line-height:1.4; margin-bottom:10px; max-width:300px; margin-left:auto; margin-right:auto;}
+.game-stage .game-principle{font-size:13.5px; color:var(--text-dim); line-height:1.4; margin-bottom:10px; max-width:300px; margin-left:auto; margin-right:auto;
+  min-height:calc(1.4em * 2); display:flex; align-items:center; justify-content:center;}
 .game-stage-meta{display:flex; align-items:center; justify-content:center; gap:7px; margin-bottom:11px; flex-wrap:wrap;}
 .game-stage-meta span{font-size:11px; letter-spacing:0.4px; color:var(--text-faint); background:rgba(255,255,255,0.05); border:1px solid var(--line); border-radius:10px; padding:6px 12px;}
 .game-stage .btn{padding:14px; max-width:300px; margin:0 auto;}
 
 /* Commandes stables : elles ne bougent pas d'un jeu à l'autre. */
-.games-nav{display:flex; align-items:center; justify-content:center; gap:16px; margin:12px 0 12px;}
-.games-nav-btn{width:52px; height:42px; flex-shrink:0; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:19px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
-.games-nav-btn{box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 6px 16px rgba(0,0,0,0.4);}
-.games-nav-btn:active{transform:scale(0.94);}
+/* --- POSITION DANS LA BIBLIOTHÈQUE --------------------------------------------------
+   Les deux flèches occupaient une ligne entière sous la fiche et, surtout, faisaient
+   bouger la mise en page d'un jeu à l'autre. Les pastilles ont une hauteur fixe, ne
+   dépendent d'aucun contenu, disent où l'on en est, et restent touchables pour sauter
+   directement à un jeu. La zone tactile fait 26 px de haut, le point 6 px. */
+.games-dots{display:flex; align-items:center; justify-content:center; gap:5px;
+  height:26px; margin:10px 0 12px;}
+.games-dot{width:16px; height:26px; padding:0; border:none; background:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;}
+.games-dot::before{content:''; width:6px; height:6px; border-radius:50%;
+  background:rgba(255,248,237,0.22);
+  transition:width .22s cubic-bezier(.22,1,.36,1), background .22s ease;}
+.games-dot.current{width:26px;}
+.games-dot.current::before{width:18px; border-radius:3px; background:var(--accent);}
 
 /* Index compact "Tous les jeux" */
 .games-index-toggle{width:100%; background:rgba(255,255,255,0.035); border:1px solid var(--line); border-radius:15px; color:var(--text-dim); font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; padding:12px; cursor:pointer; font-family:'Work Sans',sans-serif;}
 /* Ajout d'un joueur en cours de partie : le champ et son bouton sur une seule ligne.
    Le bouton est indispensable — sur un téléphone, le clavier n'affiche pas toujours une
    touche « Entrée », et la saisie ne doit pas dépendre de ça. */
-.add-player-row{display:flex; gap:8px; align-items:stretch;}
-.add-player-row .name-input{flex:1 1 auto; min-width:0; margin:0;}
-.add-player-btn{flex:0 0 auto; padding:0 16px; border-radius:13px; cursor:pointer;
+/* Le champ et son bouton partagent la même hauteur et les mêmes angles : c'est une
+   seule commande en deux morceaux, pas deux éléments posés côte à côte. */
+.add-player-row{display:flex; gap:8px; align-items:stretch; margin-top:14px;}
+.add-player-row .name-input{flex:1 1 auto; min-width:0; margin:0; height:46px; padding:0 15px;
+  border-radius:14px; background:rgba(255,255,255,0.04); font-size:14.5px;}
+.add-player-btn{flex:0 0 auto; height:46px; padding:0 18px; border-radius:14px; cursor:pointer;
   border:1px solid transparent; background:var(--accent); color:var(--ink-on-light);
-  font-family:'Work Sans',sans-serif; font-size:13.5px; font-weight:600;
+  font-family:'Work Sans',sans-serif; font-size:13.5px; font-weight:600; letter-spacing:0.2px;
+  box-shadow:0 1px 0 rgba(255,255,255,0.5) inset, 0 6px 16px rgba(232,255,61,0.18);
   transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
-.add-player-btn:active{transform:scale(0.95);}
+.add-player-btn:active{transform:scale(0.96);}
+/* Reprendre : l'action de sortie, pleine largeur, détachée de la saisie. */
+#players-sheet .btn-primary{margin-top:14px; padding:16px; border-radius:16px; font-size:15px;}
 
 .games-index{display:none; margin-top:12px;}
 .games-index.open{display:block;}
@@ -791,8 +811,6 @@
 .mode-toggle-btn.selected{border-color:var(--accent); color:var(--accent); background:var(--surface-2);}
 .mode-toggle-btn[data-mode="chill"].selected{border-color:var(--sage); color:var(--sage);}
 
-.session-player-row{display:flex; align-items:center; justify-content:space-between; padding:10px 4px; border-bottom:1px solid var(--line); font-size:14px;}
-.remove-player-x{color:var(--text-faint); cursor:pointer; padding:4px 8px;}
 .end-actions-row{display:flex; gap:10px;}
 .end-actions-row .btn{flex:1; width:auto !important;}
 
@@ -885,10 +903,33 @@
 .dup-tag{display:inline-flex; align-items:center; justify-content:center; min-width:17px; height:17px;
   border-radius:20px; background:var(--surface-2); color:var(--text-dim); font-size:10px;
   font-family:'IBM Plex Mono',monospace; margin-left:5px; padding:0 4px;}
+/* --- LE PANNEAU DES JOUEURS ---------------------------------------------------------
+   Une liste de lignes séparées par des filets, avec une puce de 9 px et une croix nue :
+   ça faisait tableau, pas panneau. Chaque joueur devient une ligne posée sur sa propre
+   surface, avec la pastille qu'il porte déjà à la saisie des prénoms et en jeu. Le
+   retrait est un bouton rond discret qui ne s'allume qu'au contact — il ne doit jamais
+   attirer l'œil autant que le prénom qu'il efface. */
+.sheet-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  margin-bottom:14px;}
+.sheet-head .rules-sheet-title{margin-bottom:0;}
+
+#session-players-list{display:flex; flex-direction:column; gap:7px;}
 .session-player-row{display:flex; align-items:center; justify-content:space-between; gap:10px;
-  padding:9px 2px; border-bottom:1px solid var(--line); font-size:14px;}
-.session-player-row > span:first-child{display:flex; align-items:center; gap:9px; min-width:0; overflow-wrap:anywhere;}
-.remove-player-x{color:var(--text-faint); cursor:pointer; padding:6px 10px; flex-shrink:0;}
+  padding:8px 8px 8px 9px; border-radius:14px; font-size:14px;
+  background:linear-gradient(150deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018));
+  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;}
+.spr-id{display:flex; align-items:center; gap:10px; min-width:0;}
+.spr-av{flex:0 0 auto; width:30px; height:30px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:15px; line-height:1;
+  background:color-mix(in srgb, var(--pc) 26%, #14140F);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--pc) 45%, transparent) inset;}
+.spr-name{min-width:0; overflow-wrap:anywhere; font-weight:500; letter-spacing:0.1px;}
+.spr-remove{flex:0 0 auto; width:28px; height:28px; border-radius:50%; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; padding:0;
+  border:1px solid transparent; background:rgba(255,255,255,0.05); color:var(--text-faint);
+  transition:background .15s ease, color .15s ease, transform .12s cubic-bezier(.34,1.56,.64,1);}
+.spr-remove:hover{background:rgba(255,59,92,0.16); color:var(--clay);}
+.spr-remove:active{transform:scale(0.88); background:rgba(255,59,92,0.22); color:var(--clay);}
 
 /* --- PAGE DE CONFIGURATION UNIQUE -------------------------------------------------
    Un seul écran : mode, durée, joueurs, prénoms, action. Pas de grosses cartes autour

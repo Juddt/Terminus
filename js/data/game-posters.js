@@ -140,18 +140,23 @@ const GAME_POSTERS = {
   palmier: '<div class="poster-ring">'+
       '<span class="ring-core" aria-hidden="true"></span>'+
       (function(){
-        const FACES = { 0:['A','\u2660'], 4:['7','\u2665'], 8:['R','\u2663'], 12:['4','\u2666'] };
+        // Dix cartes seulement, mais grandes : à seize, chacune tombait à 30 px et le
+        // cercle virait à la rosace décorative où l'on ne distinguait plus une carte.
+        // Une sur deux est retournée face visible, en alternance, pour qu'on lise tout
+        // de suite de quoi le cercle est fait.
+        const FACES = [['A','\u2660'], null, ['R','\u2665'], null, ['7','\u2663'],
+                       null, ['D','\u2666'], null, ['10','\u2660'], null];
         let out = '';
-        for(let i = 0; i < 16; i++){
-          const angle = i * 22.5;
+        for(let i = 0; i < 10; i++){
+          const angle = i * 36;
           const face = FACES[i];
-          // Chaque carte est tournée vers l'extérieur puis poussée sur le cercle : elles
-          // rayonnent au lieu de s'empiler, et aucune n'en recouvre une autre.
-          const pos = 'transform:rotate('+angle+'deg) translateY(-66px);';
+          // Tournée vers l'extérieur, puis poussée sur le cercle : elles rayonnent au
+          // lieu de s'empiler, et aucune n'en recouvre une autre.
+          const pos = 'transform:rotate('+angle+'deg) translateY(-58px);';
           if(face){
-            out += posterCard(face[0], face[1], '--pc-w:30px;'+pos, 'ring-card');
+            out += posterCard(face[0], face[1], '--pc-w:46px;'+pos, 'ring-card ring-face');
           } else {
-            out += '<div class="pc pc-black ring-card" style="--pc-w:30px;'+pos+'">'+
+            out += '<div class="pc pc-black ring-card" style="--pc-w:46px;'+pos+'">'+
                      '<div class="pc-inner"><div class="pc-back"></div></div>'+
                    '</div>';
           }
