@@ -117,8 +117,8 @@ function cibleRenderTarget(){
   const footer = document.getElementById('cible-footer');
   cible.busy = false;
   body.innerHTML =
-    '<div class="cible-aim">'+escapeHtml(ciblePlayer())+', vise une carte</div>'+
-    '<div class="cible-legend">Plus tu vises le centre, plus la question est dure</div>'+
+    '<div class="cible-aim">'+escapeHtml(ciblePlayer())+'</div>'+
+    '<div class="cible-legend">Vise une carte — plus c\'est au centre, plus la question est dure</div>'+
     cibleBoardHTML(null)+
     (cible.sipPot > 0
       ? '<div class="cible-pot"><b>'+cible.sipPot+'</b> gorgée'+(cible.sipPot > 1 ? 's' : '')+' en jeu</div>'
@@ -217,7 +217,7 @@ function cibleGuess(answer){
   } else {
     const total = cible.sipPot + card.sips;
     main = 'Manqué';
-    sub = escapeHtml(ciblePlayer())+' boit '+total+' gorgée'+(total > 1 ? 's' : '');
+    sub = 'Tu bois '+total+' gorgée'+(total > 1 ? 's' : '');
     cible.sipPot = 0;
     Sound.play('fail');
     if(navigator.vibrate) navigator.vibrate([90,50,90]);
@@ -226,6 +226,7 @@ function cibleGuess(answer){
   const body = document.getElementById('cible-body');
   const footer = document.getElementById('cible-footer');
   body.innerHTML =
+    '<div class="cible-aim">'+escapeHtml(ciblePlayer())+'</div>'+
     '<div class="cible-impact-card">'+cardHTML(card, { width:76, revealed:true })+'</div>'+
     '<div class="cible-outcome '+(correct ? 'win' : 'lose')+'">'+main+'</div>'+
     '<div class="cible-outcome-sub">'+sub+'</div>'+

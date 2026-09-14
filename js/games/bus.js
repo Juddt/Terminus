@@ -274,7 +274,8 @@ function busFlipRideCard(){
     creatorsGlasses++;
     if(window.fireConfetti) window.fireConfetti('big');
     body.innerHTML =
-      '<div class="bus-free">'+escapeHtml(bus.busPlayer)+' descend du bus</div>'+
+      '<div class="bus-who">'+escapeHtml(bus.busPlayer)+'</div>'+
+      '<div class="bus-free">descend du bus</div>'+
       busCorridorHTML(5)+
       '<div class="bus-corridor-hint">Après '+(bus.busAttempts + 1)+' tentative'+(bus.busAttempts > 0 ? 's' : '')+'</div>';
     bus.busy = false;

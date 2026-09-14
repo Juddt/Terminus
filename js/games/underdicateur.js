@@ -457,7 +457,7 @@ function undAfterElimination(idx){
     (p.dict ? '<div class="und-dict-tag">C&rsquo;était aussi le Dictateur.</div>' : '')+
     '<div class="und-drink">'+(wrong
       ? 'Mauvaise pioche. Tous les Citoyens boivent 1 gorgée.'
-      : 'Bien vu. '+p.name+' boit 2 gorgées.')+'</div>';
+      : 'Bien vu — 2 gorgées pour lui.')+'</div>';
   undFeedback(wrong ? 'fail' : 'success', wrong ? [120] : [40,40,40]);
 
   const win = undCheckWin();

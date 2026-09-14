@@ -140,7 +140,8 @@ function purpleGuess(choice){
   const cardW = call.cards >= 6 ? 44 : (call.cards >= 4 ? 58 : 70);
 
   body.innerHTML =
-    '<div class="pur-announce">'+escapeHtml(purplePlayer())+' annonce <b>'+call.label+'</b></div>'+
+    '<div class="pur-who">'+escapeHtml(purplePlayer())+'</div>'+
+    '<div class="pur-announce">annonce <b>'+call.label+'</b></div>'+
     '<div class="pc-row" id="pur-draw">'+
       drawn.map((c, i) => cardHTML(c, { width:cardW, index:i, deal:true, id:'pur-card-'+i })).join('')+
     '</div>'+
@@ -181,7 +182,7 @@ function purpleResolve(choice, drawn, correct){
   } else {
     const total = purple.sipPot + call.cards;
     main = 'Perdu';
-    sub = escapeHtml(purplePlayer())+' boit '+total+' gorgée'+(total > 1 ? 's' : '');
+    sub = 'Tu bois '+total+' gorgée'+(total > 1 ? 's' : '');
     purple.sipPot = 0;
     purple.potCards = [];
     Sound.play('fail');
