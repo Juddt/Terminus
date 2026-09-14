@@ -57,8 +57,7 @@ function purplePlayer(){ return purple.players[purple.currentIdx % purple.player
 function purpleUpdateHeader(){
   const el = document.getElementById('purple-header');
   if(!el) return;
-  el.innerHTML = '<div class="badge"><span class="bv">'+purple.deck.length+'</span> cartes</div>'+
-    (purple.sipPot > 0 ? '<div class="badge">Cagnotte <span class="bv">'+purple.sipPot+'</span></div>' : '');
+  el.innerHTML = (purple.sipPot > 0 ? '<div class="badge">Cagnotte <span class="bv">'+purple.sipPot+'</span></div>' : '');
 }
 
 // --- Le tour ------------------------------------------------------------------------
@@ -89,15 +88,28 @@ function purpleShowTurn(){
     '</div>'+
     '<div class="pur-calls">'+
       ['double','triple'].map(k => purpleCallBtn(k)).join('')+
-    '</div>';
+    '</div>'+
+    purpleLegendHTML();
 }
 
 function purpleCallBtn(key){
   const c = PURPLE_CALLS[key];
   return '<button class="pur-call pur-call-'+key+'" onclick="purpleGuess(\''+key+'\')">'+
+      '<span class="pur-call-stake">'+c.cards+'</span>'+
       '<span class="pur-call-name">'+c.label+'</span>'+
-      '<span class="pur-call-hint">'+c.hint+'</span>'+
     '</button>';
+}
+
+// La légende : ce que veut dire chaque annonce. Sous les boutons, en retrait — on la
+// consulte au premier tour, plus après.
+function purpleLegendHTML(){
+  return '<div class="pur-legend">'+
+      Object.keys(PURPLE_CALLS).map(k =>
+        '<span class="pur-legend-row">'+
+          '<b>'+PURPLE_CALLS[k].label+'</b>'+PURPLE_CALLS[k].hint+
+        '</span>').join('')+
+      '<span class="pur-legend-note">Le chiffre sur le bouton = les gorgées en jeu.</span>'+
+    '</div>';
 }
 
 // La cagnotte n'est pas qu'un nombre : ce sont les cartes déjà arrachées au paquet,

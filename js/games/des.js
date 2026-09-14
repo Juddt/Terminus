@@ -144,6 +144,7 @@ function desRenderBoard(opts){
     '<div class="duel-seam">'+
       '<div class="duel-seam-line"></div>'+
       '<div class="duel-seam-mark">'+(o.seam || '&times;')+'</div>'+
+      '<div class="duel-seam-note" id="duel-seam-note">'+(o.note || '')+'</div>'+
       '<div class="duel-seam-line"></div>'+
     '</div>'+
     half(1);
@@ -161,21 +162,25 @@ function desRenderBoard(opts){
 function desRenderFooter(phase){
   const footer = document.getElementById('des-footer');
   if(!footer) return;
-  if(phase === 'rolling' || phase === 'tie'){
-    // Pendant le lancer, aucune action : le verrou est aussi visuel, pas seulement dans
-    // le code — on ne propose pas un bouton qui ne ferait rien.
-    footer.innerHTML = '<div class="duel-hint">'+
-      (phase === 'tie' ? 'Égalité — on relance' : 'Les dés roulent…')+'</div>';
-    return;
-  }
-  const label = phase === 'result' ? 'Relancer' : 'Lancer les dés';
+  const enCours = (phase === 'rolling' || phase === 'tie');
+  const label = enCours
+    ? (phase === 'tie' ? 'Double — on relance' : 'Les dés roulent…')
+    : (phase === 'result' ? 'Relancer les dés' : 'Lancer les dés');
   footer.innerHTML =
     '<div class="footer-main">'+
-      '<button class="ctrl ctrl-primary" onclick="desRoll()">'+label+'</button>'+
+      '<button class="ctrl ctrl-primary'+(enCours ? ' is-waiting' : '')+'" '+
+        (enCours ? 'disabled' : 'onclick="desRoll()"')+'>'+label+'</button>'+
     '</div>'+
     '<div class="footer-main">'+
       '<button class="ctrl" onclick="desQuit()">Quitter</button>'+
     '</div>';
+}
+
+// Message posé dans la couture centrale, entre les deux dés : c'est là que se joue la
+// comparaison, donc là qu'on explique ce qui vient de se passer.
+function desSetSeamNote(text){
+  const el = document.getElementById('duel-seam-note');
+  if(el) el.textContent = text;
 }
 
 // --- Le lancer -----------------------------------------------------------------------
@@ -191,7 +196,7 @@ function desRoll(){
   Sound.play('dice');
 
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const duration = reduced ? 120 : 720;
+  const duration = reduced ? 120 : 1050;
 
   [0,1].forEach(side=>{
     const die = document.getElementById('die-' + side);
@@ -203,7 +208,7 @@ function desRoll(){
     }
     if(stage) stage.classList.add('tossing');
     // Un nombre de tours différent par dé : les deux ne retombent pas en miroir.
-    const spins = side === 0 ? 2 : 3;
+    const spins = side === 0 ? 3 : 4;
     // Le navigateur doit voir l'état de départ avant la nouvelle valeur, sinon il
     // n'interpole pas et le dé saute directement sur sa face.
     requestAnimationFrame(()=>{ die.style.transform = desFaceTransform(des.values[side], spins); });
@@ -226,9 +231,11 @@ function desResolve(){
     desRenderBoard({ phase:'tie', showValues:true, seam:'=' });
     if(navigator.vibrate) navigator.vibrate([35, 45, 35]);
     Sound.play('tick');
-    // La relance est automatique (c'est la règle), mais le verrou reste posé pendant
-    // l'attente : un appui pendant ce délai ne déclenche pas un second lancer.
-    desLater(()=>{ des.rolling = false; desRoll(); }, 1100);
+    // La relance est automatique (c'est la règle) : on l'annonce en clair, sinon on ne
+    // comprend pas pourquoi les dés repartent tout seuls. Le verrou reste posé pendant
+    // l'attente — un appui ne déclenche pas un second lancer.
+    desSetSeamNote('Même face des deux côtés : personne ne boit, on relance');
+    desLater(()=>{ des.rolling = false; desRoll(); }, 1500);
     return;
   }
 

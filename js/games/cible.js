@@ -82,9 +82,7 @@ function cibleNewTarget(){
 function cibleUpdateHeader(){
   const el = document.getElementById('cible-header');
   if(!el) return;
-  el.innerHTML = '<div class="badge">Joueur <span class="bv">'+(cible.currentIdx + 1)+'</span>/'+cible.players.length+'</div>'+
-    (cible.sipPot > 0 ? '<div class="badge">Cagnotte <span class="bv">'+cible.sipPot+'</span></div>' : '')+
-    (cible.direction < 0 ? '<div class="badge">Sens inversé</div>' : '');
+  el.innerHTML = (cible.direction < 0 ? '<div class="badge">Sens inversé</div>' : '');
 }
 
 // --- LE PLATEAU ---------------------------------------------------------------------
@@ -112,6 +110,14 @@ function cibleBoardHTML(highlightIdx){
   return h + '</div>';
 }
 
+function ciblePotHTML(){
+  const n = cible.sipPot;
+  return '<div class="cible-pot'+(n > 0 ? ' live' : '')+'">'+
+      '<div class="cible-pot-value">'+n+'</div>'+
+      '<div class="cible-pot-label">gorgée'+(n > 1 ? 's' : '')+' dans la cagnotte</div>'+
+    '</div>';
+}
+
 function cibleRenderTarget(){
   const body = document.getElementById('cible-body');
   const footer = document.getElementById('cible-footer');
@@ -119,10 +125,8 @@ function cibleRenderTarget(){
   body.innerHTML =
     '<div class="cible-aim">'+escapeHtml(ciblePlayer())+'</div>'+
     '<div class="cible-legend">Vise une carte — plus c\'est au centre, plus la question est dure</div>'+
-    cibleBoardHTML(null)+
-    (cible.sipPot > 0
-      ? '<div class="cible-pot"><b>'+cible.sipPot+'</b> gorgée'+(cible.sipPot > 1 ? 's' : '')+' en jeu</div>'
-      : '');
+    ciblePotHTML()+
+    cibleBoardHTML(null);
   footer.innerHTML = '<button class="btn btn-ghost" onclick="cibleNewTarget()">Nouvelle cible</button>';
 }
 

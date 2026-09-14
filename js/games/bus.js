@@ -33,7 +33,7 @@ const BUS_STEPS = [
   { q:'Rouge ou noir ?',        opts:['Rouge','Noir'],                 sips:1 },
   { q:'Plus haut ou plus bas ?', opts:['Plus haut','Plus bas'],        sips:2 },
   { q:'Dedans ou dehors ?',      opts:['Dedans','Dehors'],             sips:3 },
-  { q:'Et la couleur ?',         opts:['♥','♦','♣','♠'],               sips:4 }
+  { q:'Et la famille ?',         opts:['♥','♦','♣','♠'],               sips:4 }
 ];
 
 function busSetup(){
@@ -81,7 +81,6 @@ function busLadderHTML(activeIdx){
         '<div class="bus-step-card">'+slot+'</div>'+
         '<div class="bus-step-text">'+
           '<div class="bus-step-q">'+step.q+'</div>'+
-          '<div class="bus-step-sips">'+step.sips+' gorgée'+(step.sips > 1 ? 's' : '')+' si tu te trompes</div>'+
         '</div>'+
       '</div>';
   }).join('') + '</div>';
@@ -241,7 +240,7 @@ function busShowRideCard(){
     '<div class="bus-who">'+escapeHtml(bus.busPlayer)+'</div>'+
     busCorridorHTML(bus.busIdx)+
     '<div class="bus-corridor-hint">Case '+(bus.busIdx + 1)+' sur 5 — une figure et tu repars du début</div>';
-  footer.innerHTML = '<button class="btn btn-primary" onclick="busFlipRideCard()">Retourner</button>';
+  footer.innerHTML = '<button class="btn btn-primary" onclick="busFlipRideCard()">Retourner la carte suivante</button>';
 }
 
 function busFlipRideCard(){
@@ -264,7 +263,7 @@ function busFlipRideCard(){
     bus.busAttempts++;
     busDealRide();
     bus.busy = false;
-    footer.innerHTML = '<button class="btn btn-primary" onclick="busShowRideCard()">Recommencer</button>';
+    footer.innerHTML = '<button class="btn btn-primary" onclick="busNextRideCard()">Recommencer</button>';
     return;
   }
 
@@ -291,7 +290,15 @@ function busFlipRideCard(){
     busCorridorHTML(revealed)+
     '<div class="bus-verdict win">Passé</div>';
   bus.busy = false;
-  footer.innerHTML = '<button class="btn btn-primary" onclick="busShowRideCard()">Carte suivante</button>';
+  footer.innerHTML = '<button class="btn btn-primary" onclick="busNextRideCard()">Retourner la carte suivante</button>';
+}
+
+// Une seule action pour avancer ET révéler : on replace le couloir sur la case courante,
+// puis on retourne dans la foulée. Auparavant il fallait appuyer sur « Carte suivante »
+// puis sur « Retourner » — deux gestes pour un seul événement de jeu.
+function busNextRideCard(){
+  busShowRideCard();
+  busFlipRideCard();
 }
 
 // --- Cycle de vie -------------------------------------------------------------------

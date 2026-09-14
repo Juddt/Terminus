@@ -109,9 +109,9 @@ function pmuStartRace(){
    clics, où l'on regardait son pouce au lieu de la piste. Elle se déroule maintenant
    d'elle-même, et le rythme fait la tension — les cartes tombent vite au milieu du
    peloton, puis la cadence se casse dès qu'un as approche de l'arrivée.             */
-const PMU_TICK_FAST = 560;   // rythme de croisière
-const PMU_TICK_NEAR = 820;   // un as à deux cases de l'arrivée
-const PMU_TICK_EDGE = 1150;  // un as sur le point de gagner
+const PMU_TICK_FAST = 780;   // rythme de croisière
+const PMU_TICK_NEAR = 1080;  // un as à deux cases de l'arrivée
+const PMU_TICK_EDGE = 1500;  // un as sur le point de gagner
 
 function pmuRaceDelay(){
   const lead = PMU_SUITS.reduce((m, s) => Math.max(m, pmu.horses[s]), 0);
@@ -174,12 +174,9 @@ const PMU_OBSTACLES = 7;     // un obstacle par case intermédiaire
 function pmuUpdateHeader(){
   const el = document.getElementById('pmu-header');
   if(!el) return;
-  const lead = PMU_SUITS.reduce((a, s) => pmu.horses[s] > pmu.horses[a] ? s : a, PMU_SUITS[0]);
-  const ex = PMU_SUITS.filter(s => pmu.horses[s] === pmu.horses[lead]).length > 1;
   el.innerHTML = pmu.winner
     ? '<div class="badge">Arrivée <span class="bv">'+pmu.winner+'</span></div>'
-    : '<div class="badge">'+(ex ? 'À égalité' : 'En tête <span class="bv">'+lead+'</span>')+'</div>'+
-      '<div class="badge"><span class="bv">'+pmu.horses[lead]+'</span>/'+PMU_FINISH+'</div>';
+    : '';
 }
 
 function pmuRenderRace(){
@@ -194,10 +191,11 @@ function pmuRenderRace(){
     const red = palmIsRed(suit);
     const isWinner = pmu.winner === suit;
     const backers = pmu.players.filter(p => p.horse === suit);
-    const names = backers.length
-      ? backers.map(p => '<span class="pmu-backer">'+escapeHtml(p.name)+
-          '<i>'+p.bet+'</i></span>').join('')
-      : '<span class="pmu-backer empty">personne</span>';
+    const names = backers.map(p =>
+      '<span class="pmu-backer">'+
+        '<span class="pmu-backer-name">'+escapeHtml(p.name)+'</span>'+
+        '<span class="pmu-backer-bet">🍺'+p.bet+'</span>'+
+      '</span>').join('');
     return '<div class="pmu-lane'+(isWinner ? ' winner' : '')+'" id="pmu-lane-'+PMU_SLUG[suit]+'">'+
         '<div class="pmu-lane-head">'+
           '<div class="pmu-lane-suit '+(red ? 'red' : 'black')+'">'+suit+'</div>'+

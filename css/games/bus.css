@@ -32,7 +32,6 @@
 
 .bus-step-text{flex:1; min-width:0; text-align:left;}
 .bus-step-q{font-family:'Anton',sans-serif; font-size:16px; line-height:1.1; color:var(--text);}
-.bus-step-sips{font-size:11px; color:var(--text-faint); margin-top:2px;}
 .bus-step.active .bus-step-q{color:var(--accent);}
 
 /* Quatre réponses (les couleurs) : une grille, pas quatre boutons écrasés sur une ligne. */
