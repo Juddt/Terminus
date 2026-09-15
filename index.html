@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Soirée</title>
+<title>Terminus</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0D0D0D">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -16,7 +16,7 @@
      dans une fenêtre Safari avec sa barre d'adresse, au lieu du plein écran. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Soirée">
+<meta name="apple-mobile-web-app-title" content="Terminus">
 <!-- Polices auto-hébergées (voir css/fonts.css) : une PWA doit garder sa typographie
      hors connexion, et les requêtes vers fonts.googleapis.com échouaient hors ligne. -->
 <link rel="preload" href="fonts/work-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -33,6 +33,7 @@
 <link rel="stylesheet" href="css/games/pof.css">
 <link rel="stylesheet" href="css/games/underdicateur.css">
 <link rel="stylesheet" href="css/games/pilliers.css">
+<link rel="stylesheet" href="css/cocktails.css">
 </head>
 <body>
 <div id="frame">
@@ -83,6 +84,12 @@
           <span class="entry-glint" aria-hidden="true"></span>
           <span class="entry-name">Choisir un jeu</span>
           <span class="entry-tag">Neuf classiques. Tu vises, tu lances, ça pique.</span>
+        </button>
+        <!-- Bonus discret : n'aide en rien à jouer, donc plus petit et plus bas que les
+             deux vraies entrées. -->
+        <button class="entry-cocktails" onclick="openCocktailsScreen()">
+          <span class="entry-cocktails-glass">🍸</span>
+          <span>La Grotte à Cocktails</span>
         </button>
         <div class="home-links">
           <span onclick="openCustomScreen()">Mes ajouts</span>
@@ -486,6 +493,48 @@
     <div id="custom-challenges-list" class="chips" style="flex-direction:column;"></div>
   </div>
 
+  <!-- La Grotte à Cocktails : espace bonus, indépendant du before et des jeux (voir
+       js/core/cocktails.js). Deux onglets, six tuiles chacun. -->
+  <div class="screen scroll-screen" id="screen-cocktails">
+    <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
+    <h2 style="font-size:22px; margin-bottom:4px;">La Grotte à Cocktails</h2>
+    <div class="step-sub" style="margin-bottom:16px;">Six recettes, une variante différente à chaque visite.</div>
+    <div class="cocktail-tabs">
+      <button class="cocktail-tab selected" data-tab="cocktails" onclick="setCocktailTab('cocktails')">Cocktails</button>
+      <button class="cocktail-tab" data-tab="mocktails" onclick="setCocktailTab('mocktails')">Mocktails</button>
+    </div>
+    <div id="cocktail-grid" class="cocktail-grid"></div>
+  </div>
+
+  <!-- Fiche d'un cocktail : même panneau coulissant que les règles/joueurs. -->
+  <div id="cocktail-sheet" class="rules-sheet" onclick="closeCocktailSheet()">
+    <div class="rules-sheet-panel" onclick="event.stopPropagation()">
+      <div class="rules-sheet-grab"></div>
+      <div class="cocktail-sheet-head">
+        <span class="cocktail-sheet-glass" id="cocktail-sheet-glass"></span>
+        <div>
+          <div class="rules-sheet-title" id="cocktail-sheet-name" style="margin-bottom:2px;"></div>
+          <span class="cocktail-sheet-tier" id="cocktail-sheet-tier"></span>
+        </div>
+      </div>
+      <div class="cocktail-sheet-label">Base</div>
+      <div class="cocktail-sheet-text" id="cocktail-sheet-base"></div>
+      <div class="cocktail-sheet-label">Garniture</div>
+      <div class="cocktail-sheet-text" id="cocktail-sheet-garnish"></div>
+      <div class="cocktail-sheet-twist" id="cocktail-sheet-twist"></div>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="closeCocktailSheet()">Fermer</button>
+    </div>
+  </div>
+
+  <!-- La blague des mocktails : n'importe quelle tuile de l'onglet Mocktails y mène. -->
+  <div id="mocktail-troll-overlay" class="rules-overlay hidden" onclick="closeMocktailTroll()">
+    <div class="rules-modal mocktail-troll-modal" onclick="event.stopPropagation()">
+      <div class="mocktail-troll-badge">🚫🍹</div>
+      <p class="mocktail-troll-text" id="mocktail-troll-text"></p>
+      <button class="btn btn-primary" onclick="closeMocktailTroll()">Bon, d&rsquo;accord</button>
+    </div>
+  </div>
+
   <!-- Rules Overlay -->
   <div id="rules-overlay" class="rules-overlay hidden" onclick="closeRulesOverlay()">
     <div class="rules-modal" onclick="event.stopPropagation()">
@@ -554,6 +603,7 @@
 <script src="js/data/game-art.js"></script>
 <script src="js/data/game-posters.js"></script>
 <script src="js/data/underdicateur-words.js"></script>
+<script src="js/data/cocktails.js"></script>
 <script src="js/core/state.js"></script>
 <script src="js/core/audio.js"></script>
 <script src="js/core/confetti.js"></script>
@@ -567,6 +617,7 @@
 <script src="js/core/persistence.js"></script>
 <script src="js/core/display-mode.js"></script>
 <script src="js/core/legal.js"></script>
+<script src="js/core/cocktails.js"></script>
 <script src="js/lib/qrcode.js"></script>
 <script src="js/core/share.js"></script>
 <script src="js/core/recap-card.js"></script>

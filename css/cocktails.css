@@ -1,0 +1,75 @@
+/* ===================================================================================
+   LA GROTTE À COCKTAILS
+   -----------------------------------------------------------------------------------
+   Un bonus, pas une troisième entrée : plus petit et plus bas que « Lancer le before »
+   et « Choisir un jeu », pour qu'on ne le confonde jamais avec un vrai point de départ.
+   =================================================================================== */
+
+/* Le bouton d'accueil : une pilule sombre et discrète, pas une carte. */
+.entry-cocktails{width:100%; display:flex; align-items:center; justify-content:center;
+  gap:8px; padding:13px 18px; margin-top:2px; margin-bottom:12px;
+  border:1px solid var(--line); border-radius:16px; background:rgba(255,255,255,0.03);
+  color:var(--text-dim); font-family:'Work Sans', sans-serif; font-size:13.5px;
+  font-weight:600; cursor:pointer;
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), border-color .15s ease;}
+.entry-cocktails:active{transform:scale(0.97); border-color:rgba(232,255,61,0.3);}
+.entry-cocktails-glass{font-size:16px; line-height:1;}
+
+/* --- LES ONGLETS -------------------------------------------------------------------- */
+.cocktail-tabs{display:flex; gap:8px; margin-bottom:16px;}
+.cocktail-tab{flex:1 1 0; padding:11px; border-radius:13px; border:1px solid var(--line);
+  background:rgba(255,255,255,0.03); color:var(--text-dim);
+  font-family:'Display', sans-serif; font-weight:700; font-size:13.5px; cursor:pointer;
+  transition:background .15s ease, color .15s ease, border-color .15s ease;}
+.cocktail-tab.selected{background:var(--accent); color:var(--ink-on-light); border-color:transparent;}
+
+/* --- LA MOSAÏQUE ---------------------------------------------------------------------
+   Même langage visuel que la mosaïque des jeux (js/core/navigation.js) : un cadre
+   éclairé par un halo teinté derrière l'objet, le nom en dessous, rien d'autre. */
+.cocktail-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;
+  margin-bottom:calc(32px + env(safe-area-inset-bottom));}
+.cocktail-tile{min-width:0; display:flex; flex-direction:column; align-items:center; gap:7px;
+  padding:0 0 9px; border:1px solid var(--line); border-radius:16px; cursor:pointer;
+  background:linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 6px 16px rgba(0,0,0,0.4);
+  transition:transform .14s cubic-bezier(.34,1.56,.64,1), border-color .15s ease;}
+.cocktail-tile:active{transform:scale(0.95); border-color:color-mix(in srgb, var(--tier-color, var(--accent)) 45%, transparent);}
+.cocktail-tile-art{position:relative; width:100%; height:76px; overflow:hidden;
+  border-radius:15px 15px 0 0; display:flex; align-items:center; justify-content:center;}
+.cocktail-tile-art::before{content:''; position:absolute; inset:0;
+  background:var(--tier-color, var(--accent)); opacity:0.14; filter:blur(18px);}
+.cocktail-tile-glass{position:relative; z-index:1; font-size:34px; line-height:1;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,0.5));}
+.cocktail-tile-name{font-family:'Display', sans-serif; font-weight:700; font-size:11.5px;
+  line-height:1.15; color:var(--text); letter-spacing:-0.02em; text-align:center;
+  padding:0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+/* Les mocktails n'ont pas de teinte de tier : un halo neutre, plus calme. */
+.cocktail-tile-mocktail .cocktail-tile-art::before{background:rgba(255,255,255,0.5); opacity:0.08;}
+
+@media (max-width: 340px){ .cocktail-grid{grid-template-columns:repeat(2, 1fr);} }
+
+/* --- LA FICHE D'UN COCKTAIL ----------------------------------------------------------
+   Même panneau coulissant que les règles et le panneau des joueurs (.rules-sheet). */
+.cocktail-sheet-head{display:flex; align-items:center; gap:14px; margin-bottom:16px;}
+.cocktail-sheet-glass{font-size:40px; line-height:1;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,0.5));}
+.cocktail-sheet-tier{font-size:10.5px; letter-spacing:2px; text-transform:uppercase;
+  font-weight:700;}
+.cocktail-sheet-label{font-size:10px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--text-faint); margin:14px 0 4px;}
+.cocktail-sheet-label:first-of-type{margin-top:0;}
+.cocktail-sheet-text{font-size:14px; line-height:1.45; color:var(--text-dim);}
+/* La variante du jour : posée à part, dans un encart, pour qu'on comprenne que c'est
+   ce qui change à chaque visite et pas une troisième ligne de recette figée. */
+.cocktail-sheet-twist{margin-top:16px; padding:12px 14px; border-radius:13px;
+  font-size:13px; line-height:1.4; color:var(--text-dim); font-style:italic;
+  background:linear-gradient(158deg, rgba(232,255,61,0.10), rgba(232,255,61,0.03));
+  box-shadow:0 0 0 1px rgba(232,255,61,0.18) inset;}
+
+/* --- LA BLAGUE DES MOCKTAILS -----------------------------------------------------------
+   Rose vif : la seule couleur secondaire de l'app, réservée aux Moments/Surprises. Un
+   troll bien senti EST une surprise — la convention tient. */
+.mocktail-troll-modal{text-align:center; border-color:rgba(255,59,92,0.35);
+  background:linear-gradient(165deg, rgba(255,59,92,0.10), var(--bg) 55%);}
+.mocktail-troll-badge{font-size:34px; line-height:1; margin-bottom:10px;}
+.mocktail-troll-text{font-size:14.5px; line-height:1.5; color:var(--text); margin:0 0 18px;}

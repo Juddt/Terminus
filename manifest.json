@@ -1,6 +1,6 @@
 {
-  "name": "Soirée",
-  "short_name": "Soirée",
+  "name": "Terminus",
+  "short_name": "Terminus",
   "description": "L'app qui pilote toute la soirée : règles, défis, mini-jeux et moments.",
   "start_url": "./",
   "scope": "./",

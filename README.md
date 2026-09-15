@@ -1,4 +1,4 @@
-# Soirée
+# Terminus
 
 Application mobile (PWA, sans build, sans backend hors Pilliers en ligne) de jeux de soirée
 et d'alcool. Un téléphone posé au centre de la table pilote la partie, ou chacun joue depuis

@@ -159,7 +159,7 @@ async function shareRecapImage(){
   // navigateur non supporté, on retombe sur le téléchargement direct.
   if(navigator.canShare && navigator.canShare({files:[file]})){
     try{
-      await navigator.share({files:[file], title:'Soirée'});
+      await navigator.share({files:[file], title:'Terminus'});
       return;
     }catch(e){
       // Partage annulé par l'utilisateur ou échec silencieux : on retombe sur le
