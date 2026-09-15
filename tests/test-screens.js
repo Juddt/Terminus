@@ -44,6 +44,20 @@ const base=fs.readFileSync(path.join(root,'css','base.css'),'utf8');
 if(!/\.screen\{[^}]*display:none/.test(base)){ console.error('ÉCHEC : .screen{display:none} a disparu de base.css'); ok=false; }
 if(!/\.screen\.active\{display:flex/.test(base)){ console.error('ÉCHEC : .screen.active{display:flex} a disparu de base.css'); ok=false; }
 
+
+// --- Un conteneur à défilement horizontal ne doit pas pouvoir être comprimé ----------
+// `.games-scene` défile horizontalement (overflow-x:auto), ce qui force le navigateur à
+// calculer overflow-y en `auto` : tout ce qui dépasse est ROGNÉ, pas reporté. Or c'est
+// un élément flex dans une colonne — sans flex-shrink:0 il se laisse écraser par ce qui
+// le suit, et le bas des fiches (nom du jeu, boutons Jouer/Règles) disparaît. Le défaut
+// ne se voyait que sur un vrai téléphone : getBoundingClientRect situe correctement un
+// élément même rogné, donc une vérification géométrique le manquait.
+const appCss = fs.readFileSync(path.join(__dirname, '..', 'css', 'app.css'), 'utf8');
+const sceneRule = (appCss.match(/\.games-scene\{[^}]*\}/) || [''])[0];
+const sceneOK = /overflow-x:\s*auto/.test(sceneRule) && /flex-shrink:\s*0/.test(sceneRule);
+console.log('Scène de la bibliothèque non compressible :', sceneOK ? 'OK' : 'ÉCHEC — flex-shrink:0 manquant');
+if(!sceneOK) ok = false;
+
 console.log('Feuilles de style inspectées :', cssFiles.length);
 console.log(ok ? '\nCONVENTION DES ÉCRANS RESPECTÉE' : '\nUN ÉCRAN RISQUE DE RECOUVRIR LES AUTRES');
 process.exit(ok?0:1);
