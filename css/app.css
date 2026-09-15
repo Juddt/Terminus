@@ -296,7 +296,8 @@
    en pixels fixes (le cercle du Palmier fait 186 px) : on les met à l'échelle dans un
    cadre de taille connue plutôt que de les laisser déborder, et le cadre porte le halo
    teinté du jeu — on reconnaît la fiche qu'on vient de voir. */
-.games-index{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;}
+.games-index{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;
+  margin-bottom:calc(64px + env(safe-area-inset-bottom));}
 .games-tile{min-width:0; display:flex; flex-direction:column; align-items:center; gap:7px; padding:0 0 9px;
   border:1px solid var(--line); border-radius:16px; cursor:pointer;
   background:linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
@@ -310,9 +311,10 @@
 .games-tile-poster{position:absolute; top:50%; left:50%; z-index:1;
   display:flex; align-items:center; justify-content:center;
   transform:translate(-50%, -50%) scale(0.34); transform-origin:center;}
-.games-tile-name{font-family:'Display', sans-serif; font-size:12px; line-height:1.1;
-  color:var(--text); letter-spacing:0.2px; text-align:center; padding:0 6px;
-  overflow-wrap:anywhere;}
+.games-tile-name{font-family:'Display', sans-serif; font-weight:700; font-size:11.5px;
+  line-height:1.15; color:var(--text); letter-spacing:-0.02em; text-align:center;
+  padding:0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:100%;}
 @media (max-width: 340px){ .games-index{grid-template-columns:repeat(2, 1fr);} }
 
 /* Sur écran large, on recompose (objet à gauche, texte à droite) plutôt que d'étirer

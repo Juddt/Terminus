@@ -57,7 +57,7 @@ function purplePlayer(){ return purple.players[purple.currentIdx % purple.player
 function purpleUpdateHeader(){
   const el = document.getElementById('purple-header');
   if(!el) return;
-  el.innerHTML = (purple.sipPot > 0 ? '<div class="badge">Cagnotte <span class="bv">'+purple.sipPot+'</span></div>' : '');
+  el.innerHTML = '';
 }
 
 // --- Le tour ------------------------------------------------------------------------
@@ -103,19 +103,10 @@ function purpleCallBtn(key){
 // La cagnotte n'est pas qu'un nombre : ce sont les cartes déjà arrachées au paquet,
 // posées en éventail. Plus elle grossit, plus on hésite à relancer.
 function purplePotHTML(){
-  if(purple.sipPot <= 0){
-    return '<div class="pur-pot pur-pot-empty">'+
-        '<div class="pur-pot-value">0</div>'+
-        '<div class="pur-pot-label">cagnotte</div>'+
-      '</div>';
-  }
+  if(purple.sipPot <= 0) return '';
   const fan = purple.potCards.slice(-6).map((c, i) =>
     '<span class="pur-fan-card" style="--k:'+i+'">'+cardHTML(c, { width:34, revealed:true })+'</span>').join('');
-  return '<div class="pur-pot">'+
-      '<div class="pur-fan">'+fan+'</div>'+
-      '<div class="pur-pot-value">'+purple.sipPot+'</div>'+
-      '<div class="pur-pot-label">gorgée'+(purple.sipPot > 1 ? 's' : '')+' en jeu</div>'+
-    '</div>';
+  return '<div class="pur-pot"><div class="pur-fan">'+fan+'</div></div>';
 }
 
 // --- Le tirage ----------------------------------------------------------------------
