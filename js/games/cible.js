@@ -114,7 +114,7 @@ function ciblePotHTML(){
   const n = cible.sipPot;
   return '<div class="cible-pot'+(n > 0 ? ' live' : '')+'">'+
       '<div class="cible-pot-value">'+n+'</div>'+
-      '<div class="cible-pot-label">gorgée'+(n > 1 ? 's' : '')+' dans la cagnotte</div>'+
+      '<div class="cible-pot-label">gorgée'+(n > 1 ? 's' : '')+' en jeu</div>'+
     '</div>';
 }
 
@@ -124,7 +124,6 @@ function cibleRenderTarget(){
   cible.busy = false;
   body.innerHTML =
     '<div class="cible-aim">'+escapeHtml(ciblePlayer())+'</div>'+
-    '<div class="cible-legend">Vise une carte — plus c\'est au centre, plus la question est dure</div>'+
     ciblePotHTML()+
     cibleBoardHTML(null);
   footer.innerHTML = '<button class="btn btn-ghost" onclick="cibleNewTarget()">Nouvelle cible</button>';

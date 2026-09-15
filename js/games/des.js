@@ -131,7 +131,7 @@ function desRenderBoard(opts){
       '<div class="duel-value'+(o.showValues ? ' shown' : '')+'" id="duel-value-'+side+'">'+
         (o.showValues ? des.values[side] : '')+'</div>'+
       '<div class="duel-verdict'+(verdict ? ' shown' : '')+'">'+
-        (verdict ? '<div class="duel-verdict-sub">'+verdict.sub+'</div>'+
+        (verdict ? (verdict.sub ? '<div class="duel-verdict-sub">'+verdict.sub+'</div>' : '')+
                    '<div class="duel-verdict-main">'+verdict.main+'</div>' : '')+
       '</div>'+
       (side === 1 ? '<div class="duel-name">'+name+'</div>' : '')+
@@ -243,8 +243,8 @@ function desResolve(){
   const winner = 1 - loser;
   const sips = a * b;
   const verdicts = [];
-  verdicts[loser]  = { main: sips + ' gorgée' + (sips > 1 ? 's' : ''), sub:'Tu bois' };
-  verdicts[winner] = { main: 'Sauvé', sub: a + ' × ' + b };
+  verdicts[loser]  = { main: sips + ' gorgée' + (sips > 1 ? 's' : ''), sub:'boit' };
+  verdicts[winner] = { main: 'Sauvé', sub:'' };
 
   desRenderBoard({ phase:'result', showValues:true, outcome:loser, verdicts, seam:'&times;' });
   if(navigator.vibrate) navigator.vibrate([70, 40, 70]);

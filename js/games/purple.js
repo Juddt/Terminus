@@ -88,29 +88,17 @@ function purpleShowTurn(){
     '</div>'+
     '<div class="pur-calls">'+
       ['double','triple'].map(k => purpleCallBtn(k)).join('')+
-    '</div>'+
-    purpleLegendHTML();
+    '</div>';
 }
 
 function purpleCallBtn(key){
   const c = PURPLE_CALLS[key];
   return '<button class="pur-call pur-call-'+key+'" onclick="purpleGuess(\''+key+'\')">'+
-      '<span class="pur-call-stake">'+c.cards+'</span>'+
       '<span class="pur-call-name">'+c.label+'</span>'+
+      '<span class="pur-call-stake">'+c.cards+' gorgée'+(c.cards > 1 ? 's' : '')+'</span>'+
     '</button>';
 }
 
-// La légende : ce que veut dire chaque annonce. Sous les boutons, en retrait — on la
-// consulte au premier tour, plus après.
-function purpleLegendHTML(){
-  return '<div class="pur-legend">'+
-      Object.keys(PURPLE_CALLS).map(k =>
-        '<span class="pur-legend-row">'+
-          '<b>'+PURPLE_CALLS[k].label+'</b>'+PURPLE_CALLS[k].hint+
-        '</span>').join('')+
-      '<span class="pur-legend-note">Le chiffre sur le bouton = les gorgées en jeu.</span>'+
-    '</div>';
-}
 
 // La cagnotte n'est pas qu'un nombre : ce sont les cartes déjà arrachées au paquet,
 // posées en éventail. Plus elle grossit, plus on hésite à relancer.

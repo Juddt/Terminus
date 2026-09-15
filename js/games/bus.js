@@ -239,7 +239,10 @@ function busShowRideCard(){
   body.innerHTML =
     '<div class="bus-who">'+escapeHtml(bus.busPlayer)+'</div>'+
     busCorridorHTML(bus.busIdx)+
-    '<div class="bus-corridor-hint">Case '+(bus.busIdx + 1)+' sur 5 — une figure et tu repars du début</div>';
+    '<div class="bus-stake">'+
+      '<span class="bus-stake-top">Cinq cartes à passer</span>'+
+      '<span class="bus-stake-main">Une figure et tu repars de zéro</span>'+
+    '</div>';
   footer.innerHTML = '<button class="btn btn-primary" onclick="busFlipRideCard()">Retourner la carte suivante</button>';
 }
 

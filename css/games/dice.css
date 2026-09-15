@@ -29,7 +29,8 @@
 .duel-half-a{justify-content:flex-end; padding-bottom:6px;}
 .duel-half-b{justify-content:flex-start; padding-top:6px;}
 
-.duel-name{flex-shrink:0; font-family:'Anton',sans-serif; font-size:20px; letter-spacing:0.5px;
+.duel-name{flex-shrink:0; font-family:'Display', sans-serif; font-weight:700; font-size:24px;
+  letter-spacing:-0.02em;
   color:var(--text-dim); line-height:1; max-width:280px; overflow-wrap:anywhere;
   text-align:center; transition:color .3s ease;}
 .duel-half.is-winner .duel-name{color:var(--accent);}
@@ -40,7 +41,8 @@
 .duel-verdict{flex-shrink:0; min-height:34px; display:flex; flex-direction:column; align-items:center;
   justify-content:center; gap:2px; opacity:0; transition:opacity .28s ease;}
 .duel-verdict.shown{opacity:1;}
-.duel-verdict-main{font-family:'Anton',sans-serif; font-size:23px; line-height:1; letter-spacing:0.4px;}
+.duel-verdict-main{font-family:'Display', sans-serif; font-weight:700; font-size:25px;
+  line-height:1; letter-spacing:-0.02em;}
 .duel-verdict-sub{font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint);}
 .is-loser .duel-verdict-main{color:var(--clay);}
 .is-winner .duel-verdict-main{color:var(--accent);}
@@ -54,14 +56,13 @@
   letter-spacing:0.2px; color:var(--text-dim); line-height:1.3; margin-top:4px;
   transition:opacity .25s ease;}
 .duel-seam-line{flex:1; height:1px; background:linear-gradient(to right, transparent, var(--line) 35%, var(--line) 65%, transparent);}
-.duel-seam-mark{width:38px; height:38px; flex-shrink:0; border-radius:12px;
-  border:1px solid var(--line); background:var(--surface);
+.duel-seam-mark{width:30px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Anton',sans-serif; font-size:17px; color:var(--text-dim);
+  font-family:'Display', sans-serif; font-weight:700; font-size:20px; color:var(--text-faint);
   box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 6px 16px rgba(0,0,0,0.45);
   transition:color .3s ease, border-color .3s ease, background .3s ease;}
-.duel.is-result .duel-seam-mark{color:var(--ink-on-light); background:var(--accent); border-color:transparent;}
-.duel.is-tie .duel-seam-mark{color:var(--text); background:var(--surface-2);}
+.duel.is-result .duel-seam-mark{color:var(--accent);}
+.duel.is-tie .duel-seam-mark{color:var(--text);}
 
 /* --- LE DÉ ---------------------------------------------------------------------------
    Cube de 104 px d'arête. La scène porte la perspective ; le cube porte la rotation ;
@@ -159,7 +160,7 @@
   .die-face-5{transform:rotateX(90deg)  translateZ(37px);}
   .die-face-2{transform:rotateX(-90deg) translateZ(37px);}
   .die-shadow{width:64px; height:11px; bottom:-11px;}
-  .duel-name{font-size:17px;}
+  .duel-name{font-size:20px;}
   .duel-value{font-size:13px; min-height:16px;}
   .duel-verdict{min-height:28px;}
   .duel-verdict-main{font-size:19px;}

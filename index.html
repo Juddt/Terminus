@@ -19,7 +19,6 @@
 <meta name="apple-mobile-web-app-title" content="Soirée">
 <!-- Polices auto-hébergées (voir css/fonts.css) : une PWA doit garder sa typographie
      hors connexion, et les requêtes vers fonts.googleapis.com échouaient hors ligne. -->
-<link rel="preload" href="fonts/anton-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/work-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/base.css">
@@ -204,15 +203,14 @@
   <div class="screen scroll-screen" id="screen-games-list">
     <div class="topnav"><div class="back-link" onclick="goTo('home')">← Accueil</div></div>
     <h2 style="font-size:22px; margin-bottom:4px;">Choisir un jeu</h2>
-    <div id="games-filter-wrap" class="games-filter-wrap"></div>
     <div id="games-list-wrap" class="games-scene"></div>
     <!-- Position dans la bibliothèque. Les flèches vivaient ici et décalaient la mise
          en page à chaque changement de jeu ; les pastilles gardent une hauteur fixe et
          disent d'un coup d'œil où l'on en est. Elles restent cliquables : le balayage
          n'est jamais le seul moyen de naviguer. -->
     <div class="games-dots" id="games-dots"></div>
-    <button class="games-index-toggle" id="games-index-toggle" onclick="toggleGamesIndex()">Tous les jeux</button>
-    <div id="games-index" class="games-index"></div>
+    <div class="games-all-label">Tous les jeux</div>
+    <div id="games-index" class="games-index open"></div>
   </div>
 
   <div class="screen scroll-screen" id="screen-game-detail">
@@ -229,8 +227,9 @@
   <div class="screen" id="screen-palmier">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         <div class="game-topbar-right">
+          <button class="top-btn" onclick="openGamePlayers('palmier')">Joueurs</button>
           <button class="top-btn icon-only" onclick="showRulesOverlay('palmier')" aria-label="Règles">?</button>
         </div>
       </div>
@@ -251,8 +250,9 @@
   <div class="screen" id="screen-bus">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         <div class="game-topbar-right">
+          <button class="top-btn" onclick="openGamePlayers('bus')">Joueurs</button>
           <button class="top-btn icon-only" onclick="showRulesOverlay('bus')" aria-label="Règles">?</button>
         </div>
       </div>
@@ -269,8 +269,9 @@
   <div class="screen" id="screen-cible">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         <div class="game-topbar-right">
+          <button class="top-btn" onclick="openGamePlayers('cible')">Joueurs</button>
           <button class="top-btn icon-only" onclick="showRulesOverlay('cible')" aria-label="Règles">?</button>
         </div>
       </div>
@@ -287,8 +288,9 @@
   <div class="screen" id="screen-purple">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         <div class="game-topbar-right">
+          <button class="top-btn" onclick="openGamePlayers('purple')">Joueurs</button>
           <button class="top-btn icon-only" onclick="showRulesOverlay('purple')" aria-label="Règles">?</button>
         </div>
       </div>
@@ -305,9 +307,9 @@
   <div class="screen" id="screen-pmu-bet">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="pmuSetup()">← Retour</button>
+        <button class="top-btn" onclick="pmuSetup()">← Réglages</button>
         <div class="game-topbar-right">
-          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         </div>
       </div>
     </div>
@@ -319,8 +321,9 @@
   <div class="screen" id="screen-pmu">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         <div class="game-topbar-right">
+          <button class="top-btn" onclick="openGamePlayers('pmu')">Joueurs</button>
           <button class="top-btn icon-only" onclick="showRulesOverlay('pmu')" aria-label="Règles">?</button>
         </div>
       </div>
@@ -336,9 +339,9 @@
   <div class="screen" id="screen-pof-mode">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="pofSetup()">← Retour</button>
+        <button class="top-btn" onclick="pofSetup()">← Réglages</button>
         <div class="game-topbar-right">
-          <button class="top-btn" onclick="goTo('home')">Accueil</button>
+          <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         </div>
       </div>
     </div>
@@ -350,8 +353,9 @@
   <div class="screen" id="screen-pof">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         <div class="game-topbar-right">
+          <button class="top-btn" onclick="openGamePlayers('pof')">Joueurs</button>
           <button class="top-btn icon-only" onclick="showRulesOverlay('pof')" aria-label="Règles">?</button>
         </div>
       </div>
@@ -368,8 +372,9 @@
   <div class="screen" id="screen-des">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         <div class="game-topbar-right">
+          <button class="top-btn" onclick="openGamePlayers('des')">Joueurs</button>
           <button class="top-btn icon-only" onclick="showRulesOverlay('des')" aria-label="Règles">?</button>
         </div>
       </div>
@@ -383,8 +388,9 @@
   <div class="screen" id="screen-und">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         <div class="game-topbar-right">
+          <button class="top-btn" onclick="openGamePlayers('und')">Joueurs</button>
           <button class="top-btn icon-only" onclick="showRulesOverlay('underdicateur')" aria-label="Règles">?</button>
         </div>
       </div>
@@ -401,8 +407,9 @@
   <div class="screen" id="screen-pilliers">
     <div class="game-topbar">
       <div class="game-topbar-row">
-        <button class="top-btn" onclick="goTo('home')">Accueil</button>
+        <button class="top-btn" onclick="goTo('games-list')">&larr; Retour aux jeux</button>
         <div class="game-topbar-right">
+          <button class="top-btn" onclick="openGamePlayers('pilliers')">Joueurs</button>
           <button class="top-btn icon-only" onclick="showRulesOverlay('pilliers')" aria-label="Règles">?</button>
         </div>
       </div>
@@ -483,7 +490,7 @@
   <div id="rules-overlay" class="rules-overlay hidden" onclick="closeRulesOverlay()">
     <div class="rules-modal" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-family:Anton,sans-serif;font-size:18px;" id="rules-overlay-title">Règles</div>
+        <div style="font-family:'Display', sans-serif;font-size:18px;" id="rules-overlay-title">Règles</div>
         <div style="cursor:pointer;color:var(--text-dim);font-size:18px;" onclick="closeRulesOverlay()">✕</div>
       </div>
       <div id="rules-overlay-content"></div>
@@ -511,6 +518,25 @@
     </div>
   </div>
 
+  <!-- Joueurs d'un mini-jeu : même panneau que le before (voir game-players.js) -->
+  <div id="game-players-sheet" class="rules-sheet" onclick="closeGamePlayers()">
+    <div class="rules-sheet-panel" onclick="event.stopPropagation()">
+      <div class="rules-sheet-grab"></div>
+      <div class="sheet-head">
+        <div class="rules-sheet-title">Joueurs</div>
+        <div class="players-sheet-hint" id="game-players-hint"></div>
+      </div>
+      <div id="game-players-list"></div>
+      <div class="add-player-row">
+        <input class="name-input" id="game-player-field" placeholder="Prénom du nouveau joueur"
+               maxlength="16" autocomplete="off" autocapitalize="words" enterkeyhint="done"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();addGamePlayer();}">
+        <button class="add-player-btn" id="game-player-add" onclick="addGamePlayer()">Ajouter</button>
+      </div>
+      <button class="btn btn-primary" style="margin-top:12px;" onclick="closeGamePlayers()">Reprendre la partie</button>
+    </div>
+  </div>
+
   <!-- Panneau des règles actives, coulissant depuis le bas -->
   <div id="rules-sheet" class="rules-sheet" onclick="closeRulesSheet()">
     <div class="rules-sheet-panel" onclick="event.stopPropagation()">
@@ -532,6 +558,7 @@
 <script src="js/core/audio.js"></script>
 <script src="js/core/confetti.js"></script>
 <script src="js/core/navigation.js"></script>
+<script src="js/core/game-players.js"></script>
 <script src="js/core/setup-wizard.js"></script>
 <script src="js/core/custom-content.js"></script>
 <script src="js/core/sober-mode.js"></script>

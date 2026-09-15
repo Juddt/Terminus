@@ -13,14 +13,16 @@
 
 #screen-cible{padding:0;}
 
-.cible-aim{font-family:'Anton',sans-serif; font-size:23px; line-height:1.1; color:var(--accent);
+.cible-aim{font-family:'Display', sans-serif; font-weight:700; font-size:30px; line-height:1.1;
+  letter-spacing:-0.02em; color:var(--accent);
   overflow-wrap:anywhere; max-width:300px;}
 .cible-legend{font-size:12px; color:var(--text-faint); margin-top:-4px;}
-.cible-question{font-family:'Anton',sans-serif; font-size:21px; color:var(--text); line-height:1.2;}
+.cible-question{font-family:'Display', sans-serif; font-size:21px; color:var(--text); line-height:1.2;}
 .cible-stake{font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:var(--text-faint);}
 .cible-pot{display:flex; flex-direction:column; align-items:center; gap:1px;
   min-height:62px; justify-content:center;}
-.cible-pot-value{font-family:'Anton',sans-serif; font-size:44px; line-height:0.92;
+.cible-pot-value{font-family:'Display', sans-serif; font-weight:700; font-size:58px;
+  line-height:0.9; letter-spacing:-0.03em;
   color:var(--text-faint); transition:color .3s ease, text-shadow .3s ease, transform .3s cubic-bezier(.34,1.56,.64,1);}
 .cible-pot-label{font-size:9.5px; letter-spacing:2.4px; text-transform:uppercase;
   color:var(--text-faint); transition:color .3s ease;}
@@ -60,7 +62,7 @@
   background:linear-gradient(155deg, #24241A, #14140E);
   border:1px solid rgba(232,255,61,0.18);
   box-shadow:0 4px 10px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.1) inset;}
-.cible-slot-sips{position:relative; font-family:'Anton',sans-serif;
+.cible-slot-sips{position:relative; font-family:'Display', sans-serif;
   font-size:calc(var(--cw, 32px) * 0.46); color:var(--accent); line-height:1;}
 .cible-slot:active{transform:translate(-50%,-50%) scale(0.9);}
 .cible-slot.dim{opacity:0.22; pointer-events:none;}
@@ -79,14 +81,14 @@
 /* Treize valeurs : une grille régulière, jamais une ligne qui déborde. */
 .cible-values{display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; width:100%;}
 .cible-val-btn{min-height:44px; border:1px solid var(--line); border-radius:11px;
-  background:var(--surface-2); color:var(--text); font-family:'Anton',sans-serif; font-size:16px;
+  background:var(--surface-2); color:var(--text); font-family:'Display', sans-serif; font-size:16px;
   cursor:pointer; box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;
   transition:transform .12s cubic-bezier(.34,1.56,.64,1), background .15s ease;}
 .cible-val-btn:active{transform:scale(0.94); background:var(--accent); color:var(--ink-on-light);}
 
 /* --- L'impact ------------------------------------------------------------------------ */
 .cible-impact-card{display:flex; justify-content:center; margin-bottom:4px;}
-.cible-outcome{font-family:'Anton',sans-serif; font-size:33px; line-height:1;}
+.cible-outcome{font-family:'Display', sans-serif; font-size:33px; line-height:1;}
 .cible-outcome.win{color:var(--accent);}
 .cible-outcome.lose{color:var(--clay);}
 .cible-outcome-sub{font-size:14px; color:var(--text-dim); line-height:1.4; max-width:290px;}
@@ -103,7 +105,7 @@
 
 @media (max-height:720px){
   .cible-board{width:min(100%, 250px);}
-  .cible-aim{font-size:19px;}
+  .cible-aim{font-size:25px;}
   .cible-question{font-size:18px;}
   .cible-outcome{font-size:27px;}
   .cible-val-btn{min-height:38px; font-size:14px;}

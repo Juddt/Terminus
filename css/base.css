@@ -30,7 +30,7 @@ body{font-family:'Work Sans', sans-serif; color:var(--text); overflow:hidden; di
 #frame{width:100%; max-width:480px; height:100vh; height:100dvh; background:var(--bg); position:relative; overflow:hidden;}
 .screen{position:absolute; inset:0; display:none; flex-direction:column; padding:32px 24px; box-sizing:border-box;}
 .screen.active{display:flex;}
-h1,h2,h3{font-family:'Anton', sans-serif; font-weight:700; margin:0;}
+h1,h2,h3{font-family:'Display', sans-serif; font-weight:700; margin:0;}
 .eyebrow{font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
 /* Une seule famille de boutons dans toute l'app : rectangle aux angles modérément
    arrondis, contour fin, relief donné par un liseré clair en haut et une ombre portée.

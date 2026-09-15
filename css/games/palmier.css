@@ -119,17 +119,17 @@
 .balance-cursor.miss{background:var(--clay); box-shadow:0 0 14px rgba(255,59,92,0.8);}
 
 /* --- Manche et fin ------------------------------------------------------------------- */
-.palm-verdict{font-family:'Anton',sans-serif; font-size:26px; line-height:1;}
+.palm-verdict{font-family:'Display', sans-serif; font-size:26px; line-height:1;}
 .palm-verdict.win{color:var(--accent);}
 .palm-verdict.lose{color:var(--clay);}
 .palm-height-line{font-size:13.5px; color:var(--text-dim); line-height:1.4; max-width:300px;}
 
-.palm-end-title{font-family:'Anton',sans-serif; font-size:27px; color:var(--text); line-height:1.15;
+.palm-end-title{font-family:'Display', sans-serif; font-size:27px; color:var(--text); line-height:1.15;
   max-width:300px;}
 .palm-end-stats{display:flex; gap:20px; justify-content:center; margin:4px 0 2px;}
 .palm-end-stats span{display:flex; flex-direction:column; gap:2px; font-size:10px;
   letter-spacing:1.8px; text-transform:uppercase; color:var(--text-faint);}
-.palm-end-stats b{font-family:'Anton',sans-serif; font-weight:400; font-size:25px;
+.palm-end-stats b{font-family:'Display', sans-serif; font-weight:400; font-size:25px;
   letter-spacing:0; color:var(--text);}
 
 .creators-counter{text-align:center; font-size:11.5px; color:var(--text-faint); margin-top:10px;}
@@ -146,7 +146,7 @@
 .palm-role-sym{font-size:14px; line-height:1;}
 .palm-role-label{font-weight:500;}
 .palm-role-sep{color:rgba(232,255,61,0.45);}
-.palm-role-name{font-family:'Anton',sans-serif; font-size:14px; letter-spacing:0.4px;
+.palm-role-name{font-family:'Display', sans-serif; font-size:14px; letter-spacing:0.4px;
   color:var(--accent-bright);}
 
 @media (max-height:720px){

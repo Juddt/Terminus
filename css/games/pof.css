@@ -19,7 +19,7 @@
 
 .coin-side{position:absolute; inset:0; border-radius:50%; backface-visibility:hidden;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Anton',sans-serif; font-size:23px; letter-spacing:1.5px;
+  font-family:'Display', sans-serif; font-size:23px; letter-spacing:1.5px;
   /* Laiton brossé : la lumière vient du haut-gauche, le bas de la pièce reste sourd. */
   background:
     radial-gradient(circle at 32% 26%, rgba(255,246,214,0.95), rgba(255,246,214,0) 52%),
@@ -49,10 +49,10 @@
 
 /* --- Mise en scène de la manche ---------------------------------------------------- */
 .pof-duel{display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;}
-.pof-name{font-family:'Anton',sans-serif; font-size:26px; color:var(--accent); line-height:1;
+.pof-name{font-family:'Display', sans-serif; font-size:26px; color:var(--accent); line-height:1;
   overflow-wrap:anywhere;}
 .pof-vs{font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
-.pof-opp{font-family:'Anton',sans-serif; font-size:18px; color:var(--text-dim); line-height:1;
+.pof-opp{font-family:'Display', sans-serif; font-size:18px; color:var(--text-dim); line-height:1;
   overflow-wrap:anywhere;}
 
 /* --- LES DEUX RÔLES ----------------------------------------------------------------
@@ -60,7 +60,7 @@
    rôle sous son prénom, et seul celui qui décide est éclairé. */
 .pof-roles{display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;}
 .pof-role{display:flex; flex-direction:column; align-items:center; gap:3px; max-width:132px;}
-.pof-role-name{font-family:'Anton',sans-serif; font-size:21px; line-height:1;
+.pof-role-name{font-family:'Display', sans-serif; font-size:21px; line-height:1;
   color:var(--text-dim); overflow-wrap:anywhere; text-align:center;}
 .pof-role-what{font-size:10px; letter-spacing:2px; text-transform:uppercase;
   color:var(--text-faint); text-align:center; line-height:1.25;}
@@ -70,11 +70,11 @@
 
 /* L'annonce, pendant que la pièce tourne. */
 .pof-called{font-size:13px; color:var(--text-dim); letter-spacing:0.2px;}
-.pof-called b{font-family:'Anton',sans-serif; font-weight:400; font-size:17px; color:var(--text);}
+.pof-called b{font-family:'Display', sans-serif; font-weight:400; font-size:17px; color:var(--text);}
 
 .pof-bets{display:flex; gap:9px; align-items:center; justify-content:center;}
 .pof-bet-btn{width:52px; height:48px; border-radius:13px; display:flex; align-items:center;
-  justify-content:center; font-family:'Anton',sans-serif; font-size:19px; cursor:pointer;
+  justify-content:center; font-family:'Display', sans-serif; font-size:19px; cursor:pointer;
   border:1px solid var(--line); background:var(--surface-2); color:var(--text-dim);
   box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;
   transition:transform .12s cubic-bezier(.34,1.56,.64,1), background .15s ease, color .15s ease;}
@@ -83,7 +83,7 @@
 
 .pof-verdict{display:flex; flex-direction:column; align-items:center; gap:4px;}
 .pof-landed{font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--text-faint);}
-.pof-outcome{font-family:'Anton',sans-serif; font-size:31px; line-height:1;}
+.pof-outcome{font-family:'Display', sans-serif; font-size:31px; line-height:1;}
 .pof-outcome.win{color:var(--accent);}
 .pof-outcome.lose{color:var(--clay);}
 .pof-drinks{font-size:15px; color:var(--text); line-height:1.35; max-width:290px;}
@@ -95,7 +95,7 @@
 .pof-calls{display:flex; gap:11px; width:100%;}
 .pof-call{flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:9px;
   padding:17px 12px; border-radius:16px; cursor:pointer;
-  font-family:'Anton',sans-serif; font-size:19px; letter-spacing:0.5px; color:var(--text);
+  font-family:'Display', sans-serif; font-size:19px; letter-spacing:0.5px; color:var(--text);
   border:1px solid rgba(255,255,255,0.14);
   background:linear-gradient(158deg, rgba(255,255,255,0.075), rgba(255,255,255,0.02));
   box-shadow:0 1px 0 rgba(255,255,255,0.09) inset, 0 8px 20px rgba(0,0,0,0.45);
@@ -112,7 +112,7 @@
   border:1px solid var(--line); cursor:pointer; text-align:left; margin-bottom:10px;
   box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;}
 .pof-mode-card.selected{border-color:var(--accent); background:rgba(232,255,61,0.07);}
-.pof-mode-card h3{font-family:'Anton',sans-serif; font-size:19px; color:var(--text); margin-bottom:5px;}
+.pof-mode-card h3{font-family:'Display', sans-serif; font-size:19px; color:var(--text); margin-bottom:5px;}
 .pof-mode-card.selected h3{color:var(--accent);}
 .pof-mode-card p{font-size:13px; color:var(--text-dim); margin:0; line-height:1.45;}
 

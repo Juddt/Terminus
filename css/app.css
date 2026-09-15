@@ -12,7 +12,7 @@
 #screen-home::before{content:''; position:absolute; top:-30%; left:50%; transform:translateX(-50%); width:150%; height:70%; background:radial-gradient(ellipse at center, var(--accent) 0%, transparent 62%); opacity:0.10; filter:blur(30px); pointer-events:none; z-index:0;}
 .home-content{position:relative; z-index:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(26px,6vh,52px); padding:58px 22px 34px; box-sizing:border-box; text-align:center;}
 .home-mark{display:flex; flex-direction:column; align-items:center;}
-.hero-title{font-family:'Anton', sans-serif; font-weight:400; font-size:60px; letter-spacing:1px; line-height:1.14;
+.hero-title{font-family:'Display', sans-serif; font-weight:400; font-size:60px; letter-spacing:1px; line-height:1.14;
   background:linear-gradient(178deg, #FFFFFF 14%, #EFEFE8 48%, #9D9D92 100%);
   -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent;
   filter:drop-shadow(0 3px 10px rgba(0,0,0,0.6)) drop-shadow(0 0 26px rgba(232,255,61,0.14));}
@@ -80,7 +80,7 @@
 .mode-card{width:100%; border:none; border-radius:24px; padding:28px 26px; text-align:left; background:var(--surface-2); margin-bottom:14px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.35); transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
 .mode-card:active{transform:scale(0.96);}
 .mode-card .mode-icon{font-size:32px; line-height:1; margin-bottom:10px;}
-.mode-card .mode-name{font-family:'Anton', sans-serif; font-size:21px; font-weight:700; color:var(--text); line-height:1.25;}
+.mode-card .mode-name{font-family:'Display', sans-serif; font-size:21px; font-weight:700; color:var(--text); line-height:1.25;}
 .mode-card .mode-tag{font-family:'Work Sans',sans-serif; font-size:13.5px; color:var(--text-dim); margin-top:6px; line-height:1.35;}
 .mode-card.primary{background:linear-gradient(135deg, var(--accent-bright), var(--accent)); box-shadow:0 8px 24px rgba(232,255,61,0.35);}
 .mode-card.primary .mode-name{color:var(--ink-on-light);}
@@ -160,7 +160,7 @@
 .poster-chip{position:absolute; transform:translate(-50%,-50%);
   width:var(--cw); height:calc(var(--cw) * 1.4); border-radius:4px;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Anton',sans-serif; font-size:calc(var(--cw) * 0.5); color:var(--accent);
+  font-family:'Display', sans-serif; font-size:calc(var(--cw) * 0.5); color:var(--accent);
   background:linear-gradient(155deg, #24241A, #14140E);
   border:1px solid rgba(232,255,61,0.2); box-shadow:0 3px 8px rgba(0,0,0,0.55);}
 
@@ -220,7 +220,7 @@
 /* Le mot sous scellé d'UnderDicateur. */
 .poster-secret{display:flex; align-items:center; gap:10px;}
 .poster-word{padding:13px 15px; border-radius:12px; border:1px solid var(--line);
-  background:var(--surface-2); font-family:'Anton',sans-serif; font-size:17px; color:var(--text);
+  background:var(--surface-2); font-family:'Display', sans-serif; font-size:17px; color:var(--text);
   box-shadow:0 6px 16px rgba(0,0,0,0.45);}
 .poster-word.alt{color:var(--clay); border-color:rgba(255,59,92,0.35); background:rgba(255,59,92,0.07);}
 .poster-veil{width:46px; height:46px; border-radius:14px; display:flex; align-items:center;
@@ -231,7 +231,7 @@
 .poster-roles{display:flex; align-items:center; gap:8px;}
 .poster-role{width:56px; height:78px; border-radius:10px; display:flex; align-items:center;
   justify-content:center; text-align:center; padding:6px;
-  font-family:'Anton',sans-serif; font-size:12px; line-height:1.1;
+  font-family:'Display', sans-serif; font-size:12px; line-height:1.1;
   box-shadow:0 8px 20px rgba(0,0,0,0.5);}
 .poster-role.village{background:linear-gradient(160deg,#20301F,#131F13);
   border:1px solid var(--sage); color:var(--sage); transform:rotate(-7deg);}
@@ -241,7 +241,7 @@
   border:1px solid rgba(232,255,61,0.18); color:var(--text-faint); font-size:20px; z-index:1;}
 
 .game-stage-body{padding:2px 0 0; width:100%;}
-.game-stage .game-name{font-family:'Anton', sans-serif; font-size:28px; letter-spacing:0.4px; color:var(--text); line-height:1.04; margin-bottom:6px;}
+.game-stage .game-name{font-family:'Display', sans-serif; font-size:28px; letter-spacing:0.4px; color:var(--text); line-height:1.04; margin-bottom:6px;}
 .game-stage .game-principle{font-size:13.5px; color:var(--text-dim); line-height:1.4; margin-bottom:10px; max-width:300px; margin-left:auto; margin-right:auto;
   min-height:calc(1.4em * 2); display:flex; align-items:center; justify-content:center;}
 .game-stage-meta{display:flex; align-items:center; justify-content:center; gap:7px; margin-bottom:11px; flex-wrap:wrap;}
@@ -265,7 +265,15 @@
 .games-dot.current::before{width:18px; border-radius:3px; background:var(--accent);}
 
 /* Index compact "Tous les jeux" */
-.games-index-toggle{width:100%; background:rgba(255,255,255,0.035); border:1px solid var(--line); border-radius:15px; color:var(--text-dim); font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; padding:12px; cursor:pointer; font-family:'Work Sans',sans-serif;}
+/* Jouer et Règles : même hauteur, même famille de forme. Le secondaire ne se déguise
+   pas en lien perdu à côté du bouton principal. */
+.game-stage-actions{display:flex; gap:9px; max-width:300px; margin:0 auto; align-items:stretch;}
+.game-stage-actions .btn{flex:1 1 auto; margin:0; max-width:none;}
+.game-stage-actions .btn-ghost{flex:0 0 96px;}
+
+.games-all-label{font-size:11px; letter-spacing:2.4px; text-transform:uppercase;
+  color:var(--text-faint); margin:4px 0 10px; padding-top:14px;
+  border-top:1px solid var(--line);}
 /* Ajout d'un joueur en cours de partie : le champ et son bouton sur une seule ligne.
    Le bouton est indispensable — sur un téléphone, le clavier n'affiche pas toujours une
    touche « Entrée », et la saisie ne doit pas dépendre de ça. */
@@ -288,8 +296,7 @@
    en pixels fixes (le cercle du Palmier fait 186 px) : on les met à l'échelle dans un
    cadre de taille connue plutôt que de les laisser déborder, et le cadre porte le halo
    teinté du jeu — on reconnaît la fiche qu'on vient de voir. */
-.games-index{display:none; margin-top:12px;}
-.games-index.open{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;}
+.games-index{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;}
 .games-tile{min-width:0; display:flex; flex-direction:column; align-items:center; gap:7px; padding:0 0 9px;
   border:1px solid var(--line); border-radius:16px; cursor:pointer;
   background:linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
@@ -303,10 +310,10 @@
 .games-tile-poster{position:absolute; top:50%; left:50%; z-index:1;
   display:flex; align-items:center; justify-content:center;
   transform:translate(-50%, -50%) scale(0.34); transform-origin:center;}
-.games-tile-name{font-family:'Anton',sans-serif; font-size:12px; line-height:1.1;
+.games-tile-name{font-family:'Display', sans-serif; font-size:12px; line-height:1.1;
   color:var(--text); letter-spacing:0.2px; text-align:center; padding:0 6px;
   overflow-wrap:anywhere;}
-@media (max-width: 340px){ .games-index.open{grid-template-columns:repeat(2, 1fr);} }
+@media (max-width: 340px){ .games-index{grid-template-columns:repeat(2, 1fr);} }
 
 /* Sur écran large, on recompose (objet à gauche, texte à droite) plutôt que d'étirer
    la mise en page mobile. */
@@ -323,10 +330,10 @@
 
 .game-detail-meta{display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap;}
 .game-detail-meta .gd-item{font-size:11px; color:var(--text-faint);}
-.game-detail-meta .gd-item b{color:var(--accent); font-weight:500; display:block; font-family:'Anton', sans-serif; font-size:15px;}
+.game-detail-meta .gd-item b{color:var(--accent); font-weight:500; display:block; font-family:'Display', sans-serif; font-size:15px;}
 .game-desc{font-size:13.5px; color:var(--text-dim); line-height:1.5; margin-bottom:22px;}
 .rule-step{display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.10);}
-.rule-step .step-num{font-family:'Anton', sans-serif; color:var(--accent-bright); font-size:13px; font-weight:600; flex-shrink:0; min-width:36px;}
+.rule-step .step-num{font-family:'Display', sans-serif; color:var(--accent-bright); font-size:13px; font-weight:600; flex-shrink:0; min-width:36px;}
 .rule-step .step-text{font-size:13px; color:var(--text-dim); line-height:1.4;}
 
 /* Setup wizard */
@@ -340,7 +347,7 @@
 
 .stepper{display:flex; align-items:center; justify-content:center; gap:22px; margin:18px 0;}
 .stepper button{width:48px; height:48px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--text); font-size:20px; font-family:'Work Sans'; flex-shrink:0;}
-.count-input{font-family:'Anton', sans-serif; font-size:42px; width:90px; text-align:center; background:transparent; border:none; color:var(--text); -moz-appearance:textfield;}
+.count-input{font-family:'Display', sans-serif; font-size:42px; width:90px; text-align:center; background:transparent; border:none; color:var(--text); -moz-appearance:textfield;}
 .count-input::-webkit-outer-spin-button, .count-input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
 .count-input:focus{outline:none;}
 .unit-label{text-align:center; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint); margin-bottom:18px;}
@@ -356,14 +363,14 @@
 .chip span.x{color:var(--text-faint); cursor:pointer; font-size:14px; padding:0 2px;}
 .choice-list{display:flex; flex-direction:column; gap:9px;}
 .choice{padding:16px 16px; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; cursor:pointer;}
-.choice .choice-label{font-family:'Anton', sans-serif; font-size:16px; color:var(--text-dim);}
+.choice .choice-label{font-family:'Display', sans-serif; font-size:16px; color:var(--text-dim);}
 .choice .choice-sub{font-size:11px; color:var(--text-faint); margin-top:3px;}
 .choice.selected{border-color:var(--accent);}
 .choice.selected .choice-label{color:var(--accent);}
 
 /* Countdown */
 #screen-countdown{align-items:center; justify-content:center; text-align:center;}
-#cd-number{font-family:'Anton', sans-serif; font-size:130px; color:var(--accent); line-height:1;}
+#cd-number{font-family:'Display', sans-serif; font-size:130px; color:var(--accent); line-height:1;}
 
 /* Main session (Mode Rapide) */
 #screen-main{padding:20px 20px 28px;}
@@ -371,13 +378,13 @@
 
 /* Bouton compteur de règles + panneau coulissant (remplace le bandeau permanent) */
 .rules-count-btn{align-self:flex-start; align-items:center; gap:7px; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); border:1px solid var(--line); border-radius:11px; padding:7px 12px; cursor:pointer;}
-.rules-count-num{background:var(--accent); color:var(--ink-on-light); border-radius:20px; min-width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-family:'Anton',sans-serif; font-size:11px; padding:0 5px;}
+.rules-count-num{background:var(--accent); color:var(--ink-on-light); border-radius:20px; min-width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-family:'Display', sans-serif; font-size:11px; padding:0 5px;}
 .rules-sheet{position:fixed; inset:0; z-index:120; background:rgba(0,0,0,0.6); display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity .2s ease;}
 .rules-sheet.open{opacity:1; pointer-events:auto;}
 .rules-sheet-panel{width:100%; max-width:480px; margin:0 auto; background:var(--surface); border-radius:26px 26px 0 0; padding:12px 22px 30px; transform:translateY(100%); transition:transform .26s cubic-bezier(.22,1,.36,1); max-height:72vh; overflow-y:auto;}
 .rules-sheet.open .rules-sheet-panel{transform:translateY(0);}
 .rules-sheet-grab{width:42px; height:4px; border-radius:4px; background:var(--line); margin:0 auto 16px;}
-.rules-sheet-title{font-family:'Anton',sans-serif; font-size:20px; color:var(--text); margin-bottom:14px;}
+.rules-sheet-title{font-family:'Display', sans-serif; font-size:20px; color:var(--text); margin-bottom:14px;}
 .rules-sheet-row{display:flex; align-items:flex-start; gap:10px; padding:13px 0; border-bottom:1px solid var(--line); font-size:14px; color:var(--text); line-height:1.45;}
 .rules-sheet-dot{flex-shrink:0; width:8px; height:8px; border-radius:50%; background:var(--accent); margin-top:6px;}
 .rules-sheet-empty{font-size:13px; color:var(--text-faint); padding:8px 0;}
@@ -417,27 +424,27 @@
 .scene-kicker.light{color:var(--clay);}
 /* Trois corps de consigne selon la longueur (voir instructionClass) : une phrase courte
    claque en très gros, une longue reste lisible sans occuper tout l'écran. */
-.scene-instruction{font-family:'Anton',sans-serif; font-weight:400; color:var(--text); max-width:340px; letter-spacing:0.3px;}
+.scene-instruction{font-family:'Display', sans-serif; font-weight:400; color:var(--text); max-width:340px; letter-spacing:0.3px;}
 .scene-instruction.xl{font-size:33px; line-height:1.1;}
 .scene-instruction.lg{font-size:25px; line-height:1.18;}
 .scene-instruction.md{font-family:'Work Sans',sans-serif; font-weight:500; font-size:18px; line-height:1.45; letter-spacing:0; max-width:330px;}
-.scene-instruction.big{font-family:'Anton',sans-serif; font-weight:400; font-size:30px; line-height:1.14; letter-spacing:0.3px; max-width:340px;}
-.scene-question{font-family:'Anton',sans-serif; font-size:27px; line-height:1.15; color:var(--text); max-width:330px;}
+.scene-instruction.big{font-family:'Display', sans-serif; font-weight:400; font-size:30px; line-height:1.14; letter-spacing:0.3px; max-width:340px;}
+.scene-question{font-family:'Display', sans-serif; font-size:27px; line-height:1.15; color:var(--text); max-width:330px;}
 
 .scene-avatar{width:44px; height:44px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 6px 18px rgba(0,0,0,0.5);}
 .scene-avatar.big{width:76px; height:76px; font-size:38px; box-shadow:0 10px 26px rgba(0,0,0,0.55), inset 0 2px 0 rgba(255,255,255,0.28);}
 
 /* Défi express : le prénom domine, la consigne suit. */
 .scene-who{display:flex; flex-direction:column; align-items:center; gap:10px;}
-.scene-who-name{font-family:'Anton',sans-serif; font-size:34px; letter-spacing:0.5px; color:var(--scene-accent); line-height:1; max-width:300px; overflow-wrap:anywhere;}
+.scene-who-name{font-family:'Display', sans-serif; font-size:34px; letter-spacing:0.5px; color:var(--scene-accent); line-height:1; max-width:300px; overflow-wrap:anywhere;}
 
 /* Duel : deux côtés opposés, séparés par le VS. */
 .scene-duel{display:flex; align-items:center; justify-content:center; gap:8px; width:100%;}
 .duel-side{flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:9px;}
-.duel-name{font-family:'Anton',sans-serif; font-size:19px; color:var(--text); line-height:1.1; overflow-wrap:anywhere; max-width:100%;}
+.duel-name{font-family:'Display', sans-serif; font-size:19px; color:var(--text); line-height:1.1; overflow-wrap:anywhere; max-width:100%;}
 .duel-a .scene-avatar{box-shadow:0 10px 26px rgba(0,0,0,0.55), 0 0 0 3px var(--accent);}
 .duel-b .scene-avatar{box-shadow:0 10px 26px rgba(0,0,0,0.55), 0 0 0 3px var(--clay);}
-.duel-vs{flex:0 0 auto; font-family:'Anton',sans-serif; font-size:22px; color:var(--bg); background:var(--text); width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; transform:rotate(-8deg); box-shadow:0 6px 18px rgba(0,0,0,0.5);}
+.duel-vs{flex:0 0 auto; font-family:'Display', sans-serif; font-size:22px; color:var(--bg); background:var(--text); width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; transform:rotate(-8deg); box-shadow:0 6px 18px rgba(0,0,0,0.5);}
 
 /* Vote : zones tactiles, puis révélation centrale. */
 .vote-zones{display:flex; flex-wrap:wrap; gap:9px; justify-content:center; max-width:340px;}
@@ -455,13 +462,13 @@
 .vote-zones.done .vote-zone.chosen{opacity:1; border-color:var(--accent); background:var(--surface-2);}
 .scene-vote-reveal{display:none; flex-direction:column; gap:4px;}
 .scene-vote-reveal.shown{display:flex;}
-.vote-reveal-name{font-family:'Anton',sans-serif; font-size:30px; color:var(--accent); line-height:1; overflow-wrap:anywhere;}
+.vote-reveal-name{font-family:'Display', sans-serif; font-size:30px; color:var(--accent); line-height:1; overflow-wrap:anywhere;}
 .vote-reveal-tag{font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint);}
 
 /* Nouvelle règle : annonce lisible, sans minuteur qui presse la lecture. */
 .scene-rule{display:flex; flex-direction:column; align-items:center; gap:16px; width:100%;}
-.rule-flash{font-family:'Anton',sans-serif; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:var(--bg); background:var(--text); padding:7px 16px; border-radius:4px; transform:rotate(-1.5deg);}
-.rule-text{font-family:'Anton',sans-serif; font-size:29px; line-height:1.16; color:var(--text); max-width:330px; padding:0 6px; border-left:3px solid var(--accent); border-right:3px solid var(--accent);}
+.rule-flash{font-family:'Display', sans-serif; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:var(--bg); background:var(--text); padding:7px 16px; border-radius:4px; transform:rotate(-1.5deg);}
+.rule-text{font-family:'Display', sans-serif; font-size:29px; line-height:1.16; color:var(--text); max-width:330px; padding:0 6px; border-left:3px solid var(--accent); border-right:3px solid var(--accent);}
 .rule-hint{font-size:12px; color:var(--text-faint); letter-spacing:0.4px;}
 
 /* Surprise : rupture brève de l'ambiance. */
@@ -481,12 +488,12 @@
 .scene-hint{font-size:12.5px; color:var(--text-faint); line-height:1.45; max-width:300px;}
 
 /* MINI-JEU — une règle du jeu, annoncée comme telle. */
-.mini-badge{font-family:'Anton',sans-serif; font-size:12px; letter-spacing:4px;
+.mini-badge{font-family:'Display', sans-serif; font-size:12px; letter-spacing:4px;
   text-transform:uppercase; color:var(--ink-on-light); background:var(--accent);
   padding:7px 15px; border-radius:8px;}
 .mini-players{display:flex; gap:16px; justify-content:center; flex-wrap:wrap;}
 .mini-player{display:flex; flex-direction:column; align-items:center; gap:7px;}
-.mini-player-name{font-family:'Anton',sans-serif; font-size:17px; color:var(--text);
+.mini-player-name{font-family:'Display', sans-serif; font-size:17px; color:var(--text);
   overflow-wrap:anywhere; max-width:120px;}
 .mini-all{display:flex; flex-wrap:wrap; gap:7px; justify-content:center; max-width:300px;}
 
@@ -508,17 +515,17 @@
   background:var(--surface-2); box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;}
 .dilemme-letter{flex-shrink:0; width:28px; height:28px; border-radius:9px;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Anton',sans-serif; font-size:14px;
+  font-family:'Display', sans-serif; font-size:14px;
   background:var(--accent); color:var(--ink-on-light);}
 .dilemme-side:last-of-type .dilemme-letter{background:var(--text); color:var(--bg);}
-.dilemme-text{font-family:'Anton',sans-serif; font-weight:400; font-size:17px; line-height:1.2;
+.dilemme-text{font-family:'Display', sans-serif; font-weight:400; font-size:17px; line-height:1.2;
   color:var(--text); overflow-wrap:anywhere;}
 .dilemme-or{font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--text-faint);
   text-align:center;}
 
 /* MISSION SECRÈTE */
 .mission-who{font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:var(--accent);}
-.mission-text{font-family:'Anton',sans-serif; font-weight:400; font-size:21px; line-height:1.25;
+.mission-text{font-family:'Display', sans-serif; font-weight:400; font-size:21px; line-height:1.25;
   color:var(--text); max-width:250px;}
 
 /* DESTINS LIÉS — le lien remplace le VS de l'affrontement. */
@@ -527,12 +534,12 @@
   transform:rotate(0deg) !important;}
 
 /* BARMAN */
-.barman-badge{font-family:'Anton',sans-serif; font-size:12px; letter-spacing:4px;
+.barman-badge{font-family:'Display', sans-serif; font-size:12px; letter-spacing:4px;
   text-transform:uppercase; color:var(--bg); background:var(--accent);
   padding:7px 15px; border-radius:8px;}
 
 /* TRIBUNAL — l'accusé d'un côté, le jury de l'autre. */
-.tribunal-head{font-family:'Anton',sans-serif; font-size:12px; letter-spacing:4px;
+.tribunal-head{font-family:'Display', sans-serif; font-size:12px; letter-spacing:4px;
   text-transform:uppercase; color:var(--clay); border:1px solid rgba(255,59,92,0.35);
   background:rgba(255,59,92,0.08); padding:7px 15px; border-radius:8px;}
 .scene-who-name.accuse{color:var(--clay);}
@@ -546,7 +553,7 @@
   border:1px solid var(--line); background:rgba(255,255,255,0.035);
   transition:border-color .3s ease, background .3s ease;}
 .roulette.landed{border-color:var(--accent); background:rgba(232,255,61,0.08);}
-.roulette-name{font-family:'Anton',sans-serif; font-size:34px; line-height:1;
+.roulette-name{font-family:'Display', sans-serif; font-size:34px; line-height:1;
   color:var(--text-dim); overflow-wrap:anywhere; transition:color .3s ease;}
 .roulette.landed .roulette-name{color:var(--accent);}
 @media (prefers-reduced-motion: no-preference){
@@ -740,16 +747,16 @@
    ajoute le récapitulatif de ce qui s'est réellement passé. */
 #screen-special{align-items:center; justify-content:center; text-align:center; color:var(--text); background:var(--bg); overflow:hidden; gap:0;}
 .special-glow{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(140%,520px); height:56%; border-radius:50%; background:radial-gradient(ellipse at center, var(--clay) 0%, transparent 70%); opacity:0.30; filter:blur(30px); pointer-events:none;}
-#special-eyebrow{position:relative; font-family:'Anton',sans-serif; font-size:12px; letter-spacing:5px; text-transform:uppercase; color:var(--clay); margin-bottom:20px;}
+#special-eyebrow{position:relative; font-family:'Display', sans-serif; font-size:12px; letter-spacing:5px; text-transform:uppercase; color:var(--clay); margin-bottom:20px;}
 #special-icon{display:none;}
-#special-text{position:relative; font-family:'Anton', sans-serif; font-size:29px; font-weight:400; line-height:1.18; max-width:330px; padding:0 22px;}
+#special-text{position:relative; font-family:'Display', sans-serif; font-size:29px; font-weight:400; line-height:1.18; max-width:330px; padding:0 22px;}
 #screen-special.climax .special-glow{opacity:0.45; height:70%;}
 #screen-special.climax #special-text{font-size:37px; line-height:1.08;}
 #screen-special.climax #special-eyebrow{color:var(--accent);}
 .special-recap{position:relative; display:none; gap:22px; margin-top:30px; padding-top:20px; border-top:1px solid var(--line);}
 .special-recap.shown{display:flex;}
 .special-recap span{display:flex; flex-direction:column; gap:3px; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint);}
-.special-recap b{font-family:'Anton',sans-serif; font-size:25px; letter-spacing:0; color:var(--text);}
+.special-recap b{font-family:'Display', sans-serif; font-size:25px; letter-spacing:0; color:var(--text);}
 @media (prefers-reduced-motion: no-preference){
   #screen-special.active .special-glow{animation:glowIn .7s cubic-bezier(.22,1,.36,1) both;}
   #screen-special.active #special-text{animation:sceneIn .45s cubic-bezier(.22,1,.36,1) .12s both;}
@@ -766,7 +773,7 @@
 .end-sub{text-align:center; color:var(--text-dim); font-size:13px; margin-bottom:28px;}
 .stat-card{background:var(--surface); border:none; border-radius:18px; padding:22px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;}
 .stat-label{font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-faint);}
-.stat-value{font-family:'Anton', sans-serif; font-size:18px; color:var(--accent); margin-top:3px;}
+.stat-value{font-family:'Display', sans-serif; font-size:18px; color:var(--accent); margin-top:3px;}
 .stat-sub{font-size:11px; color:var(--text-faint); margin-top:2px;}
 
 /* Compteur live de défis (topbar, pendant la partie) */
@@ -783,9 +790,9 @@
 .podium-card.podium-mvp{border:1px solid var(--accent);}
 .podium-icon{font-size:26px;}
 .podium-card > div:nth-child(2){flex:1;}
-.podium-name{font-family:'Anton', sans-serif; font-size:16px; color:var(--text); margin-top:3px; display:flex; align-items:center; gap:8px;}
+.podium-name{font-family:'Display', sans-serif; font-size:16px; color:var(--text); margin-top:3px; display:flex; align-items:center; gap:8px;}
 .podium-name .avatar-badge-sm{width:20px; height:20px; font-size:11px;}
-.podium-count{font-family:'Anton', sans-serif; font-size:20px; color:var(--accent);}
+.podium-count{font-family:'Display', sans-serif; font-size:20px; color:var(--accent);}
 
 /* Home : bandeau de reprise + liens utilitaires */
 /* --- REPRENDRE UNE SOIRÉE -----------------------------------------------------------
@@ -802,7 +809,7 @@
   box-shadow:0 1px 0 rgba(255,255,255,0.08) inset, 0 10px 26px rgba(0,0,0,0.45);
   transition:transform .14s cubic-bezier(.34,1.56,.64,1), border-color .15s ease;}
 .resume-card:active{transform:scale(0.975); border-color:var(--accent);}
-.resume-card-action{font-family:'Anton',sans-serif; font-size:19px; letter-spacing:0.4px;
+.resume-card-action{font-family:'Display', sans-serif; font-size:19px; letter-spacing:0.4px;
   line-height:1.05; color:var(--accent);}
 .resume-card-meta{display:flex; flex-wrap:wrap; gap:1px 12px; font-size:11px; line-height:1.35;
   color:var(--text-dim); margin-top:3px; max-width:100%;}
@@ -825,7 +832,7 @@
 
 /* Sélecteur Chill / Chaos (étape durée du wizard) */
 .mode-toggle{display:flex; gap:10px; margin-bottom:22px;}
-.mode-toggle-btn{flex:1; background:var(--surface); border:2px solid var(--line); border-radius:14px; padding:16px 10px; font-family:'Anton', sans-serif; font-size:18px; letter-spacing:1px; color:var(--text-dim); cursor:pointer; transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.mode-toggle-btn{flex:1; background:var(--surface); border:2px solid var(--line); border-radius:14px; padding:16px 10px; font-family:'Display', sans-serif; font-size:18px; letter-spacing:1px; color:var(--text-dim); cursor:pointer; transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
 .mode-toggle-btn:active{transform:scale(0.95);}
 .mode-toggle-btn.selected{border-color:var(--accent); color:var(--accent); background:var(--surface-2);}
 .mode-toggle-btn[data-mode="chill"].selected{border-color:var(--sage); color:var(--sage);}
@@ -834,39 +841,6 @@
 .end-actions-row .btn{flex:1; width:auto !important;}
 
 /* Filtre catégories du catalogue de jeux */
-.games-filter-wrap{display:flex; flex-wrap:nowrap; gap:8px; margin:0 -24px 12px; padding:2px 24px;
-  overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;}
-.games-filter-wrap::-webkit-scrollbar{display:none;}
-.games-filter-chip{flex:0 0 auto; white-space:nowrap;}
-.games-filter-chip{font-size:12.5px; padding:9px 14px; border-radius:11px; border:1px solid var(--line);
-  background:rgba(255,255,255,0.03); color:var(--text-dim); cursor:pointer;
-  box-shadow:0 1px 0 rgba(255,255,255,0.04) inset;}
-.games-filter-chip.selected{border-color:transparent; color:var(--ink-on-light); background:var(--accent); font-weight:600;}
-
-/* La promesse du palier sélectionné : une ligne, sous les puces. */
-/* --- LES PALIERS DE DÉFI -----------------------------------------------------------
-   Quatre teintes qui montent avec l'intensité : vert tranquille, bleu réfléchi, orange
-   qui pique, rouge qui brûle. Le palier se lit à la couleur avant même d'être lu. */
-.tier-soft   { --tier:#3ADC8F; }
-.tier-malin  { --tier:#5AA8FF; }
-.tier-culotte{ --tier:#FFA33D; }
-.tier-chaos  { --tier:#FF3B5C; }
-.games-filter-chip[class*="tier-"]{color:var(--tier); border-color:color-mix(in srgb, var(--tier) 34%, transparent);
-  background:color-mix(in srgb, var(--tier) 9%, transparent);}
-.games-filter-chip[class*="tier-"].selected{background:var(--tier); color:#0D0D0D; border-color:transparent;}
-
-/* Sur l'affiche du jeu, le palier prend la place de tête dans la ligne d'informations :
-   c'est lui qui décide si on lance ce jeu-là maintenant. */
-.game-stage-meta .tier-chip{color:var(--tier); font-weight:600; letter-spacing:0.6px;
-  text-transform:uppercase; font-size:10px;
-  border-color:color-mix(in srgb, var(--tier) 38%, transparent);
-  background:color-mix(in srgb, var(--tier) 12%, transparent);}
-
-/* Jouer et Règles : même hauteur, même famille de forme. Le secondaire ne se déguise
-   pas en lien perdu à côté du bouton principal. */
-.game-stage-actions{display:flex; gap:9px; max-width:300px; margin:0 auto; align-items:stretch;}
-.game-stage-actions .btn{flex:1 1 auto; margin:0; max-width:none;}
-.game-stage-actions .btn-ghost{flex:0 0 96px;}
 
 /* Carte-souvenir (canvas) */
 .recap-preview{display:flex; justify-content:center;}
@@ -901,10 +875,10 @@
 /* --- Badge 18+ et informations légales --------------------------------------- */
 /* Discret, non bloquant : posé en haut à droite de l'accueil, renvoie vers les
    informations légales complètes au clic (voir openLegalScreen). */
-.age-badge{position:absolute; top:14px; right:58px; z-index:5; font-family:'Anton', sans-serif; font-size:12px; font-weight:700; color:var(--text-dim); background:var(--surface-2); border-radius:999px; padding:5px 11px; cursor:pointer; letter-spacing:0.5px; height:34px; box-sizing:border-box; display:flex; align-items:center;}
+.age-badge{position:absolute; top:14px; right:58px; z-index:5; font-family:'Display', sans-serif; font-size:12px; font-weight:700; color:var(--text-dim); background:var(--surface-2); border-radius:999px; padding:5px 11px; cursor:pointer; letter-spacing:0.5px; height:34px; box-sizing:border-box; display:flex; align-items:center;}
 
 .legal-section{margin-bottom:26px;}
-.legal-h{font-family:'Anton', sans-serif; font-size:17px; color:var(--accent); margin:0 0 10px;}
+.legal-h{font-family:'Display', sans-serif; font-size:17px; color:var(--accent); margin:0 0 10px;}
 .legal-p{font-size:13.5px; color:var(--text-dim); line-height:1.6; margin:0 0 12px;}
 .legal-p b{color:var(--text); font-weight:600;}
 .legal-date{font-size:12px; color:var(--text-faint);}
@@ -958,7 +932,7 @@
 #screen-setup{padding-bottom:0;}
 #screen-setup.active{display:flex; flex-direction:column;}
 .setup-page{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:18px;}
-.setup-title{font-family:'Anton',sans-serif; font-size:34px; line-height:1.05; color:var(--text); margin:2px 0 22px;}
+.setup-title{font-family:'Display', sans-serif; font-size:34px; line-height:1.05; color:var(--text); margin:2px 0 22px;}
 
 .setup-block{margin-bottom:26px;}
 .setup-legend{font-size:10.5px; letter-spacing:2.4px; text-transform:uppercase;
@@ -983,7 +957,7 @@
   transition:transform .1s cubic-bezier(.34,1.56,.64,1), opacity .16s;}
 .counter-btn:active{transform:scale(0.9);}
 .counter-btn:disabled{opacity:0.3; cursor:default; transform:none;}
-.counter-value{flex:1; text-align:center; font-family:'Anton',sans-serif; font-size:29px; color:var(--text);}
+.counter-value{flex:1; text-align:center; font-family:'Display', sans-serif; font-size:29px; color:var(--text);}
 .counter-unit{font-family:'Work Sans',sans-serif; font-size:14px; font-weight:500; color:var(--text-dim);}
 
 /* Pastille de couleur du joueur, réutilisée par le récapitulatif de fin de partie. */
@@ -1027,7 +1001,7 @@
   background:linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);}
 .entry > *:not(.entry-glint){position:relative; z-index:2;}
 
-.entry-name{font-family:'Anton',sans-serif; font-size:31px; letter-spacing:0.4px;
+.entry-name{font-family:'Display', sans-serif; font-size:31px; letter-spacing:0.4px;
   line-height:1; color:var(--text);}
 .entry-tag{font-family:'Work Sans',sans-serif; font-size:13.5px; line-height:1.35;
   color:var(--text-dim); margin-top:7px;}

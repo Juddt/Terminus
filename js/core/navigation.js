@@ -1,21 +1,3 @@
-// Filtre courant du catalogue ('all' ou une valeur de g.category). Persiste tant que
-// l'app reste ouverte, réinitialisé au rechargement (pas besoin de le sauvegarder).
-let gamesListCategoryFilter = 'all';
-
-/* --- LES PALIERS DE DÉFI -----------------------------------------------------------
-   Les anciennes catégories décrivaient la mécanique : Adresse, Devinette, Bluff,
-   Rapide. Mais à une table, personne ne se dit « je veux de la devinette » : la vraie
-   question est « on part sur quoi, là ? ». Les paliers répondent à celle-là, et ils
-   sont rangés dans l'ordre où une soirée monte — on descend la liste à mesure que le
-   before avance. Chacun porte sa promesse en une ligne : aucun n'a besoin d'être
-   expliqué deux fois. */
-const GAME_TIERS = [
-  { key:'Soft',    hint:'On se chauffe. Personne ne se met en danger.' },
-  { key:'Malin',   hint:'Il faut réfléchir, observer, démasquer.' },
-  { key:'Culotté', hint:'Il faut annoncer, parier, assumer.' },
-  { key:'Chaos',   hint:'Ça va vite et ça tape fort.' },
-];
-const TIER_SLUGS = { 'Soft':'soft', 'Malin':'malin', 'Culotté':'culotte', 'Chaos':'chaos' };
 
 // Correspondance label -> slug ASCII, pour éviter des noms de classe CSS accentués
 // (game-difficulty-Modéré) qui posent parfois problème selon les outils/navigateurs.
@@ -32,14 +14,7 @@ function stageGlow(g){
 function renderGamesList(){
   const wrap = document.getElementById('games-list-wrap');
   wrap.innerHTML = '';
-  const filtered = gamesListCategoryFilter === 'all'
-    ? GAMES
-    : GAMES.filter(g=> g.category === gamesListCategoryFilter);
-
-  if(!filtered.length){
-    wrap.innerHTML = '<div class="step-sub">Aucun jeu dans cette catégorie.</div>';
-    return;
-  }
+  const filtered = GAMES;
 
   filtered.forEach(g=>{
     const stage = document.createElement('div');
@@ -55,7 +30,6 @@ function renderGamesList(){
         '<div class="game-name">'+g.name+'</div>'+
         (g.tagline ? '<div class="game-principle">'+soberize(g.tagline)+'</div>' : '')+
         '<div class="game-stage-meta">'+
-          '<span class="tier-chip tier-'+(TIER_SLUGS[g.category] || 'soft')+'">'+(g.category || '')+'</span>'+
           '<span>'+g.joueurs+' joueurs</span><span>'+g.duree+'</span>'+
         '</div>'+
         '<div class="game-stage-actions">'+
@@ -119,44 +93,15 @@ function syncGamesDots(){
 // la fiche complète, avec « Jouer » et « Règles » sous la main.
 function pickGameFromIndex(i){
   goToGameIndex(i);
-  const index = document.getElementById('games-index');
-  const btn = document.getElementById('games-index-toggle');
-  if(index) index.classList.remove('open');
-  if(btn) btn.textContent = 'Tous les jeux';
-  const scene = document.getElementById('games-list-wrap');
-  if(scene) scene.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  // La mosaïque reste en place : on remonte simplement sur la fiche du jeu choisi, avec
+  // « Jouer » et « Règles » sous la main.
+  const screen = document.getElementById('screen-games-list');
+  if(screen) screen.scrollTo({ top:0, behavior:'smooth' });
 }
 
-function toggleGamesIndex(){
-  const index = document.getElementById('games-index');
-  const btn = document.getElementById('games-index-toggle');
-  const open = index.classList.toggle('open');
-  btn.textContent = open ? 'Masquer l\'index' : 'Tous les jeux';
-}
-
-function setGamesListFilter(category){
-  gamesListCategoryFilter = category;
-  document.querySelectorAll('.games-filter-chip').forEach(el=>{
-    el.classList.toggle('selected', el.dataset.category === category);
-  });
-  renderGamesList();
-}
 
 function openGamesList(){
-  const filterWrap = document.getElementById('games-filter-wrap');
-  if(filterWrap && !filterWrap.dataset.built){
-    // Une puce « Tous », puis un palier par niveau de défi réellement présent.
-    const present = new Set(GAMES.map(g=>g.category).filter(Boolean));
-    const tiers = GAME_TIERS.filter(t => present.has(t.key));
-    filterWrap.innerHTML =
-      '<div class="games-filter-chip selected" data-category="all" onclick="setGamesListFilter(\'all\')">Tous</div>'+
-      tiers.map(t=>
-        '<div class="games-filter-chip tier-'+TIER_SLUGS[t.key]+'" data-category="'+t.key+'" '+
-          'title="'+t.hint+'" onclick="setGamesListFilter(\''+t.key+'\')">'+t.key+'</div>'
-      ).join('');
-    filterWrap.dataset.built = '1';
-  }
-  setGamesListFilter(gamesListCategoryFilter);
+  renderGamesList();
   // Un seul écouteur, posé une fois pour toutes : la scène est reconstruite à chaque
   // changement de filtre, pas son conteneur.
   const scene = document.getElementById('games-list-wrap');

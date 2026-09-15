@@ -2,14 +2,14 @@
    Tout passe par #und-body, donc les blocs sont pensés pour s'empiler dans la
    colonne centrée de .palm-body sans largeur fixe. */
 
-.und-h1{font-family:'Anton',sans-serif; font-size:24px; color:var(--text); line-height:1.2;}
+.und-h1{font-family:'Display', sans-serif; font-size:24px; color:var(--text); line-height:1.2;}
 .und-sub{font-size:13px; color:var(--text-dim); line-height:1.45; max-width:300px;}
 .und-pass{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim);}
 
 /* Composition + réglages */
 .und-compo{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:14px 0 22px;}
 .und-compo span{background:rgba(255,255,255,0.05); border-radius:20px; padding:8px 14px; font-size:12px; color:var(--text-dim);}
-.und-compo b{font-family:'Anton',sans-serif; font-size:15px; color:var(--accent); margin-right:4px;}
+.und-compo b{font-family:'Display', sans-serif; font-size:15px; color:var(--accent); margin-right:4px;}
 .und-opts{width:100%; max-width:340px; display:flex; flex-direction:column; gap:10px;}
 .und-opt{display:flex; align-items:center; gap:14px; text-align:left; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; cursor:pointer;}
 .und-opt.on{border-color:var(--accent);}
@@ -24,14 +24,14 @@
 /* Carte de rôle */
 .und-role{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim);}
 .und-role.white{color:var(--accent);}
-.und-word{font-family:'Anton',sans-serif; font-size:38px; font-weight:600; color:var(--accent); line-height:1.1; margin:6px 0 12px; max-width:320px;}
+.und-word{font-family:'Display', sans-serif; font-size:38px; font-weight:600; color:var(--accent); line-height:1.1; margin:6px 0 12px; max-width:320px;}
 .und-word.none{color:var(--text-faint); font-size:26px; font-style:italic;}
 .und-dict-tag{margin-top:16px; background:rgba(232,255,61,0.14); border:1px solid rgba(232,255,61,0.4); border-radius:14px; padding:12px 16px; font-size:12px; color:var(--accent-deep); line-height:1.45; max-width:300px;}
 
 /* Tour de table */
 .und-order{width:100%; max-width:300px; display:flex; flex-direction:column; gap:6px;}
 .und-turn{display:flex; align-items:center; gap:12px; background:var(--surface); border-radius:12px; padding:11px 16px; font-size:15px; color:var(--text); text-align:left;}
-.und-turn-n{font-family:'Anton',sans-serif; font-size:12px; color:var(--accent); width:16px; flex-shrink:0;}
+.und-turn-n{font-family:'Display', sans-serif; font-size:12px; color:var(--accent); width:16px; flex-shrink:0;}
 
 /* Pouvoirs du Dictateur */
 .und-powers{width:100%; max-width:340px; display:flex; flex-direction:column; gap:10px; margin-top:16px;}
@@ -45,7 +45,7 @@
 .und-target{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 18px; font-size:16px; color:var(--text); cursor:pointer; text-align:left;}
 .und-target:active{border-color:var(--accent);}
 
-.und-drink{font-family:'Anton',sans-serif; font-size:18px; color:var(--text); line-height:1.35; margin-top:14px; max-width:300px;}
+.und-drink{font-family:'Display', sans-serif; font-size:18px; color:var(--text); line-height:1.35; margin-top:14px; max-width:300px;}
 
 /* Révélation de rôle */
 .und-reveal{font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:8px; padding:7px 16px; border-radius:20px; display:inline-block;}
@@ -54,9 +54,9 @@
 .und-reveal.white{background:rgba(232,255,61,0.16); color:var(--accent);}
 
 /* Fin de partie */
-.und-win{font-family:'Anton',sans-serif; font-size:28px; font-weight:600; line-height:1.15;}
+.und-win{font-family:'Display', sans-serif; font-size:28px; font-weight:600; line-height:1.15;}
 .und-words{display:flex; gap:10px; margin:18px 0 14px; flex-wrap:wrap; justify-content:center;}
-.und-words div{background:var(--surface); border-radius:14px; padding:12px 18px; font-family:'Anton',sans-serif; font-size:17px; color:var(--text);}
+.und-words div{background:var(--surface); border-radius:14px; padding:12px 18px; font-family:'Display', sans-serif; font-size:17px; color:var(--text);}
 .und-words small{display:block; font-family:'Work Sans',sans-serif; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px;}
 .und-roster{width:100%; max-width:320px; display:flex; flex-direction:column; gap:5px;}
 .und-row{display:flex; justify-content:space-between; align-items:center; gap:10px; background:rgba(255,255,255,0.05); border-radius:10px; padding:9px 14px; font-size:14px;}
@@ -76,5 +76,5 @@
 #und-body::-webkit-scrollbar{display:none;}
 #und-body::before, #und-body::after{content:''; margin:auto; flex-shrink:0;}
 
-.und-pass-small{font-family:'Anton',sans-serif; font-size:21px; color:var(--text-dim);
+.und-pass-small{font-family:'Display', sans-serif; font-size:21px; color:var(--text-dim);
   line-height:1; overflow-wrap:anywhere; max-width:300px;}
