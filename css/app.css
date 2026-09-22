@@ -1068,3 +1068,20 @@
 
 /* Au-delà de 8 joueurs les pastilles se resserrent plutôt que de déborder. */
 @media (max-width: 340px){ .name-rows{grid-template-columns:1fr;} }
+
+/* --- Interface ordinateur ----------------------------------------------------
+   Sous 900px de large, rien ne change : #frame occupe tout l'écran comme avant.
+   Au-dessus, plutôt qu'une colonne étroite perdue dans un fond noir, on agrandit
+   #frame lui-même (boutons, textes, fond : tout suit, puisque c'est un simple
+   transform:scale) pour qu'il remplisse l'écran en conservant ses proportions.
+   --app-scale est calculée en JS (voir index.html, fitFrameScale) à partir du
+   canevas de référence 480×700 et plafonnée pour ne pas devenir démesurée sur
+   un très grand écran ; elle n'est utilisée que par cette media query. */
+@media (min-width:900px){
+  html,body{ background:var(--bg); }
+  #frame{
+    width:480px; max-width:none; height:700px;
+    transform:scale(var(--app-scale, 1));
+    transform-origin:center center;
+  }
+}
